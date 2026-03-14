@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oxford 3000 — Тренажёр английских слов</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #161a23;
+  --surface2: #1e2330;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #eef0f6;
+  --muted: #8890a8;
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --blue: #60a5fa;
+  --card-radius: 18px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* BG pattern */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(108,99,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,0.08) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* HEADER */
+header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  background: rgba(13,15,20,0.7);
+  position: sticky;
+  top: 0;
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo-badge {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+.header-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.hstat {
+  text-align: center;
+  line-height: 1.2;
+}
+.hstat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent2);
+}
+.hstat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 80px 24px 60px;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 7vw, 72px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, #fff 30%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+}
+.hero p {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  box-shadow: 0 4px 32px rgba(108,99,255,0.35);
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(108,99,255,0.5); }
+.hero-chips {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--surface);
+}
+.chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* MAIN APP */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* MODE SELECTOR */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.mode-card:hover { border-color: var(--border2); background: var(--surface2); }
+.mode-card.active {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.12);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.mode-icon { font-size: 22px; margin-bottom: 6px; }
+.mode-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+/* FILTERS */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-label { font-size: 13px; color: var(--muted); margin-right: 4px; }
+.lvl-btn {
+  padding: 5px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.lvl-btn.active-A1 { background: rgba(52,211,153,0.15); color: var(--green); border-color: rgba(52,211,153,0.4); }
+.lvl-btn.active-A2 { background: rgba(96,165,250,0.15); color: var(--blue); border-color: rgba(96,165,250,0.4); }
+.lvl-btn.active-B1 { background: rgba(251,191,36,0.15); color: var(--amber); border-color: rgba(251,191,36,0.4); }
+.lvl-btn.active-B2 { background: rgba(248,113,113,0.15); color: var(--red); border-color: rgba(248,113,113,0.4); }
+.shuffle-btn {
+  margin-left: auto;
+  padding: 5px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+  font-family: 'Nunito', sans-serif;
+}
+.shuffle-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* PROGRESS */
+.progress-wrap { margin-bottom: 12px; }
+.progress-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.progress-counter { font-size: 13px; color: var(--muted); }
+.progress-pct { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent2); }
+
+/* STATS BAR */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* FLASHCARD */
+.card-scene { perspective: 1200px; margin-bottom: 18px; min-height: 240px; }
+.card-inner {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+.card-inner.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 32px;
+  text-align: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  min-height: 240px;
+}
+.card-front-face {
+  background: var(--surface);
+}
+.card-back-face {
+  background: var(--surface2);
+  transform: rotateY(180deg);
+}
+.card-eyebrow { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.card-word-main { font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: -1px; }
+.card-pos-tag { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+.level-pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+}
+.lp-A1 { background: rgba(52,211,153,0.15); color: var(--green); }
+.lp-A2 { background: rgba(96,165,250,0.15); color: var(--blue); }
+.lp-B1 { background: rgba(251,191,36,0.15); color: var(--amber); }
+.lp-B2 { background: rgba(248,113,113,0.15); color: var(--red); }
+.card-hint { font-size: 12px; color: var(--muted); margin-top: 20px; opacity: 0.7; }
+.card-translation { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 600; color: var(--accent2); margin-bottom: 10px; }
+
+/* ACTIONS */
+.card-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; }
+.act-btn {
+  padding: 11px 28px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text);
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.act-btn:hover { background: var(--surface2); }
+.act-btn.btn-know { background: rgba(52,211,153,0.12); color: var(--green); border-color: rgba(52,211,153,0.35); }
+.act-btn.btn-know:hover { background: rgba(52,211,153,0.22); }
+.act-btn.btn-repeat { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.35); }
+.act-btn.btn-repeat:hover { background: rgba(248,113,113,0.22); }
+.act-btn.btn-next { background: rgba(108,99,255,0.15); color: var(--accent2); border-color: rgba(108,99,255,0.4); }
+.act-btn.btn-next:hover { background: rgba(108,99,255,0.25); }
+
+/* QUIZ */
+.quiz-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--card-radius);
+  padding: 32px;
+  margin-bottom: 18px;
+}
+.quiz-eyebrow { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.quiz-q { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.5px; }
+.quiz-meta { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+.quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt-btn {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+  line-height: 1.3;
+}
+.opt-btn:hover:not([disabled]) { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+.opt-btn.correct { background: rgba(52,211,153,0.15); border-color: var(--green); color: var(--green); }
+.opt-btn.wrong { background: rgba(248,113,113,0.15); border-color: var(--red); color: var(--red); }
+.opt-btn[disabled] { cursor: default; }
+
+/* TYPE */
+.type-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--card-radius);
+  padding: 32px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.type-input {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 18px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-top: 20px;
+}
+.type-input:focus { border-color: var(--accent); }
+.type-input:disabled { opacity: 0.6; cursor: default; }
+.type-feedback { margin-top: 14px; font-size: 16px; font-weight: 600; min-height: 24px; font-family: 'Syne', sans-serif; }
+
+/* RESULTS */
+.result-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--card-radius);
+  padding: 48px 32px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.result-score {
+  font-family: 'Syne', sans-serif;
+  font-size: 72px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--green), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.result-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.result-sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+
+/* EMPTY */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; }
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 30px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+footer strong { color: var(--accent2); }
+
+/* RESPONSIVE */
+@media(max-width: 600px) {
+  header { padding: 14px 20px; }
+  .header-stats { gap: 14px; }
+  .hstat-val { font-size: 16px; }
+  .hero { padding: 48px 20px 40px; }
+  .mode-grid { grid-template-columns: repeat(2,1fr); }
+  .quiz-opts { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: repeat(2,1fr); }
+  .card-word-main { font-size: 28px; }
+  .quiz-q { font-size: 22px; }
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo" onclick="scrollToApp()">
+    Oxford 3000
+    <span class="logo-badge">RU</span>
+  </a>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-val" id="hs-total">0</div>
+      <div class="hstat-label">Слов</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" style="color:var(--green)" id="hs-known">0</div>
+      <div class="hstat-label">Знаю</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" style="color:var(--accent2)" id="hs-pct">0%</div>
+      <div class="hstat-label">Прогресс</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Выучи английский<br>раз и навсегда</h1>
+  <p>3000 самых важных слов Oxford с переводом на русский. Карточки, тесты, ввод — три режима тренировки.</p>
+  <a href="#app" class="hero-cta" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})">
+    Начать тренировку →
+  </a>
+  <div class="hero-chips">
+    <div class="chip"><span class="chip-dot" style="background:var(--green)"></span> A1 — Начальный</div>
+    <div class="chip"><span class="chip-dot" style="background:var(--blue)"></span> A2 — Элементарный</div>
+    <div class="chip"><span class="chip-dot" style="background:var(--amber)"></span> B1 — Средний</div>
+    <div class="chip"><span class="chip-dot" style="background:var(--red)"></span> B2 — Выше среднего</div>
+  </div>
+</section>
+
+<div class="app-container" id="app">
+
+  <div class="mode-grid">
+    <div class="mode-card active" onclick="setMode('flash')" id="tab-flash">
+      <div class="mode-icon">🃏</div>
+      <div class="mode-name">Карточки</div>
+    </div>
+    <div class="mode-card" onclick="setMode('quiz')" id="tab-quiz">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-name">Тест 4 варианта</div>
+    </div>
+    <div class="mode-card" onclick="setMode('type')" id="tab-type">
+      <div class="mode-icon">⌨️</div>
+      <div class="mode-name">Введи перевод</div>
+    </div>
+    <div class="mode-card" onclick="setMode('review')" id="tab-review">
+      <div class="mode-icon">🔁</div>
+      <div class="mode-name">Повторение</div>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">Уровень:</span>
+    <button class="lvl-btn active-A1" id="lbtn-A1" onclick="toggleLevel('A1')">A1</button>
+    <button class="lvl-btn active-A2" id="lbtn-A2" onclick="toggleLevel('A2')">A2</button>
+    <button class="lvl-btn active-B1" id="lbtn-B1" onclick="toggleLevel('B1')">B1</button>
+    <button class="lvl-btn active-B2" id="lbtn-B2" onclick="toggleLevel('B2')">B2</button>
+    <button class="shuffle-btn" onclick="shuffleDeck()">🔀 Перемешать</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box">
+      <div class="stat-num" id="s-total">0</div>
+      <div class="stat-lbl">Всего</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:var(--green)" id="s-known">0</div>
+      <div class="stat-lbl">Знаю</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:var(--red)" id="s-repeat">0</div>
+      <div class="stat-lbl">Повторить</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:var(--accent2)" id="s-pct">0%</div>
+      <div class="stat-lbl">Прогресс</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <div class="progress-meta">
+      <span class="progress-counter" id="counter"></span>
+      <span class="progress-pct" id="pct-txt"></span>
+    </div>
+  </div>
+
+  <div id="main-area" class="fade-up"></div>
+
+</div>
+
+<footer>
+  <p>Oxford 3000™ American English · Перевод на русский язык · <strong>3000 слов</strong></p>
+  <p style="margin-top:6px;font-size:12px">Делись с друзьями — открывается в любом браузере</p>
+</footer>
+
+<script>
+const WORDS = [
+["a, an","art.","A1","неопределённый артикль"],
+["abandon","v.","B2","бросать, покидать"],
+["ability","n.","A2","способность, умение"],
+["able","adj.","A2","способный, умеющий"],
+["about","prep., adv.","A1","о, около, примерно"],
+["above","prep., adv.","A1","выше, над"],
+["abroad","adv.","B2","за рубежом, за границу"],
+["absolute","adj.","B2","абсолютный, полный"],
+["absolutely","adv.","B1","абсолютно, совершенно"],
+["academic","adj.","B1","академический, учебный"],
+["accept","v.","A2","принимать, соглашаться"],
+["accident","n.","A2","несчастный случай, авария"],
+["achieve","v.","A2","достигать, добиваться"],
+["action","n.","A1","действие, поступок"],
+["active","adj.","A2","активный, деятельный"],
+["activity","n.","A1","деятельность, занятие"],
+["actor","n.","A1","актёр"],
+["actress","n.","A1","актриса"],
+["add","v.","A1","добавлять, прибавлять"],
+["address","n., v.","A1","адрес; обращаться к"],
+["admire","v.","B1","восхищаться"],
+["admit","v.","B1","признавать, допускать"],
+["adult","n., adj.","A1","взрослый"],
+["advance","n., v.","B2","продвижение; продвигаться"],
+["advantage","n.","A2","преимущество, польза"],
+["adventure","n.","A2","приключение"],
+["advertise","v.","A2","рекламировать"],
+["advertisement","n.","A2","реклама, объявление"],
+["advice","n.","A1","совет"],
+["advise","v.","B1","советовать, рекомендовать"],
+["affect","v.","A2","влиять, воздействовать"],
+["afford","v.","B1","позволять себе (материально)"],
+["afraid","adj.","A1","боящийся, испуганный"],
+["after","prep., conj.","A1","после, за"],
+["afternoon","n.","A1","вторая половина дня"],
+["again","adv.","A1","снова, опять"],
+["against","prep.","A2","против, напротив"],
+["age","n., v.","A1","возраст; стареть"],
+["agency","n.","B2","агентство"],
+["agent","n.","B1","агент, представитель"],
+["aggressive","adj.","B2","агрессивный"],
+["ago","adv.","A1","тому назад"],
+["agree","v.","A1","соглашаться"],
+["agreement","n.","B1","соглашение, договор"],
+["ahead","adv.","B1","вперёд, впереди"],
+["aim","v., n.","B1","целиться; цель"],
+["air","n.","A1","воздух"],
+["airline","n.","A2","авиакомпания"],
+["airport","n.","A1","аэропорт"],
+["alarm","n., v.","B1","тревога; пугать"],
+["album","n.","B1","альбом"],
+["alcohol","n.","B1","алкоголь"],
+["alive","adj.","A2","живой"],
+["allow","v.","A2","позволять, разрешать"],
+["almost","adv.","A2","почти"],
+["alone","adj./adv.","A2","один, в одиночестве"],
+["already","adv.","A2","уже"],
+["also","adv.","A1","также, тоже"],
+["although","conj.","A2","хотя, несмотря на то что"],
+["always","adv.","A1","всегда"],
+["amazing","adj.","A1","удивительный, потрясающий"],
+["ambition","n.","B1","амбиция, честолюбие"],
+["among","prep.","A2","среди, между"],
+["amount","n.","A2","количество, сумма"],
+["analysis","n.","B1","анализ"],
+["analyze","v.","A2","анализировать"],
+["ancient","adj.","A2","древний, старинный"],
+["anger","n.","B2","гнев, злость"],
+["angry","adj.","A1","злой, сердитый"],
+["animal","n.","A1","животное"],
+["ankle","n.","A2","лодыжка, щиколотка"],
+["announce","v.","B1","объявлять, сообщать"],
+["answer","n., v.","A1","ответ; отвечать"],
+["apartment","n.","A1","квартира"],
+["apologize","v.","B1","извиняться"],
+["app","n.","A2","приложение (мобильное)"],
+["appear","v.","A2","появляться, казаться"],
+["apple","n.","A1","яблоко"],
+["apply","v.","A2","подавать заявление; применять"],
+["appreciate","v.","B1","ценить, быть благодарным"],
+["April","n.","A1","апрель"],
+["architect","n.","A2","архитектор"],
+["area","n.","A1","район, область, зона"],
+["argue","v.","A2","спорить, утверждать"],
+["arm","n.","A1","рука (от плеча до кисти)"],
+["army","n.","A2","армия"],
+["arrange","v.","A2","устраивать, организовывать"],
+["arrive","v.","A1","прибывать, приезжать"],
+["art","n.","A1","искусство"],
+["article","n.","A1","статья, артикль"],
+["artist","n.","A1","художник, артист"],
+["ask","v.","A1","спрашивать, просить"],
+["assist","v.","B1","помогать, содействовать"],
+["athlete","n.","A2","спортсмен, атлет"],
+["atmosphere","n.","B1","атмосфера"],
+["attack","n., v.","A2","нападение; нападать"],
+["attend","v.","A2","посещать, присутствовать"],
+["attention","n.","A2","внимание"],
+["attitude","n.","B1","отношение, позиция"],
+["attract","v.","B1","привлекать, притягивать"],
+["audience","n.","A2","аудитория, зрители"],
+["August","n.","A1","август"],
+["aunt","n.","A1","тётя"],
+["author","n.","A2","автор, писатель"],
+["available","adj.","A2","доступный, имеющийся"],
+["average","adj., n.","A2","средний; среднее значение"],
+["avoid","v.","A2","избегать"],
+["award","n., v.","A2","награда; награждать"],
+["away","adv.","A1","прочь, далеко"],
+["awesome","adj.","A1","потрясающий, классный"],
+["awful","adj.","A2","ужасный, отвратительный"],
+["baby","n.","A1","ребёнок, малыш"],
+["back","n., adv.","A1","спина; назад"],
+["background","n.","A2","фон, прошлое, происхождение"],
+["bad","adj.","A1","плохой"],
+["bag","n.","A1","сумка, мешок"],
+["bake","v.","B1","печь, запекать"],
+["ball","n.","A1","мяч, шар"],
+["banana","n.","A1","банан"],
+["bank","n.","A1","банк; берег (реки)"],
+["baseball","n.","A1","бейсбол"],
+["basketball","n.","A1","баскетбол"],
+["bath","n.","A1","ванна, купание"],
+["bathroom","n.","A1","ванная комната"],
+["be","v.","A1","быть, являться"],
+["beach","n.","A1","пляж"],
+["bean","n.","A2","боб, фасоль"],
+["bear","n.","A2","медведь"],
+["beat","v.","A2","бить, побеждать"],
+["beautiful","adj.","A1","красивый, прекрасный"],
+["beauty","n.","B1","красота"],
+["because","conj.","A1","потому что"],
+["become","v.","A1","становиться"],
+["bed","n.","A1","кровать"],
+["bedroom","n.","A1","спальня"],
+["beef","n.","A2","говядина"],
+["beer","n.","A1","пиво"],
+["before","prep., adv.","A1","до, перед, раньше"],
+["begin","v.","A1","начинать"],
+["beginning","n.","A1","начало"],
+["behave","v.","A2","вести себя"],
+["behavior","n.","A2","поведение"],
+["behind","prep., adv.","A1","позади, сзади"],
+["believe","v.","A1","верить, считать"],
+["belong","v.","A2","принадлежать"],
+["below","adv., prep.","A1","ниже, под"],
+["belt","n.","A2","ремень, пояс"],
+["benefit","n., v.","A2","польза, выгода"],
+["bicycle","n.","A1","велосипед"],
+["big","adj.","A1","большой"],
+["bike","n.","A1","велосипед, байк"],
+["biology","n.","A2","биология"],
+["bird","n.","A1","птица"],
+["birthday","n.","A1","день рождения"],
+["black","adj., n.","A1","чёрный"],
+["blog","n.","A1","блог"],
+["blood","n.","A2","кровь"],
+["blue","adj., n.","A1","синий, голубой"],
+["boat","n.","A1","лодка, корабль"],
+["body","n.","A1","тело, организм"],
+["boil","v.","A2","кипеть, варить"],
+["bone","n.","A2","кость"],
+["book","n., v.","A1","книга; бронировать"],
+["boot","n.","A1","сапог, ботинок"],
+["bored","adj.","A1","скучающий"],
+["boring","adj.","A1","скучный"],
+["born","v.","A1","рождённый"],
+["borrow","v.","A2","брать взаймы"],
+["boss","n.","A2","начальник, шеф"],
+["bottle","n.","A1","бутылка"],
+["box","n.","A1","коробка, ящик"],
+["boy","n.","A1","мальчик"],
+["boyfriend","n.","A1","парень (романтический)"],
+["brain","n.","A2","мозг"],
+["brave","adj.","B1","храбрый, смелый"],
+["bread","n.","A1","хлеб"],
+["break","v., n.","A1","ломать; перерыв, пауза"],
+["breakfast","n.","A1","завтрак"],
+["bridge","n.","A2","мост"],
+["bring","v.","A1","приносить, привозить"],
+["brother","n.","A1","брат"],
+["brown","adj., n.","A1","коричневый"],
+["build","v.","A1","строить"],
+["building","n.","A1","здание, строение"],
+["bus","n.","A1","автобус"],
+["business","n.","A1","бизнес, дело"],
+["busy","adj.","A1","занятый"],
+["butter","n.","A1","масло (сливочное)"],
+["buy","v.","A1","покупать"],
+["cafe","n.","A1","кафе"],
+["cake","n.","A1","торт, пирог"],
+["calculate","v.","B2","вычислять, рассчитывать"],
+["call","v., n.","A1","звонить, называть; звонок"],
+["camera","n.","A1","фотоаппарат, камера"],
+["camp","n., v.","A2","лагерь; ходить в поход"],
+["cancel","v.","B2","отменять"],
+["candy","n.","A2","конфета, сладости"],
+["car","n.","A1","машина, автомобиль"],
+["card","n.","A1","карта, карточка"],
+["care","n., v.","A2","забота; заботиться"],
+["career","n.","A1","карьера"],
+["carrot","n.","A1","морковь"],
+["carry","v.","A1","нести, перевозить"],
+["cartoon","n.","A2","мультфильм, карикатура"],
+["cat","n.","A1","кошка"],
+["catch","v.","A2","ловить"],
+["cause","n., v.","A2","причина; вызывать"],
+["celebrate","v.","A2","праздновать, отмечать"],
+["celebrity","n.","A2","знаменитость"],
+["center","n.","A1","центр"],
+["century","n.","A2","век, столетие"],
+["change","v., n.","A1","изменять; изменение"],
+["character","n.","A2","характер, персонаж"],
+["cheap","adj.","A1","дешёвый"],
+["check","v., n.","A1","проверять; чек, проверка"],
+["cheese","n.","A1","сыр"],
+["chemistry","n.","A2","химия"],
+["chicken","n.","A1","курица, куриное мясо"],
+["child","n.","A1","ребёнок"],
+["chocolate","n.","A1","шоколад"],
+["choose","v.","A1","выбирать"],
+["church","n.","A2","церковь"],
+["circle","n.","A2","круг"],
+["city","n.","A1","город"],
+["class","n.","A1","класс, урок"],
+["clean","adj., v.","A1","чистый; чистить"],
+["climb","v.","A1","взбираться"],
+["clock","n.","A1","часы (настенные)"],
+["clothes","n.","A1","одежда"],
+["cloud","n.","A2","облако"],
+["club","n.","A1","клуб"],
+["coat","n.","A1","пальто"],
+["coffee","n.","A1","кофе"],
+["cold","adj., n.","A1","холодный; простуда"],
+["come","v.","A1","приходить, приезжать"],
+["comment","n., v.","A2","комментарий; комментировать"],
+["communicate","v.","A2","общаться, связываться"],
+["community","n.","A2","сообщество, население"],
+["company","n.","A1","компания, фирма"],
+["compare","v.","A1","сравнивать"],
+["compete","v.","A2","соревноваться, конкурировать"],
+["competition","n.","A2","соревнование, конкуренция"],
+["complain","v.","A2","жаловаться"],
+["complete","adj., v.","A1","полный; завершать"],
+["computer","n.","A1","компьютер"],
+["concert","n.","A1","концерт"],
+["condition","n.","A2","условие, состояние"],
+["conference","n.","A2","конференция"],
+["connect","v.","A2","соединять, связывать"],
+["context","n.","A2","контекст"],
+["continue","v.","A2","продолжать"],
+["control","n., v.","A2","контроль; контролировать"],
+["conversation","n.","A1","разговор, беседа"],
+["cook","v., n.","A1","готовить; повар"],
+["cookie","n.","A2","печенье"],
+["copy","n., v.","A2","копия; копировать"],
+["corner","n.","A2","угол"],
+["correct","adj., v.","A1","правильный; исправлять"],
+["cost","n., v.","A1","стоимость; стоить"],
+["count","v.","A2","считать"],
+["country","n.","A1","страна"],
+["couple","n.","A2","пара, несколько"],
+["course","n.","A1","курс (учебный); блюдо"],
+["cousin","n.","A1","двоюродный брат/сестра"],
+["cover","v., n.","A2","покрывать; обложка, крышка"],
+["cow","n.","A1","корова"],
+["crazy","adj.","A2","сумасшедший, безумный"],
+["create","v.","A1","создавать, творить"],
+["creative","adj.","A2","творческий, креативный"],
+["crime","n.","A2","преступление"],
+["cross","v., n.","A2","переходить; крест"],
+["crowd","n.","A2","толпа"],
+["cry","v.","A2","плакать"],
+["culture","n.","A1","культура"],
+["cup","n.","A1","чашка"],
+["customer","n.","A1","покупатель, клиент"],
+["cut","v., n.","A1","резать; порез, сокращение"],
+["dad","n.","A1","папа"],
+["damage","n., v.","B1","ущерб; повреждать"],
+["dance","n., v.","A1","танец; танцевать"],
+["danger","n.","A2","опасность"],
+["dangerous","adj.","A1","опасный"],
+["dark","adj., n.","A1","тёмный; темнота"],
+["data","n.","A2","данные"],
+["daughter","n.","A1","дочь"],
+["day","n.","A1","день"],
+["dead","adj.","A2","мёртвый"],
+["deal","v., n.","A2","иметь дело; сделка"],
+["death","n.","A2","смерть"],
+["December","n.","A1","декабрь"],
+["decide","v.","A1","решать"],
+["decision","n.","A2","решение"],
+["deep","adj., adv.","A2","глубокий; глубоко"],
+["definitely","adv.","A2","определённо, точно"],
+["degree","n.","A2","степень; градус; диплом"],
+["delicious","adj.","A1","вкусный, восхитительный"],
+["describe","v.","A1","описывать"],
+["design","n., v.","A1","дизайн; проектировать"],
+["designer","n.","A2","дизайнер"],
+["desk","n.","A1","письменный стол"],
+["dessert","n.","A2","десерт"],
+["develop","v.","A2","развивать"],
+["device","n.","A2","устройство, прибор"],
+["dialogue","n.","A1","диалог, разговор"],
+["dictionary","n.","A1","словарь"],
+["die","v.","A1","умирать"],
+["diet","n.","A1","диета, питание"],
+["difference","n.","A1","разница, различие"],
+["different","adj.","A1","разный, другой"],
+["difficult","adj.","A1","трудный, сложный"],
+["digital","adj.","A2","цифровой"],
+["dinner","n.","A1","ужин, обед"],
+["dirty","adj.","A1","грязный"],
+["disagree","v.","A2","не соглашаться"],
+["disappear","v.","A2","исчезать"],
+["disaster","n.","A2","катастрофа, бедствие"],
+["discover","v.","A2","открывать, обнаруживать"],
+["discuss","v.","A1","обсуждать"],
+["disease","n.","A2","болезнь"],
+["dish","n.","A1","блюдо, тарелка"],
+["distance","n.","A2","расстояние"],
+["divorced","adj.","A2","разведённый"],
+["doctor","n.","A1","врач"],
+["dog","n.","A1","собака"],
+["dollar","n.","A1","доллар"],
+["door","n.","A1","дверь"],
+["download","v., n.","A2","загружать; загрузка"],
+["drama","n.","A2","драма"],
+["draw","v.","A1","рисовать; привлекать"],
+["drawing","n.","A2","рисунок"],
+["dream","n., v.","A2","мечта, сон; мечтать"],
+["dress","n., v.","A1","платье; одеваться"],
+["drink","n., v.","A1","напиток; пить"],
+["drive","v., n.","A1","ехать за рулём; поездка"],
+["driver","n.","A1","водитель"],
+["drop","v., n.","A2","ронять, падать; капля"],
+["drug","n.","A2","лекарство; наркотик"],
+["dry","adj., v.","A2","сухой; сушить"],
+["during","prep.","A1","в течение, во время"],
+["each","det./pron.","A1","каждый"],
+["ear","n.","A1","ухо"],
+["early","adj., adv.","A1","ранний; рано"],
+["earn","v.","A2","зарабатывать"],
+["earth","n.","A2","земля, Земля"],
+["easy","adj.","A1","лёгкий, простой"],
+["eat","v.","A1","есть, питаться"],
+["education","n.","A2","образование"],
+["effect","n.","A2","эффект, результат"],
+["effort","n.","B1","усилие, труд"],
+["egg","n.","A1","яйцо"],
+["electricity","n.","A2","электричество"],
+["elephant","n.","A1","слон"],
+["elevator","n.","A2","лифт"],
+["email","n., v.","A1","электронная почта"],
+["employ","v.","A2","нанимать на работу"],
+["employee","n.","A2","сотрудник, работник"],
+["empty","adj.","A2","пустой"],
+["energy","n.","A2","энергия"],
+["engine","n.","A2","двигатель, мотор"],
+["engineer","n.","A2","инженер"],
+["enjoy","v.","A1","наслаждаться, получать удовольствие"],
+["enormous","adj.","A2","огромный, громадный"],
+["enter","v.","A2","входить, поступать"],
+["environment","n.","A2","окружающая среда"],
+["equipment","n.","A2","оборудование"],
+["error","n.","A2","ошибка"],
+["especially","adv.","A2","особенно"],
+["essay","n.","A2","эссе, сочинение"],
+["euro","n.","A1","евро"],
+["evening","n.","A1","вечер"],
+["event","n.","A1","событие, мероприятие"],
+["evidence","n.","A2","доказательство, свидетельство"],
+["exact","adj.","A2","точный, конкретный"],
+["exam","n.","A1","экзамен"],
+["example","n.","A1","пример"],
+["excellent","adj.","A2","отличный, превосходный"],
+["excited","adj.","A1","взволнованный, возбуждённый"],
+["exciting","adj.","A1","захватывающий, волнующий"],
+["exercise","n., v.","A1","упражнение; делать упражнения"],
+["exist","v.","A2","существовать"],
+["expect","v.","A2","ожидать"],
+["expensive","adj.","A1","дорогой"],
+["experience","n., v.","A2","опыт; испытывать"],
+["experiment","n.","A2","эксперимент"],
+["expert","n., adj.","A2","эксперт, специалист"],
+["explain","v.","A1","объяснять"],
+["eye","n.","A1","глаз"],
+["face","n., v.","A1","лицо; сталкиваться"],
+["fact","n.","A1","факт"],
+["factory","n.","A2","завод, фабрика"],
+["fail","v.","A2","провалиться, потерпеть неудачу"],
+["fair","adj.","A2","справедливый, честный"],
+["fall","v., n.","A1","падать; осень (сезон)"],
+["family","n.","A1","семья"],
+["famous","adj.","A1","знаменитый, известный"],
+["fan","n.","A2","поклонник; вентилятор"],
+["fantastic","adj.","A1","фантастический, замечательный"],
+["farm","n.","A1","ферма"],
+["farmer","n.","A1","фермер"],
+["fashion","n.","A2","мода"],
+["fast","adj., adv.","A1","быстрый; быстро"],
+["fat","adj., n.","A1","толстый; жир"],
+["father","n.","A1","отец"],
+["favorite","adj., n.","A1","любимый; любимец"],
+["fear","n., v.","A2","страх; бояться"],
+["February","n.","A1","февраль"],
+["feel","v.","A1","чувствовать"],
+["feeling","n.","A1","чувство, ощущение"],
+["festival","n.","A1","фестиваль, праздник"],
+["fever","n.","A2","жар, лихорадка"],
+["fiction","n.","A2","художественная литература, вымысел"],
+["field","n.","A2","поле, сфера, область"],
+["fight","v., n.","A2","драться, бороться; борьба"],
+["fill","v.","A1","наполнять"],
+["film","n., v.","A2","фильм; снимать фильм"],
+["final","adj., n.","A1","заключительный; финал"],
+["finally","adv.","A2","наконец, в конечном итоге"],
+["financial","adj.","B1","финансовый"],
+["find","v.","A1","находить, обнаруживать"],
+["fine","adj.","A1","хорошо, отлично"],
+["finger","n.","A2","палец (руки)"],
+["finish","v.","A1","заканчивать"],
+["fire","n., v.","A1","огонь, пожар; увольнять"],
+["fish","n.","A1","рыба"],
+["fix","v.","A2","чинить"],
+["flight","n.","A1","полёт, рейс"],
+["floor","n.","A1","пол; этаж"],
+["flower","n.","A1","цветок"],
+["flu","n.","A2","грипп"],
+["fly","v.","A1","летать"],
+["focus","v., n.","A2","сосредотачиваться; фокус"],
+["follow","v.","A1","следовать, следить"],
+["food","n.","A1","еда, пища"],
+["foot","n.","A1","нога (ступня); фут"],
+["football","n.","A1","американский футбол; футбол"],
+["forget","v.","A1","забывать"],
+["fork","n.","A2","вилка"],
+["form","n., v.","A1","форма; образовывать"],
+["formal","adj.","A2","официальный, формальный"],
+["free","adj., adv.","A1","свободный, бесплатный"],
+["friend","n.","A1","друг"],
+["friendly","adj.","A1","дружелюбный"],
+["frog","n.","A2","лягушка"],
+["front","n., adj.","A1","перед, фронт; передний"],
+["fruit","n.","A1","фрукт"],
+["full","adj.","A1","полный"],
+["fun","n., adj.","A1","веселье; весёлый"],
+["funny","adj.","A1","смешной, забавный"],
+["furniture","n.","A2","мебель"],
+["future","n., adj.","A1","будущее; будущий"],
+["game","n.","A1","игра"],
+["gap","n.","A2","разрыв, пробел"],
+["garden","n.","A1","сад"],
+["gas","n.","A2","газ; бензин"],
+["geography","n.","A1","география"],
+["get","v.","A1","получать, становиться"],
+["gift","n.","A2","подарок; дар, способность"],
+["girl","n.","A1","девочка, девушка"],
+["girlfriend","n.","A1","подруга (романтическая)"],
+["give","v.","A1","давать"],
+["glass","n.","A1","стекло; стакан"],
+["go","v.","A1","идти, ехать"],
+["goal","n.","A2","цель; гол"],
+["god","n.","A2","бог"],
+["gold","n., adj.","A2","золото; золотой"],
+["golf","n.","A2","гольф"],
+["good","adj., n.","A1","хороший; добро"],
+["grandfather","n.","A1","дедушка"],
+["grandmother","n.","A1","бабушка"],
+["grass","n.","A2","трава"],
+["gray","adj., n.","A1","серый"],
+["great","adj.","A1","великий, замечательный"],
+["green","adj., n.","A1","зелёный"],
+["greet","v.","A2","приветствовать"],
+["grocery","n.","A2","продуктовый магазин; продукты"],
+["ground","n.","A2","земля, почва"],
+["group","n.","A1","группа"],
+["grow","v.","A1","расти, выращивать"],
+["guest","n.","A2","гость"],
+["guide","n., v.","A2","гид, руководство; направлять"],
+["guitar","n.","A1","гитара"],
+["gun","n.","A2","ружьё, пистолет"],
+["gym","n.","A1","спортзал"],
+["habit","n.","A2","привычка"],
+["hair","n.","A1","волосы"],
+["hand","n.","A1","рука (кисть)"],
+["happen","v.","A1","случаться, происходить"],
+["happy","adj.","A1","счастливый, довольный"],
+["hard","adj., adv.","A1","твёрдый, трудный; усердно"],
+["hat","n.","A1","шляпа, шапка"],
+["hate","v.","A1","ненавидеть"],
+["have","v.","A1","иметь"],
+["head","n.","A1","голова"],
+["headache","n.","A2","головная боль"],
+["health","n.","A1","здоровье"],
+["healthy","adj.","A1","здоровый"],
+["hear","v.","A1","слышать"],
+["heart","n.","A2","сердце"],
+["heat","n., v.","A2","жара, тепло; нагревать"],
+["heavy","adj.","A2","тяжёлый"],
+["height","n.","A2","рост, высота"],
+["hello","exclam.","A1","привет, здравствуйте"],
+["help","v., n.","A1","помогать; помощь"],
+["here","adv.","A1","здесь, сюда"],
+["hero","n.","A2","герой"],
+["hide","v.","A2","прятать, скрывать"],
+["high","adj., adv.","A1","высокий; высоко"],
+["hill","n.","A2","холм"],
+["history","n.","A1","история"],
+["hit","v., n.","A2","ударять; удар, хит"],
+["hobby","n.","A1","хобби, увлечение"],
+["hockey","n.","A2","хоккей"],
+["hold","v.","A2","держать"],
+["hole","n.","A2","дыра, отверстие"],
+["holiday","n.","A2","праздник, каникулы"],
+["home","n., adv.","A1","дом; домой"],
+["homework","n.","A1","домашнее задание"],
+["hope","v., n.","A1","надеяться; надежда"],
+["horse","n.","A1","лошадь"],
+["hospital","n.","A1","больница"],
+["hot","adj.","A1","горячий, жаркий"],
+["hotel","n.","A1","гостиница, отель"],
+["hour","n.","A1","час"],
+["house","n.","A1","дом"],
+["how","adv.","A1","как"],
+["huge","adj.","A2","огромный"],
+["human","adj., n.","A2","человеческий; человек"],
+["hundred","number","A1","сто"],
+["hungry","adj.","A1","голодный"],
+["hurt","v.","A2","причинять боль"],
+["husband","n.","A1","муж"],
+["ice","n.","A1","лёд"],
+["ice cream","n.","A1","мороженое"],
+["idea","n.","A1","идея, мысль"],
+["if","conj.","A1","если"],
+["ill","adj.","A2","больной"],
+["illness","n.","A2","болезнь"],
+["image","n.","A2","образ, изображение"],
+["imagine","v.","A1","воображать, представлять"],
+["important","adj.","A1","важный"],
+["improve","v.","A1","улучшать"],
+["include","v.","A1","включать"],
+["increase","v., n.","A2","увеличивать; увеличение"],
+["incredible","adj.","A2","невероятный"],
+["independent","adj.","A2","независимый"],
+["industry","n.","A2","промышленность, отрасль"],
+["information","n.","A1","информация"],
+["insect","n.","A2","насекомое"],
+["interest","n., v.","A1","интерес; интересовать"],
+["interesting","adj.","A1","интересный"],
+["international","adj.","A2","международный"],
+["internet","n.","A1","интернет"],
+["interview","n., v.","A1","интервью; брать интервью"],
+["into","prep.","A1","в, внутрь"],
+["introduce","v.","A1","представлять, вводить"],
+["invent","v.","A2","изобретать"],
+["invite","v.","A2","приглашать"],
+["involve","v.","A2","вовлекать, включать"],
+["island","n.","A1","остров"],
+["jacket","n.","A1","куртка, пиджак"],
+["January","n.","A1","январь"],
+["jeans","n.","A1","джинсы"],
+["job","n.","A1","работа, должность"],
+["join","v.","A1","присоединяться, вступать"],
+["joke","n., v.","A2","шутка; шутить"],
+["journalist","n.","A2","журналист"],
+["juice","n.","A1","сок"],
+["July","n.","A1","июль"],
+["jump","v., n.","A2","прыгать; прыжок"],
+["June","n.","A1","июнь"],
+["keep","v.","A1","держать, хранить, продолжать"],
+["kid","n.","A2","ребёнок; малыш"],
+["kill","v.","A2","убивать"],
+["kind","n., adj.","A1","вид, тип; добрый"],
+["king","n.","A2","король"],
+["kitchen","n.","A1","кухня"],
+["knee","n.","A2","колено"],
+["knife","n.","A2","нож"],
+["know","v.","A1","знать"],
+["knowledge","n.","A2","знание"],
+["lake","n.","A2","озеро"],
+["language","n.","A1","язык"],
+["large","adj.","A1","большой, крупный"],
+["last","det., adv.","A1","последний; прошлый; длиться"],
+["late","adj., adv.","A1","поздний; поздно"],
+["laugh","v., n.","A1","смеяться; смех"],
+["law","n.","A2","закон, право"],
+["lawyer","n.","A2","юрист, адвокат"],
+["lazy","adj.","A2","ленивый"],
+["lead","v., n.","A2","вести, возглавлять; руководство"],
+["leader","n.","A2","лидер, руководитель"],
+["learn","v.","A1","учиться, узнавать"],
+["leave","v.","A1","уходить, оставлять"],
+["left","adj., adv.","A1","левый; слева; налево"],
+["leg","n.","A1","нога (от бедра до ступни)"],
+["lend","v.","A2","давать взаймы"],
+["lesson","n.","A1","урок"],
+["let","v.","A1","позволять, давать"],
+["letter","n.","A1","письмо; буква"],
+["library","n.","A1","библиотека"],
+["lie","v.","A1","лежать; лгать; ложь"],
+["life","n.","A1","жизнь"],
+["lifestyle","n.","A2","образ жизни"],
+["light","n., adj.","A1","свет; светлый; лёгкий"],
+["like","prep., v.","A1","как; любить"],
+["line","n.","A1","линия, очередь"],
+["lion","n.","A1","лев"],
+["list","n., v.","A1","список; перечислять"],
+["listen","v.","A1","слушать"],
+["little","adj., adv.","A1","маленький; немного"],
+["live","v.","A1","жить"],
+["local","adj.","A1","местный"],
+["lock","v., n.","A2","запирать; замок"],
+["long","adj., adv.","A1","длинный; долго"],
+["look","v., n.","A1","смотреть; взгляд"],
+["lose","v.","A1","терять, проигрывать"],
+["love","n., v.","A1","любовь; любить"],
+["low","adj., adv.","A2","низкий; низко"],
+["luck","n.","A2","удача, везение"],
+["lucky","adj.","A2","удачливый, счастливый"],
+["lunch","n.","A1","обед"],
+["machine","n.","A1","машина, аппарат"],
+["magazine","n.","A1","журнал"],
+["main","adj.","A1","главный, основной"],
+["make","v.","A1","делать, изготавливать"],
+["man","n.","A1","мужчина, человек"],
+["manage","v.","A2","управлять; справляться"],
+["many","det./pron.","A1","много"],
+["map","n.","A1","карта"],
+["March","n.","A1","март"],
+["married","adj.","A1","женатый, замужняя"],
+["marry","v.","A2","жениться, выходить замуж"],
+["math","n.","A2","математика"],
+["matter","n., v.","A2","дело, вопрос; иметь значение"],
+["May","n.","A1","май"],
+["maybe","adv.","A1","может быть, возможно"],
+["meal","n.","A1","еда, приём пищи"],
+["mean","v.","A1","означать; иметь в виду"],
+["meat","n.","A1","мясо"],
+["media","n.","A2","средства массовой информации"],
+["medical","adj.","A2","медицинский"],
+["medicine","n.","A2","медицина, лекарство"],
+["meet","v.","A1","встречать, знакомиться"],
+["meeting","n.","A1","встреча, собрание"],
+["member","n.","A1","член, участник"],
+["memory","n.","A2","память, воспоминание"],
+["mention","v.","A2","упоминать"],
+["menu","n.","A1","меню"],
+["message","n.","A1","сообщение"],
+["metal","n.","A2","металл"],
+["meter","n.","A1","метр"],
+["method","n.","A2","метод, способ"],
+["middle","n., adj.","A2","середина; средний"],
+["midnight","n.","A1","полночь"],
+["milk","n.","A1","молоко"],
+["million","number","A1","миллион"],
+["mind","n., v.","A2","ум, разум; возражать"],
+["minute","n.","A1","минута"],
+["mirror","n.","A2","зеркало"],
+["miss","v.","A1","скучать; пропустить"],
+["mistake","n.","A1","ошибка"],
+["model","n.","A1","модель"],
+["modern","adj.","A1","современный"],
+["mom","n.","A1","мама"],
+["moment","n.","A1","момент, мгновение"],
+["Monday","n.","A1","понедельник"],
+["money","n.","A1","деньги"],
+["monkey","n.","A2","обезьяна"],
+["month","n.","A1","месяц"],
+["moon","n.","A2","луна"],
+["morning","n.","A1","утро"],
+["mostly","adv.","A2","в основном, главным образом"],
+["mother","n.","A1","мать, мама"],
+["motorcycle","n.","A2","мотоцикл"],
+["mountain","n.","A1","гора"],
+["mouth","n.","A1","рот"],
+["move","v., n.","A1","двигать; движение, ход"],
+["movie","n.","A1","фильм, кино"],
+["museum","n.","A1","музей"],
+["music","n.","A1","музыка"],
+["musician","n.","A2","музыкант"],
+["name","n., v.","A1","имя; называть"],
+["natural","adj.","A1","природный, естественный"],
+["nature","n.","A2","природа, натура"],
+["near","prep., adj.","A1","рядом, вблизи"],
+["nearly","adv.","A2","почти"],
+["necessary","adj.","A2","необходимый"],
+["neck","n.","A2","шея"],
+["need","v., n.","A1","нуждаться; нужда"],
+["neighbor","n.","A1","сосед"],
+["neighborhood","n.","A1","район, соседство"],
+["nervous","adj.","A2","нервный, взволнованный"],
+["network","n.","A2","сеть"],
+["never","adv.","A1","никогда"],
+["new","adj.","A1","новый"],
+["news","n.","A1","новости"],
+["newspaper","n.","A1","газета"],
+["night","n.","A1","ночь"],
+["noise","n.","A2","шум"],
+["normal","adj.","A2","обычный, нормальный"],
+["nose","n.","A1","нос"],
+["notice","v.","A2","замечать"],
+["November","n.","A1","ноябрь"],
+["now","adv.","A1","сейчас"],
+["number","n.","A1","число, номер"],
+["nurse","n.","A1","медсестра"],
+["ocean","n.","A1","океан"],
+["October","n.","A1","октябрь"],
+["offer","v., n.","A2","предлагать; предложение"],
+["office","n.","A1","офис, контора"],
+["often","adv.","A1","часто"],
+["oil","n.","A2","масло; нефть"],
+["old","adj.","A1","старый, пожилой"],
+["online","adj., adv.","A1","онлайн; в интернете"],
+["onion","n.","A1","лук (овощ)"],
+["open","adj., v.","A1","открытый; открывать"],
+["opinion","n.","A1","мнение"],
+["opportunity","n.","A2","возможность, шанс"],
+["opposite","adj.","A1","противоположный"],
+["option","n.","A2","вариант, возможность"],
+["orange","n., adj.","A1","апельсин; оранжевый"],
+["order","n., v.","A1","порядок; заказ; приказывать"],
+["organization","n.","A2","организация"],
+["other","adj./pron.","A1","другой, иной"],
+["outside","adv., prep.","A1","снаружи; вне"],
+["oven","n.","A2","духовка, печь"],
+["own","adj./pron., v.","A1","собственный; владеть"],
+["page","n.","A1","страница"],
+["pain","n.","A2","боль"],
+["paint","v., n.","A1","красить; краска"],
+["painting","n.","A1","картина, живопись"],
+["pair","n.","A1","пара"],
+["pants","n.","A1","брюки"],
+["paper","n.","A1","бумага; газета"],
+["parent","n.","A1","родитель"],
+["park","n., v.","A1","парк; парковать(ся)"],
+["partner","n.","A1","партнёр"],
+["party","n.","A1","вечеринка; партия"],
+["passenger","n.","A2","пассажир"],
+["passport","n.","A1","паспорт"],
+["pay","v., n.","A1","платить; зарплата"],
+["peace","n.","A2","мир, покой"],
+["pen","n.","A1","ручка (письменная)"],
+["pencil","n.","A1","карандаш"],
+["people","n.","A1","люди, народ"],
+["pepper","n.","A1","перец"],
+["percent","n.","A2","процент"],
+["perfect","adj.","A1","идеальный, совершенный"],
+["perform","v.","A2","выступать, исполнять"],
+["perhaps","adv.","A2","возможно, может быть"],
+["period","n.","A1","период, время"],
+["permission","n.","A2","разрешение"],
+["person","n.","A1","человек, личность"],
+["personal","adj.","A1","личный, персональный"],
+["phone","n., v.","A1","телефон; звонить"],
+["photo","n.","A1","фото, фотография"],
+["phrase","n.","A1","фраза, словосочетание"],
+["physical","adj.","A2","физический"],
+["physics","n.","A2","физика"],
+["piano","n.","A1","пианино, рояль"],
+["picture","n.","A1","картина, фотография"],
+["pig","n.","A1","свинья"],
+["pilot","n.","A2","пилот"],
+["pink","adj., n.","A1","розовый"],
+["place","n., v.","A1","место; ставить, класть"],
+["plan","n., v.","A1","план; планировать"],
+["plane","n.","A1","самолёт"],
+["planet","n.","A2","планета"],
+["plant","n., v.","A1","растение; сажать"],
+["plastic","n., adj.","A2","пластик; пластиковый"],
+["plate","n.","A2","тарелка"],
+["play","v., n.","A1","играть; игра, пьеса"],
+["player","n.","A1","игрок"],
+["pocket","n.","A2","карман"],
+["police","n.","A1","полиция"],
+["polite","adj.","A2","вежливый"],
+["pool","n.","A1","бассейн"],
+["poor","adj.","A1","бедный; плохой"],
+["popular","adj.","A1","популярный"],
+["population","n.","A2","население"],
+["possible","adj.","A1","возможный"],
+["post","n., v.","A1","почта; публикация; отправлять"],
+["potato","n.","A1","картофель"],
+["practice","n., v.","A1","практика; тренироваться"],
+["predict","v.","A2","предсказывать"],
+["prefer","v.","A1","предпочитать"],
+["prepare","v.","A1","готовить(ся)"],
+["present","adj., n.","A1","присутствующий; подарок; представлять"],
+["president","n.","A2","президент"],
+["pretty","adj., adv.","A1","красивый; довольно"],
+["prevent","v.","A2","предотвращать, мешать"],
+["price","n.","A1","цена"],
+["prison","n.","A2","тюрьма"],
+["prize","n.","A2","приз, награда"],
+["probably","adv.","A1","вероятно, наверное"],
+["problem","n.","A1","проблема"],
+["process","n.","A2","процесс"],
+["product","n.","A1","продукт, товар"],
+["professor","n.","A2","профессор"],
+["program","n.","A1","программа"],
+["progress","n.","A2","прогресс"],
+["project","n.","A1","проект"],
+["promise","v., n.","A2","обещать; обещание"],
+["protect","v.","A2","защищать"],
+["public","adj., n.","A2","общественный; публика"],
+["publish","v.","A2","публиковать, издавать"],
+["purple","adj., n.","A1","фиолетовый"],
+["purpose","n.","A2","цель, намерение"],
+["put","v.","A1","класть, ставить"],
+["quality","n.","A2","качество"],
+["queen","n.","A2","королева"],
+["question","n.","A1","вопрос"],
+["quick","adj.","A1","быстрый"],
+["quiet","adj.","A1","тихий, спокойный"],
+["quite","adv.","A1","довольно, весьма"],
+["radio","n.","A1","радио"],
+["rain","n., v.","A1","дождь; идти (о дожде)"],
+["read","v.","A1","читать"],
+["ready","adj.","A1","готовый"],
+["real","adj.","A1","реальный, настоящий"],
+["realize","v.","A2","осознавать, понимать"],
+["really","adv.","A1","на самом деле, действительно"],
+["reason","n.","A1","причина, повод"],
+["receive","v.","A2","получать"],
+["recent","adj.","A2","недавний, последний"],
+["recipe","n.","A2","рецепт"],
+["recognize","v.","A2","узнавать, признавать"],
+["recommend","v.","A2","рекомендовать"],
+["record","n., v.","A2","запись, рекорд; записывать"],
+["recycle","v.","A2","перерабатывать (отходы)"],
+["red","adj., n.","A1","красный"],
+["reduce","v.","A2","уменьшать, снижать"],
+["refrigerator","n.","A2","холодильник"],
+["refuse","v.","A2","отказывать, отказываться"],
+["region","n.","A2","регион, область"],
+["regular","adj.","A2","регулярный, обычный"],
+["relationship","n.","A2","отношения"],
+["relax","v.","A1","расслабляться, отдыхать"],
+["remove","v.","A2","удалять, убирать"],
+["repeat","v.","A1","повторять"],
+["replace","v.","A2","заменять"],
+["reply","v., n.","A2","отвечать; ответ"],
+["report","n., v.","A1","доклад, отчёт; сообщать"],
+["reporter","n.","A2","репортёр"],
+["research","n., v.","A2","исследование; исследовать"],
+["rest","n., v.","A2","отдых; оставшаяся часть; отдыхать"],
+["restaurant","n.","A1","ресторан"],
+["result","n.","A1","результат"],
+["return","v., n.","A1","возвращаться; возврат"],
+["review","n., v.","A2","обзор, рецензия; рассматривать"],
+["rice","n.","A1","рис"],
+["rich","adj.","A1","богатый"],
+["ride","v., n.","A1","ехать (на транспорте); поездка"],
+["right","adj., adv., n.","A1","правый; правильный; право"],
+["river","n.","A1","река"],
+["road","n.","A1","дорога"],
+["role","n.","A2","роль"],
+["roof","n.","A2","крыша"],
+["room","n.","A1","комната, место"],
+["route","n.","A2","маршрут, путь"],
+["rude","adj.","A2","грубый, невежливый"],
+["run","v., n.","A1","бежать, бегать; пробежка"],
+["sad","adj.","A1","грустный, печальный"],
+["safe","adj.","A2","безопасный"],
+["salad","n.","A1","салат"],
+["salary","n.","A2","зарплата, жалование"],
+["sale","n.","A2","продажа, распродажа"],
+["salt","n.","A1","соль"],
+["sandwich","n.","A1","бутерброд, сэндвич"],
+["Saturday","n.","A1","суббота"],
+["sauce","n.","A2","соус"],
+["save","v.","A2","спасать; сохранять; экономить"],
+["say","v.","A1","говорить, сказать"],
+["scared","adj.","A2","напуганный, испуганный"],
+["scene","n.","A2","сцена, место событий"],
+["school","n.","A1","школа"],
+["science","n.","A1","наука"],
+["scientist","n.","A1","учёный"],
+["score","v., n.","A2","счёт; набирать очки"],
+["sea","n.","A2","море"],
+["search","n., v.","A2","поиск; искать"],
+["season","n.","A2","сезон, время года"],
+["secret","adj., n.","A2","тайный; тайна, секрет"],
+["see","v.","A1","видеть, понимать"],
+["seem","v.","A2","казаться, выглядеть"],
+["sell","v.","A1","продавать"],
+["send","v.","A1","посылать, отправлять"],
+["sentence","n.","A1","предложение (фраза); приговор"],
+["September","n.","A1","сентябрь"],
+["serious","adj.","A2","серьёзный"],
+["serve","v.","A2","служить; обслуживать"],
+["service","n.","A2","обслуживание, услуга; служба"],
+["several","det./pron.","A2","несколько"],
+["share","v., n.","A1","делиться; доля, акция"],
+["she","pron.","A1","она"],
+["sheep","n.","A1","овца"],
+["ship","n.","A2","корабль"],
+["shirt","n.","A1","рубашка"],
+["shoe","n.","A1","ботинок, туфля"],
+["shop","n., v.","A1","магазин; делать покупки"],
+["shopping","n.","A1","шопинг, покупки"],
+["short","adj.","A1","короткий, низкий"],
+["should","modal v.","A1","должен, следует"],
+["shoulder","n.","A2","плечо"],
+["shout","v., n.","A2","кричать; крик"],
+["show","v., n.","A1","показывать; показ, шоу"],
+["shower","n.","A1","душ; ливень"],
+["sick","adj.","A1","больной"],
+["side","n.","A2","сторона, бок"],
+["sign","n., v.","A2","знак, вывеска; подписывать"],
+["similar","adj.","A1","похожий, подобный"],
+["simple","adj.","A2","простой"],
+["sing","v.","A1","петь"],
+["singer","n.","A1","певец, певица"],
+["sister","n.","A1","сестра"],
+["sit","v.","A1","сидеть, садиться"],
+["site","n.","A2","сайт; место, объект"],
+["situation","n.","A1","ситуация, положение"],
+["size","n.","A2","размер"],
+["skill","n.","A1","навык, умение"],
+["skin","n.","A2","кожа"],
+["skirt","n.","A1","юбка"],
+["sky","n.","A2","небо"],
+["sleep","v., n.","A1","спать; сон"],
+["slowly","adv.","A2","медленно"],
+["small","adj.","A1","маленький"],
+["smart","adj.","A1","умный; элегантный"],
+["smartphone","n.","A2","смартфон"],
+["smile","v., n.","A2","улыбаться; улыбка"],
+["smoke","n., v.","A2","дым; курить"],
+["snake","n.","A1","змея"],
+["snow","n., v.","A1","снег; идти (о снеге)"],
+["soccer","n.","A2","футбол"],
+["social","adj.","A2","социальный, общественный"],
+["society","n.","A2","общество"],
+["soft","adj.","A2","мягкий"],
+["soldier","n.","A2","солдат"],
+["solution","n.","A2","решение; раствор"],
+["solve","v.","A2","решать (задачу)"],
+["some","det., pron.","A1","некоторые, несколько"],
+["son","n.","A1","сын"],
+["song","n.","A1","песня"],
+["soon","adv.","A1","скоро, вскоре"],
+["sorry","adj., exclam.","A1","сожалею; извини"],
+["sound","n., v.","A1","звук; казаться"],
+["soup","n.","A1","суп"],
+["source","n.","A2","источник"],
+["south","n., adj.","A1","юг; южный"],
+["space","n.","A1","пространство; космос"],
+["speak","v.","A1","говорить, разговаривать"],
+["special","adj.","A1","особенный, специальный"],
+["speed","n.","A2","скорость"],
+["spell","v.","A1","писать по буквам"],
+["spend","v.","A1","тратить (деньги, время)"],
+["sport","n.","A1","спорт"],
+["star","n.","A1","звезда"],
+["start","v., n.","A1","начинать; начало"],
+["station","n.","A1","станция, вокзал"],
+["stay","v., n.","A1","оставаться; пребывание"],
+["steal","v.","A2","красть, воровать"],
+["stop","v., n.","A1","останавливаться; остановка"],
+["store","n.","A1","магазин"],
+["storm","n.","A2","буря, шторм"],
+["story","n.","A1","история, рассказ"],
+["straight","adv., adj.","A2","прямо; прямой"],
+["strange","adj.","A2","странный, незнакомый"],
+["strategy","n.","A2","стратегия"],
+["street","n.","A1","улица"],
+["strong","adj.","A1","сильный, крепкий"],
+["student","n.","A1","студент, учащийся"],
+["study","n., v.","A1","учёба; изучать"],
+["stupid","adj.","A2","глупый"],
+["style","n.","A1","стиль"],
+["subway","n.","A2","метро"],
+["succeed","v.","A2","добиться успеха"],
+["success","n.","A1","успех"],
+["sugar","n.","A1","сахар"],
+["suggest","v.","A2","предлагать, предполагать"],
+["summer","n.","A1","лето"],
+["sun","n.","A1","солнце"],
+["Sunday","n.","A1","воскресенье"],
+["supermarket","n.","A1","супермаркет"],
+["support","v., n.","A2","поддерживать; поддержка"],
+["sure","adj., adv.","A1","уверенный; конечно"],
+["surprise","n., v.","A2","сюрприз; удивлять"],
+["swim","v.","A1","плавать"],
+["swimming","n.","A1","плавание"],
+["symbol","n.","A2","символ"],
+["system","n.","A2","система"],
+["table","n.","A1","стол, таблица"],
+["take","v.","A1","брать, принимать"],
+["talk","v., n.","A1","говорить, разговаривать; разговор"],
+["tall","adj.","A1","высокий (о росте)"],
+["task","n.","A2","задача, задание"],
+["taste","n., v.","A2","вкус; пробовать на вкус"],
+["taxi","n.","A1","такси"],
+["tea","n.","A1","чай"],
+["teach","v.","A1","учить, преподавать"],
+["teacher","n.","A1","учитель, преподаватель"],
+["team","n.","A1","команда"],
+["technology","n.","A2","технология"],
+["teenager","n.","A1","подросток"],
+["telephone","n.","A1","телефон"],
+["television","n.","A1","телевизор, телевидение"],
+["tell","v.","A1","говорить, сказать; рассказывать"],
+["temperature","n.","A2","температура"],
+["tennis","n.","A1","теннис"],
+["test","n., v.","A1","тест, испытание; тестировать"],
+["text","n., v.","A1","текст; писать смс"],
+["theater","n.","A1","театр"],
+["think","v.","A1","думать, считать"],
+["thousand","number","A1","тысяча"],
+["ticket","n.","A1","билет, талон"],
+["time","n.","A1","время"],
+["tired","adj.","A1","уставший"],
+["title","n.","A1","название, заголовок"],
+["today","adv., n.","A1","сегодня"],
+["together","adv.","A1","вместе"],
+["toilet","n.","A1","туалет"],
+["tomato","n.","A1","помидор"],
+["tomorrow","adv., n.","A1","завтра"],
+["tonight","adv., n.","A1","сегодня вечером"],
+["tooth","n.","A1","зуб"],
+["topic","n.","A1","тема"],
+["tourist","n.","A1","турист"],
+["town","n.","A1","город (небольшой), посёлок"],
+["traffic","n.","A1","движение, трафик"],
+["train","n., v.","A1","поезд; тренировать"],
+["transportation","n.","A2","транспорт"],
+["trash","n.","A2","мусор"],
+["travel","v., n.","A1","путешествовать; путешествие"],
+["tree","n.","A1","дерево"],
+["trip","n.","A1","поездка, путешествие"],
+["truck","n.","A1","грузовик"],
+["true","adj.","A1","истинный, правдивый"],
+["try","v.","A1","пробовать, стараться"],
+["T-shirt","n.","A1","футболка"],
+["Tuesday","n.","A1","вторник"],
+["turn","v., n.","A1","поворачивать; поворот, очередь"],
+["TV","n.","A1","телевизор"],
+["type","n., v.","A1","тип, вид; печатать"],
+["typical","adj.","A2","типичный"],
+["umbrella","n.","A1","зонт"],
+["uncle","n.","A1","дядя"],
+["understand","v.","A1","понимать"],
+["university","n.","A1","университет"],
+["until","conj./prep.","A1","до, пока не"],
+["unusual","adj.","A2","необычный"],
+["use","v., n.","A1","использовать; использование"],
+["useful","adj.","A1","полезный"],
+["usually","adv.","A1","обычно"],
+["vacation","n.","A1","каникулы, отпуск"],
+["video","n.","A1","видео"],
+["visit","v., n.","A1","посещать; визит"],
+["visitor","n.","A1","посетитель"],
+["voice","n.","A2","голос"],
+["wait","v.","A1","ждать"],
+["waiter","n.","A1","официант"],
+["wake","v.","A1","просыпаться, будить"],
+["walk","v., n.","A1","ходить пешком; прогулка"],
+["wall","n.","A1","стена"],
+["want","v.","A1","хотеть"],
+["warm","adj.","A1","тёплый"],
+["wash","v.","A1","мыть; стирка"],
+["watch","v., n.","A1","смотреть; часы (наручные)"],
+["water","n.","A1","вода"],
+["weather","n.","A1","погода"],
+["website","n.","A1","веб-сайт"],
+["wedding","n.","A2","свадьба"],
+["Wednesday","n.","A1","среда"],
+["week","n.","A1","неделя"],
+["weekend","n.","A1","выходные"],
+["well","adv., adj.","A1","хорошо; в добром здоровье"],
+["west","n., adj., adv.","A1","запад; западный"],
+["wheel","n.","A2","колесо"],
+["white","adj., n.","A1","белый"],
+["wife","n.","A1","жена"],
+["win","v., n.","A1","победить; победа"],
+["window","n.","A1","окно"],
+["wine","n.","A1","вино"],
+["winter","n.","A1","зима"],
+["wish","v., n.","A2","желать; желание"],
+["woman","n.","A1","женщина"],
+["wonderful","adj.","A1","замечательный, чудесный"],
+["word","n.","A1","слово"],
+["work","v., n.","A1","работать; работа"],
+["worker","n.","A1","работник, рабочий"],
+["world","n.","A1","мир, свет"],
+["worried","adj.","A2","обеспокоенный"],
+["worry","v., n.","A2","беспокоиться; тревога"],
+["write","v.","A1","писать"],
+["writer","n.","A1","писатель, автор"],
+["wrong","adj., adv.","A1","неправильный; неверно"],
+["year","n.","A1","год"],
+["yellow","adj., n.","A1","жёлтый"],
+["yesterday","adv., n.","A1","вчера"],
+["young","adj.","A1","молодой"],
+["zero","number","A2","ноль, нулевой"],
+["absence","n.","B1","отсутствие"],
+["abuse","n., v.","B2","злоупотребление; злоупотреблять"],
+["accurate","adj.","B2","точный, верный"],
+["achieve","v.","A2","достигать, добиваться"],
+["acknowledge","v.","B2","признавать, подтверждать"],
+["acquire","v.","B2","приобретать, получать"],
+["adapt","v.","B2","адаптировать, приспосабливать"],
+["administration","n.","B1","администрация, управление"],
+["adopt","v.","B2","усыновлять; принимать"],
+["afterward","adv.","B2","потом, впоследствии"],
+["aircraft","n.","B2","воздушное судно, самолёт"],
+["alternative","n., adj.","B1","альтернатива; альтернативный"],
+["ancient","adj.","A2","древний, старинный"],
+["anxiety","n.","B2","тревога, беспокойство"],
+["apparent","adj.","B2","очевидный, явный"],
+["approximately","adv.","B1","приблизительно, около"],
+["aspect","n.","B2","аспект, сторона"],
+["assess","v.","B2","оценивать"],
+["assignment","n.","B1","задание, поручение"],
+["associate","v.","B2","ассоциировать, связывать"],
+["assume","v.","B2","предполагать, допускать"],
+["authority","n.","B1","власть, авторитет"],
+["automatic","adj.","B1","автоматический"],
+["aware","adj.","B1","осведомлённый, знающий"],
+["backward","adv.","B1","назад, в обратном направлении"],
+["bacteria","n.","B2","бактерии"],
+["balance","n., v.","B1","равновесие; балансировать"],
+["ban","v., n.","B1","запрещать; запрет"],
+["barrier","n.","B2","барьер, препятствие"],
+["basis","n.","B1","основа, базис"],
+["battle","n., v.","B1","битва, бой; сражаться"],
+["bee","n.","B1","пчела"],
+["bend","v., n.","B1","гнуть; изгиб, поворот"],
+["bill","n., v.","B2","выставлять счёт"],
+["blame","v., n.","B2","обвинять; вина"],
+["blind","adj.","B2","слепой"],
+["bond","n.","B2","связь, облигация"],
+["border","n., v.","B1","граница; граничить"],
+["breath","n.","B1","дыхание, вдох"],
+["breathe","v.","B1","дышать"],
+["bride","n.","B1","невеста"],
+["brief","adj.","B2","краткий, короткий"],
+["broadcast","v., n.","B2","транслировать; трансляция"],
+["bury","v.","B1","хоронить, зарывать"],
+["campaign","n., v.","B1","кампания; вести кампанию"],
+["candidate","n.","B1","кандидат"],
+["capacity","n.","B2","вместимость, мощность, способность"],
+["capture","v., n.","B2","захватывать; захват"],
+["category","n.","B1","категория"],
+["ceiling","n.","B1","потолок"],
+["chairman","n.","B2","председатель"],
+["challenge","n., v.","B1","вызов, трудность; бросать вызов"],
+["champion","n.","B1","чемпион"],
+["chapter","n.","B1","глава (книги)"],
+["characteristic","n., adj.","B2","характеристика; характерный"],
+["charity","n.","A2","благотворительность"],
+["civilization","n.","B1","цивилизация"],
+["claim","v., n.","B1","утверждать; утверждение"],
+["clever","adj.","B1","умный, ловкий"],
+["client","n.","B1","клиент"],
+["coal","n.","B1","уголь"],
+["collapse","v., n.","B2","рухнуть; обвал, коллапс"],
+["collection","n.","B1","коллекция, собрание"],
+["comfortable","adj.","A2","удобный, комфортный"],
+["commitment","n.","B2","обязательство, преданность"],
+["committee","n.","B2","комитет, комиссия"],
+["complex","adj., n.","B1","сложный; комплекс"],
+["concentrate","v.","B1","сосредотачиваться"],
+["concept","n.","B2","понятие, концепция"],
+["concern","n., v.","B2","беспокойство; касаться"],
+["conclusion","n.","B1","вывод, заключение"],
+["confidence","n.","B2","уверенность, доверие"],
+["confident","adj.","B1","уверенный"],
+["conflict","n., v.","B2","конфликт; конфликтовать"],
+["congress","n.","B2","конгресс"],
+["consequence","n.","B1","последствие"],
+["consider","v.","A2","рассматривать, считать"],
+["construction","n.","B2","строительство, конструкция"],
+["consumer","n.","B1","потребитель"],
+["contribution","n.","B2","вклад, взнос"],
+["convenient","adj.","B1","удобный"],
+["convince","v.","B1","убеждать"],
+["countryside","n.","B1","сельская местность"],
+["courage","n.","B2","мужество, смелость"],
+["court","n.","B1","суд; корт"],
+["crisis","n.","B2","кризис"],
+["criterion","n.","B2","критерий"],
+["cruel","adj.","B1","жестокий"],
+["cultural","adj.","B1","культурный"],
+["currency","n.","B1","валюта"],
+["decade","n.","B1","десятилетие"],
+["declare","v.","B2","объявлять, декларировать"],
+["decline","v., n.","B2","снижаться; снижение, упадок"],
+["defeat","v., n.","B2","побеждать; поражение"],
+["defend","v.","B2","защищать"],
+["define","v.","B1","определять, давать определение"],
+["definite","adj.","B1","определённый, чёткий"],
+["definition","n.","B1","определение"],
+["deliberately","adv.","B2","намеренно, специально"],
+["deliver","v.","B1","доставлять, вручать"],
+["demand","n., v.","B2","требование, спрос; требовать"],
+["demonstrate","v.","B2","демонстрировать"],
+["departure","n.","B1","отъезд, отправление"],
+["depressed","adj.","B2","подавленный, в депрессии"],
+["depth","n.","B2","глубина"],
+["desert","n., v.","B2","пустыня; покидать"],
+["deserve","v.","B2","заслуживать"],
+["desire","n., v.","B2","желание; желать"],
+["despite","prep.","B1","несмотря на"],
+["destination","n.","B1","пункт назначения"],
+["detailed","adj.","B2","подробный, детальный"],
+["determine","v.","B1","определять, устанавливать"],
+["determined","adj.","B1","решительный, настойчивый"],
+["development","n.","B1","развитие"],
+["diagram","n.","B1","схема, диаграмма"],
+["diamond","n.","B1","алмаз, бриллиант"],
+["diary","n.","A2","дневник"],
+["difficulty","n.","B1","трудность, сложность"],
+["disadvantage","n.","B1","недостаток, невыгода"],
+["disappoint","v.","B1","разочаровывать"],
+["discipline","n.","B2","дисциплина"],
+["display","v., n.","B2","показывать; дисплей, показ"],
+["distribute","v.","B2","распределять, распространять"],
+["district","n.","B1","район, округ"],
+["divide","v.","B1","делить"],
+["donate","v.","B1","жертвовать, делать пожертвование"],
+["double","adj., v.","A2","двойной; удваивать"],
+["doubt","n., v.","B1","сомнение; сомневаться"],
+["dramatic","adj.","B2","драматический, резкий"],
+["economic","adj.","B1","экономический"],
+["economy","n.","B1","экономика"],
+["edge","n.","B1","край"],
+["educated","adj.","B1","образованный"],
+["educational","adj.","B1","образовательный"],
+["effective","adj.","B1","эффективный"],
+["efficient","adj.","B2","эффективный, продуктивный"],
+["election","n.","B1","выборы"],
+["emergency","n.","B1","чрезвычайная ситуация"],
+["emotion","n.","B1","эмоция, чувство"],
+["employment","n.","B1","занятость, трудоустройство"],
+["enable","v.","B2","позволять, давать возможность"],
+["encourage","v.","B1","поощрять, поддерживать"],
+["enemy","n.","B1","враг"],
+["engineering","n.","B1","инженерное дело"],
+["enhance","v.","B2","улучшать, усиливать"],
+["ensure","v.","B2","обеспечивать, гарантировать"],
+["entertainment","n.","B1","развлечение"],
+["enthusiasm","n.","B2","энтузиазм"],
+["entire","adj.","B2","весь, целый"],
+["environment","n.","A2","окружающая среда"],
+["equal","adj., v.","B1","равный; равняться"],
+["escape","v., n.","B1","убегать; побег, спасение"],
+["essential","adj.","B1","необходимый, существенный"],
+["establish","v.","B2","устанавливать, основывать"],
+["estimate","v., n.","B2","оценивать; оценка"],
+["ethical","adj.","B2","этичный, нравственный"],
+["eventually","adv.","B1","в конечном счёте, в итоге"],
+["evil","adj., n.","B2","злой; зло"],
+["examination","n.","B2","экзамен, обследование"],
+["exhibition","n.","B1","выставка"],
+["exist","v.","A2","существовать"],
+["exit","n., v.","B1","выход; выходить"],
+["expand","v.","B1","расширять"],
+["exploration","n.","B2","исследование, изучение"],
+["explore","v.","B1","исследовать, изучать"],
+["export","n., v.","B1","экспорт; экспортировать"],
+["expose","v.","B2","подвергать воздействию; разоблачать"],
+["extend","v.","B2","расширять, продлевать"],
+["facility","n.","B2","учреждение, объект; удобство"],
+["failure","n.","B2","провал, неудача"],
+["faith","n.","B2","вера, доверие"],
+["familiar","adj.","B1","знакомый, привычный"],
+["fancy","adj.","B1","модный, изысканный"],
+["fascinating","adj.","B1","захватывающий, увлекательный"],
+["fasten","v.","B1","застёгивать, закреплять"],
+["fence","n.","B1","забор, ограда"],
+["fitness","n.","B1","физическая форма, здоровье"],
+["fixed","adj.","B1","фиксированный, закреплённый"],
+["flood","n., v.","B1","наводнение; затоплять"],
+["flour","n.","B1","мука"],
+["flow","v., n.","B1","течь, литься; поток"],
+["fold","v.","B1","складывать"],
+["folk","n., adj.","B1","народ; народный"],
+["forgive","v.","B2","прощать"],
+["found","v.","B2","основывать (организацию)"],
+["freedom","n.","B2","свобода"],
+["freeze","v.","B1","замерзать, замораживать"],
+["frequently","adv.","B1","часто"],
+["friendship","n.","B1","дружба"],
+["frighten","v.","B1","пугать"],
+["frozen","adj.","B1","замороженный"],
+["fuel","n., v.","B1","топливо; питать"],
+["fundamental","adj.","B2","фундаментальный, основной"],
+["gain","v., n.","B2","получать, зарабатывать; прибыль"],
+["generate","v.","B2","генерировать, производить"],
+["generation","n.","B1","поколение"],
+["generous","adj.","B1","щедрый"],
+["genre","n.","B2","жанр"],
+["gentle","adj.","B1","мягкий, нежный"],
+["ghost","n.","B1","призрак, дух"],
+["glad","adj.","B1","рад, доволен"],
+["global","adj.","B1","глобальный, мировой"],
+["glove","n.","B1","перчатка"],
+["govern","v.","B2","управлять, руководить"],
+["grade","n., v.","B1","оценка, класс; оценивать"],
+["gradually","adv.","B2","постепенно"],
+["graduate","n., v.","B1","выпускник; заканчивать (вуз)"],
+["grain","n.","B1","зерно, крупица"],
+["grant","v., n.","B2","предоставлять; грант"],
+["grateful","adj.","B1","благодарный"],
+["growth","n.","B1","рост"],
+["guard","n., v.","B1","охранник; охранять"],
+["guilty","adj.","B1","виноватый, виновный"],
+["hang","v.","B1","вешать, висеть"],
+["hardly","adv.","B1","едва, с трудом"],
+["harm","n., v.","B2","вред; причинять вред"],
+["harmful","adj.","B2","вредный"],
+["hate","v., n.","B1","ненавидеть; ненависть"],
+["hearing","n.","B2","слух; слушание (дела)"],
+["heating","n.","B1","отопление"],
+["heaven","n.","B2","небеса, рай"],
+["heavily","adv.","B1","сильно, тяжело"],
+["helicopter","n.","B1","вертолёт"],
+["highlight","v., n.","B1","выделять; главное событие"],
+["highly","adv.","B1","очень, весьма"],
+["highway","n.","B1","шоссе, автострада"],
+["hire","v., n.","B1","нанимать; наём"],
+["historic","adj.","B1","исторический (важный)"],
+["historical","adj.","B1","исторический"],
+["honest","adj.","B1","честный"],
+["horror","n.","B1","ужас"],
+["host","n., v.","B1","хозяин, ведущий; принимать гостей"],
+["household","n.","B2","домохозяйство"],
+["housing","n.","B2","жильё, жилищные условия"],
+["humor","n.","B2","юмор"],
+["hunt","v., n.","B1","охотиться; охота"],
+["hurricane","n.","B1","ураган"],
+["hurry","n., v.","B1","спешка; спешить"],
+["identify","v.","A2","определять, устанавливать"],
+["identity","n.","B1","личность, идентичность"],
+["ignore","v.","B1","игнорировать"],
+["illegal","adj.","B1","незаконный"],
+["illustrate","v.","B2","иллюстрировать"],
+["imagination","n.","B2","воображение"],
+["immediate","adj.","B1","немедленный, непосредственный"],
+["immigrant","n.","B1","иммигрант"],
+["impact","n., v.","B1","воздействие, влияние; влиять"],
+["importance","n.","B1","важность, значимость"],
+["impose","v.","B2","навязывать, вводить"],
+["impress","v.","B2","производить впечатление"],
+["impression","n.","B1","впечатление"],
+["impressive","adj.","B1","впечатляющий"],
+["improvement","n.","B1","улучшение"],
+["incident","n.","B2","инцидент, случай"],
+["income","n.","B2","доход"],
+["increasingly","adv.","B2","всё больше и больше"],
+["incredibly","adv.","B1","невероятно"],
+["indeed","adv.","B1","действительно, в самом деле"],
+["indicate","v.","B1","указывать, свидетельствовать"],
+["influence","n., v.","B1","влияние; влиять"],
+["ingredient","n.","B1","ингредиент"],
+["injure","v.","B1","травмировать, ранить"],
+["injured","adj.","B1","раненый, травмированный"],
+["inner","adj.","B2","внутренний"],
+["innocent","adj.","B1","невиновный, невинный"],
+["insight","n.","B2","понимание, проницательность"],
+["insist","v.","B2","настаивать"],
+["inspire","v.","B2","вдохновлять"],
+["install","v.","B2","устанавливать"],
+["institution","n.","B2","учреждение, институт"],
+["intelligence","n.","B1","интеллект, разведка"],
+["intend","v.","B1","намереваться"],
+["intense","adj.","B2","интенсивный, сильный"],
+["intention","n.","B1","намерение"],
+["internal","adj.","B2","внутренний"],
+["invest","v.","B1","инвестировать, вкладывать"],
+["investigate","v.","B1","расследовать"],
+["investigation","n.","B2","расследование"],
+["investment","n.","B2","инвестиция, вложение"],
+["iron","n., v.","B1","железо; утюг; гладить"],
+["issue","n., v.","B1","вопрос, проблема; выпускать"],
+["journey","n.","B1","путешествие, поездка"],
+["joy","n.","B2","радость"],
+["judge","n., v.","B1","судья; судить, оценивать"],
+["judgment","n.","B2","суждение, приговор"],
+["justice","n.","B2","справедливость, правосудие"],
+["keyboard","n.","B1","клавиатура"],
+["kick","v., n.","B1","пинать; пинок"],
+["killing","n.","B1","убийство"],
+["label","n., v.","B1","этикетка, ярлык; маркировать"],
+["laboratory","n.","B1","лаборатория"],
+["lack","n., v.","B1","нехватка; не хватать"],
+["launch","v., n.","B2","запускать; запуск"],
+["lay","v.","B1","класть, укладывать"],
+["layer","n.","B1","слой"],
+["leadership","n.","B2","руководство, лидерство"],
+["leading","adj.","B1","ведущий, главный"],
+["leaf","n.","B1","лист (растения)"],
+["leather","n.","B1","кожа (материал)"],
+["legal","adj.","B1","законный, юридический"],
+["leisure","n.","B1","досуг, свободное время"],
+["length","n.","B1","длина"],
+["level","n., adj.","B1","уровень; горизонтальный"],
+["likely","adj.","A2","вероятный"],
+["limit","n., v.","B1","ограничение, предел; ограничивать"],
+["literature","n.","B1","литература"],
+["logical","adj.","B2","логичный"],
+["lonely","adj.","B1","одинокий"],
+["loss","n.","B1","потеря, убыток"],
+["luxury","n.","B1","роскошь"],
+["mad","adj.","B1","сумасшедший; злой (разг.)"],
+["magic","n., adj.","B1","магия; волшебный"],
+["maintain","v.","B2","поддерживать, сохранять"],
+["majority","n.","B2","большинство"],
+["management","n.","B1","управление, менеджмент"],
+["marketing","n.","B1","маркетинг"],
+["marriage","n.","B1","брак, свадьба"],
+["mass","n., adj.","B2","масса; массовый"],
+["massive","adj.","B2","массивный, огромный"],
+["master","n., v.","B2","мастер; овладевать"],
+["maximum","adj., n.","B2","максимальный; максимум"],
+["meanwhile","adv.","B1","тем временем"],
+["measurement","n.","B2","измерение"],
+["medium","adj., n.","B1","средний; посредник"],
+["mental","adj.","B1","умственный, психический"],
+["minimum","adj., n.","B2","минимальный; минимум"],
+["mood","n.","B1","настроение"],
+["mystery","n.","B1","тайна, загадка"],
+["narrative","n., adj.","B1","рассказ, повествование"],
+["nation","n.","B1","нация, страна"],
+["naturally","adv.","B1","естественно, конечно"],
+["neat","adj.","B1","аккуратный, опрятный"],
+["negative","adj.","B2","отрицательный"],
+["nevertheless","adv.","B2","тем не менее"],
+["nor","conj./adv.","B1","ни; и не"],
+["nuclear","adj.","B1","ядерный"],
+["numerous","adj.","B2","многочисленный"],
+["objective","n., adj.","B2","цель; объективный"],
+["obligation","n.","B2","обязательство"],
+["observation","n.","B2","наблюдение"],
+["observe","v.","B2","наблюдать"],
+["obtain","v.","B2","получать, добывать"],
+["obvious","adj.","B1","очевидный"],
+["obviously","adv.","B1","очевидно, явно"],
+["occur","v.","B1","случаться, происходить"],
+["offend","v.","B2","обижать, оскорблять"],
+["official","adj., n.","B1","официальный; чиновник"],
+["operation","n.","B1","операция"],
+["oppose","v.","B2","противостоять, возражать"],
+["opposition","n.","B2","оппозиция, противодействие"],
+["outcome","n.","B2","результат, исход"],
+["overall","adj., adv.","B2","общий; в целом"],
+["overseas","adv., adj.","B1","за рубеж, за рубежом"],
+["pace","n., v.","B2","темп, скорость; шагать"],
+["package","n., v.","B1","пакет, посылка; упаковывать"],
+["participant","n.","B2","участник"],
+["participate","v.","B1","участвовать"],
+["particularly","adv.","B1","особенно"],
+["passion","n.","B1","страсть"],
+["path","n.","B1","тропа, путь"],
+["payment","n.","B1","оплата, платёж"],
+["peaceful","adj.","B1","мирный, спокойный"],
+["performance","n.","B1","выступление, исполнение"],
+["permanent","adj.","B2","постоянный"],
+["permit","v., n.","B2","разрешать; разрешение"],
+["perspective","n.","B2","перспектива, точка зрения"],
+["persuade","v.","B1","убеждать"],
+["phenomenon","n.","B2","феномен, явление"],
+["philosophy","n.","B2","философия"],
+["photographer","n.","B1","фотограф"],
+["photography","n.","B1","фотография (как искусство)"],
+["physical","adj.","A2","физический"],
+["plot","n., v.","B1","сюжет; замышлять"],
+["poem","n.","B1","стихотворение"],
+["poet","n.","B1","поэт"],
+["poetry","n.","B1","поэзия"],
+["policy","n.","B1","политика (правила); полис"],
+["political","adj.","B1","политический"],
+["politician","n.","B1","политик"],
+["politics","n.","B1","политика"],
+["poverty","n.","B1","бедность"],
+["powerful","adj.","B1","мощный, сильный"],
+["praise","n., v.","B2","похвала; хвалить"],
+["pray","v.","B1","молиться"],
+["preparation","n.","B2","подготовка, приготовление"],
+["preserve","v.","B2","сохранять"],
+["priority","n.","B2","приоритет"],
+["prisoner","n.","B1","заключённый"],
+["privacy","n.","B2","конфиденциальность"],
+["private","adj.","B1","личный, частный"],
+["profession","n.","B1","профессия"],
+["professional","adj., n.","B1","профессиональный; профессионал"],
+["profit","n.","B1","прибыль, выгода"],
+["promote","v.","B1","продвигать, поощрять"],
+["proof","n.","B2","доказательство"],
+["proper","adj.","B1","правильный, подходящий"],
+["properly","adv.","B1","правильно, должным образом"],
+["property","n.","B1","собственность, имущество"],
+["proposal","n.","B2","предложение (проект)"],
+["propose","v.","B2","предлагать, делать предложение"],
+["protect","v.","A2","защищать"],
+["protection","n.","B2","защита"],
+["protest","n., v.","B1","протест; протестовать"],
+["proud","adj.","B1","гордый"],
+["prove","v.","B1","доказывать"],
+["psychologist","n.","B2","психолог"],
+["publication","n.","B2","публикация, издание"],
+["punish","v.","B1","наказывать"],
+["punishment","n.","B1","наказание"],
+["pursue","v.","B2","преследовать, добиваться"],
+["qualification","n.","B1","квалификация"],
+["qualified","adj.","B1","квалифицированный"],
+["rapid","adj.","B2","быстрый, стремительный"],
+["rapidly","adv.","B2","быстро, стремительно"],
+["rare","adj.","B1","редкий"],
+["rarely","adv.","B1","редко"],
+["realistic","adj.","B2","реалистичный"],
+["reality","n.","B1","реальность, действительность"],
+["reasonable","adj.","B2","разумный, приемлемый"],
+["recall","v.","B2","вспоминать, отзывать"],
+["recover","v.","B2","восстанавливаться, выздоравливать"],
+["reduction","n.","B2","уменьшение, снижение"],
+["reflect","v.","B1","отражать; размышлять"],
+["regret","v., n.","B2","сожалеть; сожаление"],
+["regularly","adv.","B1","регулярно"],
+["regulation","n.","B2","регулирование, правило"],
+["reject","v.","B1","отвергать, отклонять"],
+["relate","v.","B1","относиться, связывать"],
+["related","adj.","B1","связанный"],
+["relative","adj., n.","B1","относительный; родственник"],
+["reliable","adj.","B1","надёжный"],
+["relief","n.","B2","облегчение"],
+["religion","n.","B1","религия"],
+["religious","adj.","B1","религиозный"],
+["rely","v.","B2","полагаться, рассчитывать"],
+["remain","v.","B1","оставаться"],
+["remind","v.","B1","напоминать"],
+["remote","adj.","B1","отдалённый, дистанционный"],
+["rent","n., v.","B1","аренда; арендовать"],
+["represent","v.","B1","представлять"],
+["reputation","n.","B2","репутация"],
+["require","v.","B1","требовать"],
+["reservation","n.","B1","бронирование"],
+["resolve","v.","B2","решать, разрешать"],
+["resource","n.","B1","ресурс"],
+["respect","n., v.","B1","уважение; уважать"],
+["responsibility","n.","B1","ответственность"],
+["responsible","adj.","B1","ответственный"],
+["retire","v.","B1","выходить на пенсию"],
+["reveal","v.","B2","раскрывать, обнаруживать"],
+["revise","v.","B1","пересматривать, повторять"],
+["revolution","n.","B2","революция"],
+["reward","n., v.","B2","вознаграждение; вознаграждать"],
+["rhythm","n.","B2","ритм"],
+["risk","n., v.","B1","риск; рисковать"],
+["robot","n.","B1","робот"],
+["roll","v., n.","B1","катиться; рулон"],
+["romantic","adj.","B1","романтичный"],
+["root","n.","B2","корень"],
+["rough","adj.","B1","грубый, неровный"],
+["royal","adj.","B1","королевский"],
+["rural","adj.","B2","сельский, деревенский"],
+["safety","n.","B1","безопасность"],
+["satellite","n.","B2","спутник, сателлит"],
+["scale","n.","B2","масштаб; весы"],
+["scan","v.","B1","сканировать"],
+["scientific","adj.","B1","научный"],
+["script","n.","B1","сценарий"],
+["sculpture","n.","B1","скульптура"],
+["security","n.","B1","безопасность, охрана"],
+["seek","v.","B2","искать, стремиться"],
+["senior","adj.","B2","старший"],
+["sensible","adj.","B1","разумный, здравомыслящий"],
+["sensitive","adj.","B2","чувствительный, деликатный"],
+["session","n.","B2","сессия, занятие"],
+["severe","adj.","B2","суровый, тяжёлый"],
+["shame","n.","B2","стыд, позор"],
+["sharp","adj.","B1","острый, резкий"],
+["shelter","n., v.","B2","укрытие; укрываться"],
+["shift","n., v.","B1","смена; смещать"],
+["shine","v.","B1","светить, блестеть"],
+["shoot","v.","B1","стрелять, снимать"],
+["shy","adj.","B1","застенчивый, стеснительный"],
+["sight","n.","B1","зрение; вид, достопримечательность"],
+["significant","adj.","B2","значительный, важный"],
+["significantly","adv.","B2","значительно"],
+["silence","n.","B2","тишина, молчание"],
+["silent","adj.","B1","тихий, молчаливый"],
+["similarly","adv.","B1","аналогично, так же"],
+["simply","adv.","B1","просто"],
+["sink","v.","B1","тонуть, погружаться"],
+["software","n.","B1","программное обеспечение"],
+["solar","adj.","B2","солнечный"],
+["solid","adj., n.","B1","твёрдый; твёрдое тело"],
+["somewhat","adv.","B2","несколько, в некоторой мере"],
+["spirit","n.","B1","дух, душа"],
+["spiritual","adj.","B2","духовный"],
+["sponsor","v., n.","B2","спонсировать; спонсор"],
+["spot","n., v.","B1","пятно, место; заметить"],
+["spread","v., n.","B1","распространять; распространение"],
+["stable","adj.","B2","стабильный, устойчивый"],
+["stadium","n.","B1","стадион"],
+["staff","n.","B1","персонал, штат"],
+["standard","n., adj.","B1","стандарт; стандартный"],
+["statistic","n.","B1","статистика"],
+["statue","n.","B1","статуя"],
+["status","n.","B2","статус, положение"],
+["steady","adj.","B2","устойчивый, стабильный"],
+["steel","n.","B2","сталь"],
+["strength","n.","B1","сила, прочность"],
+["strict","adj.","B2","строгий"],
+["structure","n., v.","A2","структура; структурировать"],
+["struggle","v., n.","B2","бороться; борьба"],
+["studio","n.","B1","студия"],
+["stuff","n.","B1","вещи, материал"],
+["subject","n.","A1","предмет, тема"],
+["substance","n.","B1","вещество, субстанция"],
+["suffer","v.","B1","страдать"],
+["suitable","adj.","B1","подходящий"],
+["summarize","v.","B1","подводить итог, суммировать"],
+["summary","n.","B1","краткое изложение, резюме"],
+["supply","n., v.","B1","поставка; поставлять"],
+["supporter","n.","B1","сторонник, болельщик"],
+["surgery","n.","B2","хирургия, операция"],
+["surround","v.","B2","окружать"],
+["survive","v.","B1","выживать"],
+["suspect","v., n.","B2","подозревать; подозреваемый"],
+["sympathy","n.","B2","сочувствие, симпатия"],
+["symptom","n.","B1","симптом"],
+["tail","n.","B1","хвост"],
+["talent","n.","B1","талант"],
+["talented","adj.","B1","талантливый"],
+["tax","n., v.","B1","налог; облагать налогом"],
+["technical","adj.","B1","технический"],
+["technique","n.","B1","техника, метод"],
+["tend","v.","B1","иметь тенденцию"],
+["tent","n.","B1","палатка"],
+["theme","n.","B1","тема"],
+["theory","n.","B1","теория"],
+["therapy","n.","B2","терапия, лечение"],
+["therefore","adv.","B1","следовательно, поэтому"],
+["threat","n.","B2","угроза"],
+["threaten","v.","B2","угрожать"],
+["throughout","prep./adv.","B1","по всему, на протяжении всего"],
+["tight","adj.","B1","тугой, плотный"],
+["tiny","adj.","B1","крошечный"],
+["tire","n.","B1","шина"],
+["total","adj., n.","B1","общий; итог, сумма"],
+["totally","adv.","B1","полностью, совершенно"],
+["tough","adj.","B2","трудный, жёсткий, выносливый"],
+["tourism","n.","A2","туризм"],
+["tower","n.","A2","башня"],
+["track","n., v.","A2","дорожка; отслеживать"],
+["trade","n., v.","B1","торговля; торговать"],
+["tradition","n.","A2","традиция"],
+["traditional","adj.","A2","традиционный"],
+["trainer","n.","B1","тренер"],
+["training","n.","A2","тренировка, обучение"],
+["transfer","v., n.","B2","переводить; перевод"],
+["transform","v.","B2","преобразовывать"],
+["translate","v.","B1","переводить (текст)"],
+["translation","n.","B1","перевод"],
+["treat","v.","B1","обращаться, лечить; угощать"],
+["treatment","n.","B1","лечение; обращение"],
+["trend","n.","B1","тенденция, тренд"],
+["trial","n.","B2","судебный процесс; испытание"],
+["trick","n., v.","B1","трюк, уловка; обманывать"],
+["tropical","adj.","B2","тропический"],
+["trouble","n., v.","A2","проблема, неприятность; беспокоить"],
+["trust","n., v.","B2","доверие; доверять"],
+["truth","n.","B1","правда, истина"],
+["tune","n.","B2","мелодия"],
+["tunnel","n.","B2","туннель"],
+["ultimately","adv.","B2","в конечном счёте"],
+["unable","adj.","B1","не способный"],
+["unconscious","adj.","B2","бессознательный, без сознания"],
+["unemployed","adj.","B1","безработный"],
+["unemployment","n.","B1","безработица"],
+["unexpected","adj.","B2","неожиданный"],
+["unfair","adj.","B1","несправедливый"],
+["union","n.","B1","союз, объединение"],
+["unique","adj.","B2","уникальный"],
+["universe","n.","B2","вселенная"],
+["unknown","adj.","B2","неизвестный"],
+["update","v., n.","B1","обновлять; обновление"],
+["upset","adj., v.","B1","расстроенный; расстраивать"],
+["valuable","adj.","B1","ценный"],
+["value","n., v.","B1","ценность; ценить"],
+["variety","n.","A2","разнообразие"],
+["various","adj.","B1","различный, разнообразный"],
+["vary","v.","B2","варьироваться, различаться"],
+["vast","adj.","B2","огромный, обширный"],
+["vehicle","n.","A2","транспортное средство"],
+["venue","n.","B2","место проведения"],
+["version","n.","B1","версия"],
+["victim","n.","B1","жертва"],
+["victory","n.","B2","победа"],
+["viewer","n.","B1","зритель"],
+["violence","n.","B2","насилие"],
+["violent","adj.","B1","жестокий, насильственный"],
+["vision","n.","B2","видение, зрение"],
+["visual","adj.","B2","визуальный, зрительный"],
+["vitamin","n.","B2","витамин"],
+["volunteer","n., v.","B1","доброволец; добровольно вызываться"],
+["vote","n., v.","B1","голос; голосовать"],
+["wage","n.","B2","зарплата (почасовая)"],
+["warn","v.","B1","предупреждать"],
+["warning","n.","B1","предупреждение"],
+["waste","n., v.","B1","отходы; тратить впустую"],
+["wealth","n.","B2","богатство"],
+["wealthy","adj.","B2","богатый, состоятельный"],
+["weapon","n.","B1","оружие"],
+["weigh","v.","B1","взвешивать; весить"],
+["wonder","v., n.","B1","задаваться вопросом; чудо"],
+["worldwide","adj., adv.","B1","всемирный; по всему миру"],
+["worth","adj., n.","B1","стоящий; стоимость"],
+["wound","n., v.","B2","рана; ранить"],
+["wrap","v.","B2","оборачивать, заворачивать"],
+["youth","n.","B1","молодёжь; юность"],
+["zone","n.","B2","зона"]
+];
+
+let mode = 'flash';
+let activeLevels = new Set(['A1','A2','B1','B2']);
+let deck = [];
+let idx = 0;
+let flipped = false;
+let known = new Set();
+let repeat = new Set();
+let quizAnswered = false;
+let typeAnswered = false;
+let cardDir = true; // true = eng->ru
+
+function getBaseLevel(w) {
+  const l = w[2];
+  if(l.startsWith('A1')) return 'A1';
+  if(l.startsWith('A2')) return 'A2';
+  if(l.startsWith('B1')) return 'B1';
+  return 'B2';
+}
+
+function buildDeck() {
+  deck = WORDS.filter(w => activeLevels.has(getBaseLevel(w)));
+  idx = 0; flipped = false; quizAnswered = false; typeAnswered = false;
+  updateStats();
+  render();
+}
+
+function shuffleDeck() {
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  idx=0; flipped=false; quizAnswered=false; typeAnswered=false;
+  render();
+}
+
+function toggleLevel(l) {
+  if(activeLevels.has(l)) { if(activeLevels.size>1) activeLevels.delete(l); }
+  else activeLevels.add(l);
+  const btn = document.getElementById('lbtn-'+l);
+  if(activeLevels.has(l)) btn.classList.add('active-'+l);
+  else btn.className = 'lvl-btn';
+  buildDeck();
+}
+
+function setMode(m) {
+  mode=m; idx=0; flipped=false; quizAnswered=false; typeAnswered=false;
+  ['flash','quiz','type','review'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===m);
+  });
+  render();
+}
+
+function updateStats() {
+  const total = WORDS.filter(w=>activeLevels.has(getBaseLevel(w))).length;
+  const d = mode==='review' ? [...repeat] : deck;
+  const pct = total>0 ? Math.round(known.size/total*100) : 0;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-known').textContent = known.size;
+  document.getElementById('s-repeat').textContent = repeat.size;
+  document.getElementById('s-pct').textContent = pct+'%';
+  document.getElementById('hs-total').textContent = total;
+  document.getElementById('hs-known').textContent = known.size;
+  document.getElementById('hs-pct').textContent = pct+'%';
+  const cur = d.length;
+  const fill = cur>0 ? Math.round(idx/cur*100) : 0;
+  document.getElementById('prog').style.width = fill+'%';
+  document.getElementById('counter').textContent = cur>0 ? (idx+1)+' / '+cur : '';
+  document.getElementById('pct-txt').textContent = cur>0 ? fill+'%' : '';
+}
+
+function getCard() {
+  const d = mode==='review' ? [...repeat] : deck;
+  return d[idx] || null;
+}
+
+function makeLevelPill(w) {
+  return `<span class="level-pill lp-${getBaseLevel(w)}">${w[2]}</span>`;
+}
+
+function renderFlash() {
+  const d = mode==='review' ? [...repeat] : deck;
+  const w = d[idx];
+  const dir = Math.random()<0.5;
+  const front = dir ? w[0] : w[3];
+  const back = dir ? w[3] : w[0];
+  const frontLabel = dir ? 'Английское слово' : 'Русский перевод';
+  const backLabel = dir ? 'Перевод на русский' : 'Английское слово';
+  return `
+  <div class="card-scene">
+    <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
+      <div class="card-face card-front-face">
+        <div class="card-eyebrow">${frontLabel}</div>
+        <div class="card-word-main">${front}</div>
+        <div class="card-pos-tag">${w[1]}</div>
+        ${makeLevelPill(w)}
+        <div class="card-hint">Нажми, чтобы перевернуть</div>
+      </div>
+      <div class="card-face card-back-face">
+        <div class="card-eyebrow">${backLabel}</div>
+        <div class="card-translation">${back}</div>
+        <div class="card-pos-tag">${w[1]}</div>
+        ${makeLevelPill(w)}
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <button class="act-btn btn-repeat" onclick="markRepeat()">✗ Повторить</button>
+    <button class="act-btn" onclick="skip()">→ Пропустить</button>
+    <button class="act-btn btn-know" onclick="markKnown()">✓ Знаю!</button>
+  </div>`;
+}
+
+function getRandomOpts(w, count) {
+  const others = WORDS.filter(x=>x[0]!==w[0] && activeLevels.has(getBaseLevel(x)));
+  return [...others.sort(()=>Math.random()-.5).slice(0,count-1), w].sort(()=>Math.random()-.5);
+}
+
+function renderQuiz() {
+  const d = mode==='review' ? [...repeat] : deck;
+  const w = d[idx];
+  const dir = Math.random()<0.5;
+  const question = dir ? w[0] : w[3];
+  const qLabel = dir ? 'Переведи на русский:' : 'Какое английское слово?';
+  const opts = getRandomOpts(w,4);
+  return `
+  <div class="quiz-panel">
+    <div class="quiz-eyebrow">${qLabel}</div>
+    <div class="quiz-q">${question}</div>
+    <div class="quiz-meta">${w[1]} · ${w[2]}</div>
+    <div class="quiz-opts">
+      ${opts.map(o=>{
+        const ans = dir ? o[3] : o[0];
+        const isCorrect = o[0]===w[0];
+        return `<button class="opt-btn" onclick="answerQuiz(this,${isCorrect},${dir},'${w[0].replace(/'/g,"\\'")}')">${ans}</button>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="card-actions">
+    <button class="act-btn btn-next" onclick="nextCard()" id="next-btn" style="${quizAnswered?'':'display:none'}">Следующая →</button>
+  </div>`;
+}
+
+function renderType() {
+  const d = mode==='review' ? [...repeat] : deck;
+  const w = d[idx];
+  const dir = Math.random()<0.5;
+  const question = dir ? w[0] : w[3];
+  const answer = dir ? w[3] : w[0];
+  const qLabel = dir ? 'Введи перевод на русский:' : 'Введи английское слово:';
+  return `
+  <div class="type-panel">
+    <div class="quiz-eyebrow">${qLabel}</div>
+    <div class="quiz-q">${question}</div>
+    <div class="quiz-meta">${w[1]} · ${w[2]}</div>
+    <input class="type-input" id="type-inp" placeholder="Введи ответ..." data-answer="${answer.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autofocus>
+    <div class="type-feedback" id="type-fb"></div>
+    <div class="card-actions" style="margin-top:14px">
+      ${!typeAnswered
+        ? `<button class="act-btn btn-repeat" onclick="skipType()">Показать ответ</button><button class="act-btn btn-know" onclick="checkType()">Проверить</button>`
+        : `<button class="act-btn btn-next" onclick="nextCard()">Следующая →</button>`
+      }
+    </div>
+  </div>`;
+}
+
+function render() {
+  const d = mode==='review' ? [...repeat] : deck;
+  updateStats();
+  const area = document.getElementById('main-area');
+  area.className = 'fade-up';
+  void area.offsetWidth;
+  if(d.length===0) {
+    area.innerHTML = mode==='review'
+      ? `<div class="empty-state">Нет слов для повторения.<br>Отмечай слова кнопкой "Повторить"!</div>`
+      : `<div class="empty-state">Нет слов для выбранных уровней.</div>`;
+    return;
+  }
+  if(idx>=d.length) {
+    const pct = d.length>0 ? Math.round(known.size/(mode==='review'?d.length:d.length)*100) : 0;
+    area.innerHTML = `
+    <div class="result-panel">
+      <div class="result-score">${known.size}</div>
+      <div class="result-title">слов изучено!</div>
+      <div class="result-sub">Повторить: ${repeat.size} слов · Пройдено: ${d.length} карточек</div>
+      <div class="card-actions" style="justify-content:center">
+        <button class="act-btn btn-know" onclick="restart()">Начать заново</button>
+        ${repeat.size>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">Повторить ошибки</button>`:''}
+      </div>
+    </div>`;
+    return;
+  }
+  if(mode==='flash' || mode==='review') area.innerHTML = renderFlash();
+  else if(mode==='quiz') area.innerHTML = renderQuiz();
+  else area.innerHTML = renderType();
+}
+
+function flipCard() { flipped=!flipped; document.getElementById('fc').classList.toggle('flipped'); }
+function markKnown() { if(getCard()) { known.add(getCard()[0]); repeat.delete(getCard()[0]); } nextCard(); }
+function markRepeat() { if(getCard()) repeat.add(getCard()[0]); nextCard(); }
+function skip() { nextCard(); }
+
+function nextCard() {
+  idx++; flipped=false; quizAnswered=false; typeAnswered=false;
+  render();
+}
+
+function answerQuiz(btn, isCorrect, dir, word) {
+  if(quizAnswered) return;
+  quizAnswered=true;
+  const w = getCard();
+  document.querySelectorAll('.opt-btn').forEach(o => {
+    o.disabled=true;
+    const oText = o.textContent;
+    const correctText = dir ? w[3] : w[0];
+    if(oText===correctText) o.classList.add('correct');
+    else if(o===btn && !isCorrect) o.classList.add('wrong');
+  });
+  if(isCorrect) known.add(w[0]); else repeat.add(w[0]);
+  document.getElementById('next-btn').style.display='';
+  updateStats();
+}
+
+function checkType() {
+  if(typeAnswered) return;
+  const inp = document.getElementById('type-inp');
+  const answer = inp.getAttribute('data-answer');
+  const val = inp.value.trim().toLowerCase();
+  const correct = answer.toLowerCase();
+  const isCorrect = correct.split(',').some(a=>val===a.trim()) || val===correct || correct.includes(val) && val.length>3;
+  typeAnswered=true;
+  const w = getCard();
+  const fb = document.getElementById('type-fb');
+  if(isCorrect) {
+    fb.innerHTML='<span style="color:var(--green)">Правильно! ✓</span>';
+    known.add(w[0]);
+  } else {
+    fb.innerHTML=`<span style="color:var(--red)">Неверно. Ответ: <b>${answer}</b></span>`;
+    repeat.add(w[0]);
+  }
+  inp.disabled=true;
+  setTimeout(render, 1200);
+  updateStats();
+}
+
+function skipType() {
+  if(typeAnswered) return;
+  typeAnswered=true;
+  const inp = document.getElementById('type-inp');
+  const answer = inp.getAttribute('data-answer');
+  const w = getCard();
+  repeat.add(w[0]);
+  document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">Ответ: <b>${answer}</b></span>`;
+  inp.disabled=true;
+  render();
+  updateStats();
+}
+
+function restart() { idx=0; flipped=false; quizAnswered=false; typeAnswered=false; render(); }
+function scrollToApp() { document.getElementById('app').scrollIntoView({behavior:'smooth'}); return false; }
+
+buildDeck();
+shuffleDeck();
+</script>
+</body>
+</html>
