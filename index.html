@@ -2365,6 +2365,9 @@ function renderFlash() {
   const frontLabel = dir ? 'Английское слово' : 'Русский перевод';
   const backLabel = dir ? 'Перевод на русский' : 'Английское слово';
   return `
+  <div class="card-actions" style="justify-content:flex-start;margin-bottom:12px">
+    <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">← Назад</button>
+  </div>
   <div class="card-scene">
     <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
       <div class="card-face card-front-face">
@@ -2379,13 +2382,18 @@ function renderFlash() {
         <div class="card-translation">${back}</div>
         <div class="card-pos-tag">${w[1]}</div>
         ${makeLevelPill(w)}
+        <div class="card-hint" style="margin-top:12px">Ты знал это слово?</div>
       </div>
     </div>
   </div>
-  <div class="card-actions">
-    <button class="act-btn btn-repeat" onclick="markRepeat()">✗ Повторить</button>
-    <button class="act-btn" onclick="skip()">→ Пропустить</button>
-    <button class="act-btn btn-know" onclick="markKnown()">✓ Знаю!</button>
+  <div class="card-actions" id="flash-actions" style="${flipped?'':'display:none'}">
+    <button class="act-btn btn-repeat" onclick="markRepeat()">✗ Не знал</button>
+    <button class="act-btn btn-know" onclick="markKnown()">✓ Знал!</button>
+  </div>
+  <div id="flip-hint" style="${flipped?'display:none':''}">
+    <div class="card-actions">
+      <button class="act-btn" onclick="skip()">→ Пропустить</button>
+    </div>
   </div>`;
 }
 
@@ -2473,7 +2481,14 @@ function render() {
   else area.innerHTML = renderType();
 }
 
-function flipCard() { flipped=!flipped; document.getElementById('fc').classList.toggle('flipped'); }
+function flipCard() {
+  flipped=!flipped;
+  document.getElementById('fc').classList.toggle('flipped');
+  const actions = document.getElementById('flash-actions');
+  const hint = document.getElementById('flip-hint');
+  if(actions) actions.style.display = flipped ? '' : 'none';
+  if(hint) hint.style.display = flipped ? 'none' : '';
+}
 function markKnown() { if(getCard()) { known.add(getCard()[0]); repeat.delete(getCard()[0]); } nextCard(); }
 function markRepeat() { if(getCard()) repeat.add(getCard()[0]); nextCard(); }
 function skip() { nextCard(); }
@@ -2534,6 +2549,9 @@ function skipType() {
   updateStats();
 }
 
+function goBack() {
+  if(idx > 0) { idx--; flipped=false; render(); }
+}
 function restart() { idx=0; flipped=false; quizAnswered=false; typeAnswered=false; render(); }
 function scrollToApp() { document.getElementById('app').scrollIntoView({behavior:'smooth'}); return false; }
 
