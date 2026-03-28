@@ -14,6 +14,99 @@ let correctStreak = 0;
 let timerInterval = null;
 let timerSeconds = 10;
 
+const UI_TEXT = {
+  header_words: { ru: 'Слов', kz: 'Сөздер' },
+  header_known: { ru: 'Знаю', kz: 'Білемін' },
+  header_progress: { ru: 'Прогресс', kz: 'Прогресс' },
+  header_streak: { ru: 'Дней подряд', kz: 'Қатарынан күн' },
+  hero_title: { ru: 'Выучи английский<br>раз и навсегда', kz: 'Ағылшын тілін<br>біржолата үйреніңіз' },
+  hero_subtitle: { ru: '3000 самых важных слов Oxford с переводом на русский. Карточки, тесты, ввод — три режима тренировки.', kz: 'Оксфордтың ең маңызды 3000 сөзі. Флеш-карталар, тесттер, жазу — 3 жаттығу режимі.' },
+  btn_start: { ru: 'Начать тренировку →', kz: 'Жаттығуды бастау →' },
+  lvl_a1: { ru: 'A1 — Начальный', kz: 'A1 — Бастапқы' },
+  lvl_a2: { ru: 'A2 — Элементарный', kz: 'A2 — Қарапайым' },
+  lvl_b1: { ru: 'B1 — Средний', kz: 'B1 — Орташа' },
+  lvl_b2: { ru: 'B2 — Выше среднего', kz: 'B2 — Орташадан жоғары' },
+  tab_flash: { ru: 'Карточки', kz: 'Флеш-карталар' },
+  tab_quiz: { ru: 'Тест 4 варианта', kz: 'Тест 4 нұсқа' },
+  tab_type: { ru: 'Введи перевод', kz: 'Аударманы жаз' },
+  tab_review: { ru: 'Повторение', kz: 'Қайталау' },
+  lbl_level: { ru: 'Уровень:', kz: 'Деңгей:' },
+  btn_shuffle: { ru: '🔀 Перемешать', kz: '🔀 Араластыру' },
+  stat_total: { ru: 'Всего', kz: 'Барлығы' },
+  stat_known: { ru: 'Знаю', kz: 'Білемін' },
+  stat_repeat: { ru: 'Повторить', kz: 'Қайталау' },
+  stat_progress: { ru: 'Прогресс', kz: 'Прогресс' },
+  btn_graph: { ru: '📊 График прогресса', kz: '📊 Прогресс графигі' },
+  btn_graph_hide: { ru: '📊 Скрыть график', kz: '📊 Графикті жасыру' },
+  btn_sound_on: { ru: '🔊 Звук: вкл', kz: '🔊 Дыбыс: қосулы' },
+  btn_sound_off: { ru: '🔇 Звук: выкл', kz: '🔇 Дыбыс: өшірулі' },
+  btn_reset: { ru: '🗑 Сбросить прогресс', kz: '🗑 Прогресті өшіру' },
+  graph_title: { ru: '📊 График прогресса за 7 дней', kz: '📊 7 күндік прогресс графигі' },
+  graph_stat_total: { ru: 'Всего слов', kz: 'Барлық сөздер' },
+  graph_stat_known: { ru: 'Изучено', kz: 'Жатталды' },
+  graph_stat_left: { ru: 'Осталось', kz: 'Қалды' },
+  footer_title: { ru: 'Перевод на <strong>Қазақ</strong> / Русский языки', kz: '<strong>Қазақша</strong> / Орысша аударма' },
+  footer_desc: { ru: 'Делись с друзьями — открывается в любом браузере', kz: 'Достарыңызбен бөлісіңіз — кез келген браузерде ашылады' },
+  confirm_reset: { ru: 'Сбросить весь прогресс? Это нельзя отменить.', kz: 'Барлық прогресті өшіру керек пе? Бұны кері қайтару мүмкін емес.' },
+  btn_back: { ru: '← Назад', kz: '← Артқа' },
+  card_hint: { ru: 'Нажми, чтобы перевернуть', kz: 'Аудару үшін басыңыз' },
+  card_hint_knew: { ru: 'Ты знал это слово?', kz: 'Бұл сөзді білдіңіз бе?' },
+  btn_wrong: { ru: '✗ Не знал', kz: '✗ Білмедім' },
+  btn_correct: { ru: '✓ Знал!', kz: '✓ Білдім!' },
+  btn_skip: { ru: '→ Пропустить', kz: '→ Өткізіп жіберу' },
+  btn_next: { ru: 'Следующая →', kz: 'Келесі →' },
+  lbl_eng_word: { ru: 'Английское слово', kz: 'Ағылшын сөзі' },
+  lbl_kz_trans: { ru: 'Қазақша аударма', kz: 'Қазақша аударма' },
+  lbl_ru_trans: { ru: 'Перевод на русский', kz: 'Орысша аударма' },
+  lbl_kz_trans_lbl: { ru: 'Қазақша аудармасы', kz: 'Қазақша аударма' },
+  lbl_ru_trans_lbl: { ru: 'Русский перевод', kz: 'Орысша аударма' },
+  q_translate_kz: { ru: 'Қазақшаға аудар:', kz: 'Қазақшаға аударыңыз:' },
+  q_translate_ru: { ru: 'Переведи на русский:', kz: 'Орысшаға аударыңыз:' },
+  q_guess_en_kz: { ru: 'Ағылшынша қалай болады?', kz: 'Ағылшын тілінде қалай?' },
+  q_guess_en_ru: { ru: 'Какое английское слово?', kz: 'Ағылшын сөзін табыңыз:' },
+  t_translate_kz: { ru: 'Қазақша аудармасын жаз:', kz: 'Қазақша аудармасын жазыңыз:' },
+  t_translate_ru: { ru: 'Введи перевод на русский:', kz: 'Орысша аудармасын жазыңыз:' },
+  t_guess_en_kz: { ru: 'Ағылшынша сөзді жаз:', kz: 'Ағылшын сөзін жазыңыз:' },
+  t_guess_en_ru: { ru: 'Введи английское слово:', kz: 'Ағылшын сөзін жазыңыз:' },
+  placeholder_type: { ru: 'Введи ответ...', kz: 'Жауапты жазыңыз...' },
+  btn_show_ans: { ru: 'Показать ответ', kz: 'Жауапты көрсету' },
+  btn_check_ans: { ru: 'Проверить', kz: 'Тексеру' },
+  fb_correct: { ru: 'Правильно! ✓', kz: 'Дұрыс! ✓' },
+  fb_wrong_pre: { ru: 'Неверно. Ответ: <b>', kz: 'Қате. Жауап: <b>' },
+  fb_wrong_post: { ru: '</b>', kz: '</b>' },
+  fb_ans_pre: { ru: 'Ответ: <b>', kz: 'Жауап: <b>' },
+  fb_ans_post: { ru: '</b>', kz: '</b>' },
+  empty_review: { ru: 'Нет слов для повторения.<br>Отмечай слова кнопкой "Повторить"!', kz: 'Қайталайтын сөздер жоқ.<br>"Қайталау" арқылы сөздерді белгілеңіз!' },
+  empty_level: { ru: 'Нет слов для выбранных уровней.', kz: 'Таңдалған деңгейлер үшін сөздер жоқ.' },
+  res_words_learned: { ru: 'слов изучено!', kz: 'сөз жатталды!' },
+  res_repeat: { ru: 'Повторить:', kz: 'Қайталау:' },
+  res_words: { ru: 'слов', kz: 'сөз' },
+  res_passed: { ru: 'Пройдено:', kz: 'Өтілді:' },
+  res_cards: { ru: 'карточек', kz: 'карта' },
+  btn_restart: { ru: 'Начать заново', kz: 'Қайтадан бастау' },
+  btn_repeat_errs: { ru: 'Повторить ошибки', kz: 'Қателерді қайталау' }
+};
+
+function t(key) {
+  if(!UI_TEXT[key]) return key;
+  return UI_TEXT[key][appLang];
+}
+
+function updateUI() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('sound-btn').textContent = soundOn ? t('btn_sound_on') : t('btn_sound_off');
+  const graphBtn = document.getElementById('graph-btn');
+  const area = document.getElementById('graph-area');
+  if(area && area.style.display !== 'none') graphBtn.textContent = t('btn_graph_hide');
+  else graphBtn.textContent = t('btn_graph');
+  
+  const inp = document.getElementById('type-inp');
+  if(inp) inp.placeholder = t('placeholder_type');
+}
+
+
 // SAVE / LOAD
 function saveProgress() {
   const today = new Date().toISOString().slice(0,10);
@@ -36,7 +129,7 @@ function loadProgress() {
 }
 
 function resetProgress() {
-  if(!confirm('Сбросить весь прогресс? Это нельзя отменить.')) return;
+  if(!confirm(t('confirm_reset'))) return;
   localStorage.removeItem('ox_progress');
   localStorage.removeItem('ox_history');
   known = new Set(); repeat = new Set(); correctStreak = 0;
@@ -67,7 +160,7 @@ function speak(text) {
 }
 function toggleSound() {
   soundOn = !soundOn;
-  document.getElementById('sound-btn').textContent = soundOn ? '🔊 Звук: вкл' : '🔇 Звук: выкл';
+  updateUI();
 }
 
 
@@ -135,6 +228,7 @@ function toggleLang() {
     if(btn) btn.innerHTML = '🌍 Язык: 🇷🇺 Рус';
     if(badge) badge.textContent = 'RU';
   }
+  updateUI();
   render();
 }
 
@@ -143,8 +237,8 @@ function toggleGraph() {
   const area = document.getElementById('graph-area');
   const btn = document.getElementById('graph-btn');
   if(area.style.display === 'none') {
-    area.style.display = ''; btn.textContent = '📊 Скрыть график'; drawGraph();
-  } else { area.style.display = 'none'; btn.textContent = '📊 График прогресса'; }
+    area.style.display = ''; btn.textContent = t('btn_graph_hide'); drawGraph();
+  } else { area.style.display = 'none'; btn.textContent = t('btn_graph'); }
 }
 
 function drawGraph() {
@@ -184,9 +278,9 @@ function drawGraph() {
   if(statsEl) {
     const total=WORDS.length;
     statsEl.innerHTML = [
-      {label:'Всего слов',val:total,color:'var(--text)'},
-      {label:'Изучено',val:known.size,color:'var(--green)'},
-      {label:'Осталось',val:total-known.size,color:'var(--amber)'}
+      {label:t('graph_stat_total'),val:total,color:'var(--text)'},
+      {label:t('graph_stat_known'),val:known.size,color:'var(--green)'},
+      {label:t('graph_stat_left'),val:total-known.size,color:'var(--amber)'}
     ].map(s=>`<div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
       <div style="font-size:20px;font-weight:700;color:${s.color};font-family:Syne,sans-serif">${s.val}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.label}</div></div>`).join('');
@@ -265,11 +359,11 @@ function renderFlash() {
   const dir = Math.random()<0.5;
   const front = dir ? w[0] : getTrans(w);
   const back = dir ? getTrans(w) : w[0];
-  const frontLabel = dir ? 'Английское слово' : (appLang==='kz'?'Қазақша аудармасы':'Русский перевод');
-  const backLabel = dir ? (appLang==='kz'?'Қазақша аударма':'Перевод на русский') : 'Английское слово';
+  const frontLabel = dir ? t('lbl_eng_word') : (appLang==='kz'?t('lbl_kz_trans_lbl'):t('lbl_ru_trans_lbl'));
+  const backLabel = dir ? (appLang==='kz'?t('lbl_kz_trans'):t('lbl_ru_trans')) : t('lbl_eng_word');
   return `
   <div class="card-actions" style="justify-content:flex-start;margin-bottom:12px">
-    <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">← Назад</button>
+    <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">${t('btn_back')}</button>
   </div>
   <div class="card-scene">
     <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
@@ -278,24 +372,24 @@ function renderFlash() {
         <div class="card-word-main">${front}</div>
         <div class="card-pos-tag">${w[1]}</div>
         ${makeLevelPill(w)}
-        <div class="card-hint">Нажми, чтобы перевернуть</div>
+        <div class="card-hint">${t('card_hint')}</div>
       </div>
       <div class="card-face card-back-face">
         <div class="card-eyebrow">${backLabel}</div>
         <div class="card-translation">${back}</div>
         <div class="card-pos-tag">${w[1]}</div>
         ${makeLevelPill(w)}
-        <div class="card-hint" style="margin-top:12px">Ты знал это слово?</div>
+        <div class="card-hint" style="margin-top:12px">${t('card_hint_knew')}</div>
       </div>
     </div>
   </div>
   <div class="card-actions" id="flash-actions" style="${flipped?'':'display:none'}">
-    <button class="act-btn btn-repeat" onclick="markRepeat()">✗ Не знал</button>
-    <button class="act-btn btn-know" onclick="markKnown()">✓ Знал!</button>
+    <button class="act-btn btn-repeat" onclick="markRepeat()">${t('btn_wrong')}</button>
+    <button class="act-btn btn-know" onclick="markKnown()">${t('btn_correct')}</button>
   </div>
   <div id="flip-hint" style="${flipped?'display:none':''}">
     <div class="card-actions">
-      <button class="act-btn" onclick="skip()">→ Пропустить</button>
+      <button class="act-btn" onclick="skip()">${t('btn_skip')}</button>
     </div>
   </div>`;
 }
@@ -310,7 +404,7 @@ function renderQuiz() {
   const w = d[idx];
   const dir = Math.random()<0.5;
   const question = dir ? w[0] : getTrans(w);
-  const qLabel = dir ? (appLang==='kz'?'Қазақшаға аудар:':'Переведи на русский:') : (appLang==='kz'?'Ағылшынша қалай болады?':'Какое английское слово?');
+  const qLabel = dir ? (appLang==='kz'?t('q_translate_kz'):t('q_translate_ru')) : (appLang==='kz'?t('q_guess_en_kz'):t('q_guess_en_ru'));
   const opts = getRandomOpts(w,4);
   if(!quizAnswered) setTimeout(() => {
     if(dir) speak(w[0]);
@@ -343,7 +437,7 @@ function renderQuiz() {
     </div>
   </div>
   <div class="card-actions">
-    <button class="act-btn btn-next" onclick="nextCard()" id="next-btn" style="${quizAnswered?'':'display:none'}">Следующая →</button>
+    <button class="act-btn btn-next" onclick="nextCard()" id="next-btn" style="${quizAnswered?'':'display:none'}">${t('btn_next')}</button>
   </div>`;
 }
 
@@ -353,18 +447,18 @@ function renderType() {
   const dir = Math.random()<0.5;
   const question = dir ? w[0] : getTrans(w);
   const answer = dir ? getTrans(w) : w[0];
-  const qLabel = dir ? (appLang==='kz'?'Қазақша аудармасын жаз:':'Введи перевод на русский:') : (appLang==='kz'?'Ағылшынша сөзді жаз:':'Введи английское слово:');
+  const qLabel = dir ? (appLang==='kz'?t('t_translate_kz'):t('t_translate_ru')) : (appLang==='kz'?t('t_guess_en_kz'):t('t_guess_en_ru'));
   return `
   <div class="type-panel">
     <div class="quiz-eyebrow">${qLabel}</div>
     <div class="quiz-q">${question}</div>
     <div class="quiz-meta">${w[1]} · ${w[2]}</div>
-    <input class="type-input" id="type-inp" placeholder="Введи ответ..." data-answer="${answer.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autofocus>
+    <input class="type-input" id="type-inp" placeholder="${t('placeholder_type')}" data-answer="${answer.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autofocus>
     <div class="type-feedback" id="type-fb"></div>
     <div class="card-actions" style="margin-top:14px">
       ${!typeAnswered
-        ? `<button class="act-btn btn-repeat" onclick="skipType()">Показать ответ</button><button class="act-btn btn-know" onclick="checkType()">Проверить</button>`
-        : `<button class="act-btn btn-next" onclick="nextCard()">Следующая →</button>`
+        ? `<button class="act-btn btn-repeat" onclick="skipType()">${t('btn_show_ans')}</button><button class="act-btn btn-know" onclick="checkType()">${t('btn_check_ans')}</button>`
+        : `<button class="act-btn btn-next" onclick="nextCard()">${t('btn_next')}</button>`
       }
     </div>
   </div>`;
@@ -378,20 +472,19 @@ function render() {
   void area.offsetWidth;
   if(d.length===0) {
     area.innerHTML = mode==='review'
-      ? `<div class="empty-state">Нет слов для повторения.<br>Отмечай слова кнопкой "Повторить"!</div>`
-      : `<div class="empty-state">Нет слов для выбранных уровней.</div>`;
+      ? `<div class="empty-state">${t('empty_review')}</div>`
+      : `<div class="empty-state">${t('empty_level')}</div>`;
     return;
   }
   if(idx>=d.length) {
-    const pct = d.length>0 ? Math.round(known.size/(mode==='review'?d.length:d.length)*100) : 0;
     area.innerHTML = `
     <div class="result-panel">
       <div class="result-score">${known.size}</div>
-      <div class="result-title">слов изучено!</div>
-      <div class="result-sub">Повторить: ${repeat.size} слов · Пройдено: ${d.length} карточек</div>
+      <div class="result-title">${t('res_words_learned')}</div>
+      <div class="result-sub">${t('res_repeat')} ${repeat.size} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
       <div class="card-actions" style="justify-content:center">
-        <button class="act-btn btn-know" onclick="restart()">Начать заново</button>
-        ${repeat.size>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">Повторить ошибки</button>`:''}
+        <button class="act-btn btn-know" onclick="restart()">${t('btn_restart')}</button>
+        ${repeat.size>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
       </div>
     </div>`;
     return;
@@ -464,10 +557,10 @@ function checkType() {
   const w = getCard();
   const fb = document.getElementById('type-fb');
   if(isCorrect) {
-    fb.innerHTML='<span style="color:var(--green)">Правильно! ✓</span>';
+    fb.innerHTML=`<span style="color:var(--green)">${t('fb_correct')}</span>`;
     known.add(w[0]);
   } else {
-    fb.innerHTML=`<span style="color:var(--red)">Неверно. Ответ: <b>${answer}</b></span>`;
+    fb.innerHTML=`<span style="color:var(--red)">${t('fb_wrong_pre')}${answer}${t('fb_wrong_post')}</span>`;
     repeat.add(w[0]);
   }
   inp.disabled=true;
@@ -482,7 +575,7 @@ function skipType() {
   const answer = inp.getAttribute('data-answer');
   const w = getCard();
   repeat.add(w[0]);
-  document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">Ответ: <b>${answer}</b></span>`;
+  document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">${t('fb_ans_pre')}${answer}${t('fb_ans_post')}</span>`;
   inp.disabled=true;
   render();
   updateStats();
@@ -496,5 +589,6 @@ function scrollToApp() { document.getElementById('app').scrollIntoView({behavior
 
 loadProgress();
 updateStreak();
+updateUI(); // Initial localization render
 buildDeck();
 shuffleDeck();

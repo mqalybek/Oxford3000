@@ -17,34 +17,34 @@
   <div class="header-stats">
     <div class="hstat">
       <div class="hstat-val" id="hs-total">0</div>
-      <div class="hstat-label">Слов</div>
+      <div class="hstat-label" data-i18n="header_words">Слов</div>
     </div>
     <div class="hstat">
       <div class="hstat-val" style="color:var(--green)" id="hs-known">0</div>
-      <div class="hstat-label">Знаю</div>
+      <div class="hstat-label" data-i18n="header_known">Знаю</div>
     </div>
     <div class="hstat">
       <div class="hstat-val" style="color:var(--accent2)" id="hs-pct">0%</div>
-      <div class="hstat-label">Прогресс</div>
+      <div class="hstat-label" data-i18n="header_progress">Прогресс</div>
     </div>
     <div class="hstat">
       <div class="hstat-val" style="color:var(--amber)" id="hs-streak">0🔥</div>
-      <div class="hstat-label">Дней подряд</div>
+      <div class="hstat-label" data-i18n="header_streak">Дней подряд</div>
     </div>
   </div>
 </header>
 
 <section class="hero">
-  <h1>Выучи английский<br>раз и навсегда</h1>
-  <p>3000 самых важных слов Oxford с переводом на русский. Карточки, тесты, ввод — три режима тренировки.</p>
-  <a href="#app" class="hero-cta" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})">
+  <h1 data-i18n="hero_title">Выучи английский<br>раз и навсегда</h1>
+  <p data-i18n="hero_subtitle">3000 самых важных слов Oxford с переводом на русский. Карточки, тесты, ввод — три режима тренировки.</p>
+  <a href="#app" class="hero-cta" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})" data-i18n="btn_start">
     Начать тренировку →
   </a>
   <div class="hero-chips">
-    <div class="chip"><span class="chip-dot" style="background:var(--green)"></span> A1 — Начальный</div>
-    <div class="chip"><span class="chip-dot" style="background:var(--blue)"></span> A2 — Элементарный</div>
-    <div class="chip"><span class="chip-dot" style="background:var(--amber)"></span> B1 — Средний</div>
-    <div class="chip"><span class="chip-dot" style="background:var(--red)"></span> B2 — Выше среднего</div>
+    <div class="chip"><span class="chip-dot" style="background:var(--green)"></span> <span data-i18n="lvl_a1">A1 — Начальный</span></div>
+    <div class="chip"><span class="chip-dot" style="background:var(--blue)"></span> <span data-i18n="lvl_a2">A2 — Элементарный</span></div>
+    <div class="chip"><span class="chip-dot" style="background:var(--amber)"></span> <span data-i18n="lvl_b1">B1 — Средний</span></div>
+    <div class="chip"><span class="chip-dot" style="background:var(--red)"></span> <span data-i18n="lvl_b2">B2 — Выше среднего</span></div>
   </div>
 </section>
 
@@ -53,47 +53,47 @@
   <div class="mode-grid">
     <div class="mode-card active" onclick="setMode('flash')" id="tab-flash">
       <div class="mode-icon">🃏</div>
-      <div class="mode-name">Карточки</div>
+      <div class="mode-name" data-i18n="tab_flash">Карточки</div>
     </div>
     <div class="mode-card" onclick="setMode('quiz')" id="tab-quiz">
       <div class="mode-icon">🎯</div>
-      <div class="mode-name">Тест 4 варианта</div>
+      <div class="mode-name" data-i18n="tab_quiz">Тест 4 варианта</div>
     </div>
     <div class="mode-card" onclick="setMode('type')" id="tab-type">
       <div class="mode-icon">⌨️</div>
-      <div class="mode-name">Введи перевод</div>
+      <div class="mode-name" data-i18n="tab_type">Введи перевод</div>
     </div>
     <div class="mode-card" onclick="setMode('review')" id="tab-review">
       <div class="mode-icon">🔁</div>
-      <div class="mode-name">Повторение</div>
+      <div class="mode-name" data-i18n="tab_review">Повторение</div>
     </div>
   </div>
 
   <div class="filter-row">
-    <span class="filter-label">Уровень:</span>
+    <span class="filter-label" data-i18n="lbl_level">Уровень:</span>
     <button class="lvl-btn active-A1" id="lbtn-A1" onclick="toggleLevel('A1')">A1</button>
     <button class="lvl-btn active-A2" id="lbtn-A2" onclick="toggleLevel('A2')">A2</button>
     <button class="lvl-btn active-B1" id="lbtn-B1" onclick="toggleLevel('B1')">B1</button>
     <button class="lvl-btn active-B2" id="lbtn-B2" onclick="toggleLevel('B2')">B2</button>
-    <button class="shuffle-btn" onclick="shuffleDeck()">🔀 Перемешать</button>
+    <button class="shuffle-btn" onclick="shuffleDeck()" data-i18n="btn_shuffle">🔀 Перемешать</button>
   </div>
 
   <div class="stats-bar">
     <div class="stat-box">
       <div class="stat-num" id="s-total">0</div>
-      <div class="stat-lbl">Всего</div>
+      <div class="stat-lbl" data-i18n="stat_total">Всего</div>
     </div>
     <div class="stat-box">
       <div class="stat-num" style="color:var(--green)" id="s-known">0</div>
-      <div class="stat-lbl">Знаю</div>
+      <div class="stat-lbl" data-i18n="stat_known">Знаю</div>
     </div>
     <div class="stat-box">
       <div class="stat-num" style="color:var(--red)" id="s-repeat">0</div>
-      <div class="stat-lbl">Повторить</div>
+      <div class="stat-lbl" data-i18n="stat_repeat">Повторить</div>
     </div>
     <div class="stat-box">
       <div class="stat-num" style="color:var(--accent2)" id="s-pct">0%</div>
-      <div class="stat-lbl">Прогресс</div>
+      <div class="stat-lbl" data-i18n="stat_progress">Прогресс</div>
     </div>
   </div>
 
@@ -108,12 +108,12 @@
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
     <button class="shuffle-btn" onclick="toggleLang()" id="lang-btn" style="background:var(--accent1);color:#fff;border-color:transparent">🌍 Язык: 🇰🇿 Қаз</button>
     <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
-    <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn">📊 График прогресса</button>
-    <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)">🗑 Сбросить прогресс</button>
+    <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn" data-i18n="btn_graph">📊 График прогресса</button>
+    <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)" data-i18n="btn_reset">🗑 Сбросить прогресс</button>
   </div>
 
   <div id="graph-area" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--card-radius);padding:20px;margin-bottom:16px">
-    <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">📊 График прогресса за 7 дней</div>
+    <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)" data-i18n="graph_title">📊 График прогресса за 7 дней</div>
     <canvas id="progress-chart" height="120"></canvas>
     <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="graph-stats"></div>
   </div>
@@ -123,8 +123,8 @@
 </div>
 
 <footer>
-  <p>Oxford 3000™ American English · Перевод на <strong>Қазақ</strong> / Русский языки</p>
-  <p style="margin-top:6px;font-size:12px">Делись с друзьями — открывается в любом браузере</p>
+  <p>Oxford 3000™ American English · <span data-i18n="footer_title">Перевод на Қазақ / Русский языки</span></p>
+  <p style="margin-top:6px;font-size:12px" data-i18n="footer_desc">Делись с друзьями — открывается в любом браузере</p>
 </footer>
 
 <script src="data.js"></script>
