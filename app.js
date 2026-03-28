@@ -1,3 +1,4 @@
+let appLang = 'kz'; // Default: Kazakh
 let mode = 'flash';
 let activeLevels = new Set(['A1','A2','B1','B2']);
 let deck = [];
@@ -69,6 +70,13 @@ function toggleSound() {
   document.getElementById('sound-btn').textContent = soundOn ? '🔊 Звук: вкл' : '🔇 Звук: выкл';
 }
 
+
+function getTrans(w) {
+  if (!w) return '';
+  if (appLang === 'kz') return w.length > 3 ? w[3] : '';
+  return w.length > 4 ? w[4] : (w.length > 3 ? w[3] : '');
+}
+
 // TIMER
 function startTimer(onTimeout) {
   clearInterval(timerInterval);
@@ -113,6 +121,21 @@ function launchConfetti() {
     if(frame < 120) requestAnimationFrame(draw); else canvas.remove();
   }
   draw();
+}
+
+
+function toggleLang() {
+  appLang = appLang === 'kz' ? 'ru' : 'kz';
+  const btn = document.getElementById('lang-btn');
+  const badge = document.getElementById('logo-badge');
+  if(appLang === 'kz') {
+    if(btn) btn.innerHTML = '🌍 Язык: 🇰🇿 Қаз';
+    if(badge) badge.textContent = 'KZ';
+  } else {
+    if(btn) btn.innerHTML = '🌍 Язык: 🇷🇺 Рус';
+    if(badge) badge.textContent = 'RU';
+  }
+  render();
 }
 
 // GRAPH
@@ -240,10 +263,10 @@ function renderFlash() {
   const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
   const w = d[idx];
   const dir = Math.random()<0.5;
-  const front = dir ? w[0] : w[3];
-  const back = dir ? w[3] : w[0];
-  const frontLabel = dir ? 'Английское слово' : 'Русский перевод';
-  const backLabel = dir ? 'Перевод на русский' : 'Английское слово';
+  const front = dir ? w[0] : getTrans(w);
+  const back = dir ? getTrans(w) : w[0];
+  const frontLabel = dir ? 'Английское слово' : (appLang==='kz'?'Қазақша аудармасы':'Русский перевод');
+  const backLabel = dir ? (appLang==='kz'?'Қазақша аударма':'Перевод на русский') : 'Английское слово';
   return `
   <div class="card-actions" style="justify-content:flex-start;margin-bottom:12px">
     <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">← Назад</button>
@@ -286,8 +309,8 @@ function renderQuiz() {
   const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
   const w = d[idx];
   const dir = Math.random()<0.5;
-  const question = dir ? w[0] : w[3];
-  const qLabel = dir ? 'Переведи на русский:' : 'Какое английское слово?';
+  const question = dir ? w[0] : getTrans(w);
+  const qLabel = dir ? (appLang==='kz'?'Қазақшаға аудар:':'Переведи на русский:') : (appLang==='kz'?'Ағылшынша қалай болады?':'Какое английское слово?');
   const opts = getRandomOpts(w,4);
   if(!quizAnswered) setTimeout(() => {
     if(dir) speak(w[0]);
@@ -296,7 +319,7 @@ function renderQuiz() {
         quizAnswered=true; correctStreak=0; repeat.add(w[0]);
         document.querySelectorAll('.opt-btn').forEach(o => {
           o.disabled=true;
-          if(o.textContent===(dir?w[3]:w[0])) o.classList.add('correct');
+          if(o.textContent===(dir?getTrans(w):w[0])) o.classList.add('correct');
         });
         const nb=document.getElementById('next-btn'); if(nb) nb.style.display='';
         updateStats();
@@ -313,7 +336,7 @@ function renderQuiz() {
     <div class="quiz-meta">${w[1]} · ${w[2]}</div>
     <div class="quiz-opts">
       ${opts.map(o=>{
-        const ans = dir ? o[3] : o[0];
+        const ans = dir ? getTrans(o) : o[0];
         const isCorrect = o[0]===w[0];
         return `<button class="opt-btn" onclick="answerQuiz(this,${isCorrect},${dir},'${w[0].replace(/'/g,"\\'")}')">${ans}</button>`;
       }).join('')}
@@ -328,9 +351,9 @@ function renderType() {
   const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
   const w = d[idx];
   const dir = Math.random()<0.5;
-  const question = dir ? w[0] : w[3];
-  const answer = dir ? w[3] : w[0];
-  const qLabel = dir ? 'Введи перевод на русский:' : 'Введи английское слово:';
+  const question = dir ? w[0] : getTrans(w);
+  const answer = dir ? getTrans(w) : w[0];
+  const qLabel = dir ? (appLang==='kz'?'Қазақша аудармасын жаз:':'Введи перевод на русский:') : (appLang==='kz'?'Ағылшынша сөзді жаз:':'Введи английское слово:');
   return `
   <div class="type-panel">
     <div class="quiz-eyebrow">${qLabel}</div>
@@ -415,7 +438,7 @@ function answerQuiz(btn, isCorrect, dir, word) {
   const w = getCard();
   document.querySelectorAll('.opt-btn').forEach(o => {
     o.disabled=true;
-    const correctText = dir ? w[3] : w[0];
+    const correctText = dir ? getTrans(w) : w[0];
     if(o.textContent===correctText) o.classList.add('correct');
     else if(o===btn && !isCorrect) o.classList.add('wrong');
   });

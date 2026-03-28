@@ -12,7 +12,7 @@
 <header>
   <a href="#" class="logo" onclick="scrollToApp()">
     Oxford 3000
-    <span class="logo-badge">RU</span>
+    <span class="logo-badge" id="logo-badge">KZ</span>
   </a>
   <div class="header-stats">
     <div class="hstat">
@@ -106,6 +106,7 @@
   </div>
 
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+    <button class="shuffle-btn" onclick="toggleLang()" id="lang-btn" style="background:var(--accent1);color:#fff;border-color:transparent">🌍 Язык: 🇰🇿 Қаз</button>
     <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
     <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn">📊 График прогресса</button>
     <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)">🗑 Сбросить прогресс</button>
@@ -122,7 +123,7 @@
 </div>
 
 <footer>
-  <p>Oxford 3000™ American English · Перевод на русский язык · <strong>3000 слов</strong></p>
+  <p>Oxford 3000™ American English · Перевод на <strong>Қазақ</strong> / Русский языки</p>
   <p style="margin-top:6px;font-size:12px">Делись с друзьями — открывается в любом браузере</p>
 </footer>
 
