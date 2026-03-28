@@ -1,6 +1,7 @@
 let appLang = 'kz'; // Default: Kazakh
 let mode = 'flash';
 let activeLevels = new Set(['A1','A2','B1','B2']);
+let activeCats = new Set(['cat_core','cat_people','cat_home','cat_edu','cat_travel','cat_food','cat_health','cat_nature','cat_business','cat_tech','cat_art','cat_sport']);
 let deck = [];
 let idx = 0;
 let flipped = false;
@@ -31,6 +32,19 @@ const UI_TEXT = {
   tab_type: { ru: 'Введи перевод', kz: 'Аударманы жаз' },
   tab_review: { ru: 'Повторение', kz: 'Қайталау' },
   lbl_level: { ru: 'Уровень:', kz: 'Деңгей:' },
+  lbl_cat: { ru: 'Категории:', kz: 'Категориялар:' },
+  cat_core: { ru: 'Основные', kz: 'Негізгі' },
+  cat_people: { ru: 'Люди', kz: 'Адамдар' },
+  cat_home: { ru: 'Дом', kz: 'Үй' },
+  cat_edu: { ru: 'Образование', kz: 'Білім' },
+  cat_travel: { ru: 'Путешествия', kz: 'Саяхат' },
+  cat_food: { ru: 'Еда', kz: 'Тамақ' },
+  cat_health: { ru: 'Здоровье', kz: 'Денсаулық' },
+  cat_nature: { ru: 'Природа', kz: 'Табиғат' },
+  cat_business: { ru: 'Бизнес', kz: 'Бизнес' },
+  cat_tech: { ru: 'Технологии', kz: 'IT/Ғылым' },
+  cat_art: { ru: 'Искусство', kz: 'Өнер' },
+  cat_sport: { ru: 'Спорт', kz: 'Спорт' },
   btn_shuffle: { ru: '🔀 Перемешать', kz: '🔀 Араластыру' },
   stat_total: { ru: 'Всего', kz: 'Барлығы' },
   stat_known: { ru: 'Знаю', kz: 'Білемін' },
@@ -290,8 +304,12 @@ function getBaseLevel(w) {
   return 'B2';
 }
 
+function getCat(w) {
+  return w.length > 5 ? w[5] : 'cat_core';
+}
+
 function buildDeck() {
-  deck = WORDS.filter(w => activeLevels.has(getBaseLevel(w)));
+  deck = WORDS.filter(w => activeLevels.has(getBaseLevel(w)) && activeCats.has(getCat(w)));
   idx = 0; flipped = false; quizAnswered = false; typeAnswered = false;
   updateStats();
   render();
@@ -312,6 +330,17 @@ function toggleLevel(l) {
   buildDeck();
 }
 
+function toggleCat(c) {
+  if(activeCats.has(c)) { if(activeCats.size>1) activeCats.delete(c); }
+  else activeCats.add(c);
+  const btn = document.getElementById('cbtn-'+c);
+  if(btn) {
+    if(activeCats.has(c)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  }
+  buildDeck();
+}
+
 function setMode(m) {
   mode=m; idx=0; flipped=false; quizAnswered=false; typeAnswered=false;
   ['flash','quiz','type','review'].forEach(t => {
@@ -321,7 +350,7 @@ function setMode(m) {
 }
 
 function updateStats() {
-  const total = WORDS.filter(w=>activeLevels.has(getBaseLevel(w))).length;
+  const total = WORDS.filter(w=>activeLevels.has(getBaseLevel(w)) && activeCats.has(getCat(w))).length;
   const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
   const pct = total>0 ? Math.round(known.size/total*100) : 0;
   document.getElementById('s-total').textContent = total;
@@ -390,7 +419,7 @@ function renderFlash() {
 }
 
 function getRandomOpts(w, count) {
-  const others = WORDS.filter(x=>x[0]!==w[0] && activeLevels.has(getBaseLevel(x)));
+  const others = WORDS.filter(x=>x[0]!==w[0] && activeLevels.has(getBaseLevel(x)) && activeCats.has(getCat(x)));
   return [...others.sort(()=>Math.random()-.5).slice(0,count-1), w].sort(()=>Math.random()-.5);
 }
 

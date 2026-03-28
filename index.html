@@ -74,13 +74,29 @@
     </div>
   </div>
 
-  <div class="filter-row">
+  <div class="filter-row" style="margin-bottom: 12px;">
     <span class="filter-label" data-i18n="lbl_level">Уровень:</span>
     <button class="lvl-btn active-A1" id="lbtn-A1" onclick="toggleLevel('A1')">A1</button>
     <button class="lvl-btn active-A2" id="lbtn-A2" onclick="toggleLevel('A2')">A2</button>
     <button class="lvl-btn active-B1" id="lbtn-B1" onclick="toggleLevel('B1')">B1</button>
     <button class="lvl-btn active-B2" id="lbtn-B2" onclick="toggleLevel('B2')">B2</button>
     <button class="shuffle-btn" onclick="shuffleDeck()" data-i18n="btn_shuffle">🔀 Перемешать</button>
+  </div>
+
+  <div class="filter-row" id="cat-filters" style="gap:6px">
+    <span class="filter-label" data-i18n="lbl_cat" style="width:100%; display:block; margin-bottom: 4px;">Категории:</span>
+    <button class="cat-btn active" id="cbtn-cat_core" onclick="toggleCat('cat_core')">🗣️ <span data-i18n="cat_core">Негізгі</span></button>
+    <button class="cat-btn active" id="cbtn-cat_people" onclick="toggleCat('cat_people')">👨‍👩‍👧 <span data-i18n="cat_people">Адамдар</span></button>
+    <button class="cat-btn active" id="cbtn-cat_home" onclick="toggleCat('cat_home')">🏠 <span data-i18n="cat_home">Үй</span></button>
+    <button class="cat-btn active" id="cbtn-cat_edu" onclick="toggleCat('cat_edu')">🎓 <span data-i18n="cat_edu">Білім</span></button>
+    <button class="cat-btn active" id="cbtn-cat_travel" onclick="toggleCat('cat_travel')">✈️ <span data-i18n="cat_travel">Саяхат</span></button>
+    <button class="cat-btn active" id="cbtn-cat_food" onclick="toggleCat('cat_food')">🍔 <span data-i18n="cat_food">Тамақ</span></button>
+    <button class="cat-btn active" id="cbtn-cat_health" onclick="toggleCat('cat_health')">💊 <span data-i18n="cat_health">Здоровье</span></button>
+    <button class="cat-btn active" id="cbtn-cat_nature" onclick="toggleCat('cat_nature')">🌿 <span data-i18n="cat_nature">Природа</span></button>
+    <button class="cat-btn active" id="cbtn-cat_business" onclick="toggleCat('cat_business')">💼 <span data-i18n="cat_business">Бизнес</span></button>
+    <button class="cat-btn active" id="cbtn-cat_tech" onclick="toggleCat('cat_tech')">💻 <span data-i18n="cat_tech">IT</span></button>
+    <button class="cat-btn active" id="cbtn-cat_art" onclick="toggleCat('cat_art')">🎭 <span data-i18n="cat_art">Өнер</span></button>
+    <button class="cat-btn active" id="cbtn-cat_sport" onclick="toggleCat('cat_sport')">🏀 <span data-i18n="cat_sport">Спорт</span></button>
   </div>
 
   <div class="stats-bar">

@@ -240,6 +240,24 @@ header {
 .lvl-btn.active-A2 { background: rgba(96,165,250,0.15); color: var(--blue); border-color: rgba(96,165,250,0.4); }
 .lvl-btn.active-B1 { background: rgba(251,191,36,0.15); color: var(--amber); border-color: rgba(251,191,36,0.4); }
 .lvl-btn.active-B2 { background: rgba(248,113,113,0.15); color: var(--red); border-color: rgba(248,113,113,0.4); }
+.cat-btn {
+  padding: 5px 12px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.cat-btn.active {
+  background: rgba(108,99,255,0.15);
+  color: var(--accent2);
+  border-color: rgba(108,99,255,0.4);
+}
+.cat-btn:hover { background: var(--surface2); }
+
 .shuffle-btn {
   margin-left: auto;
   padding: 5px 16px;
