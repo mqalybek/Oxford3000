@@ -217,17 +217,12 @@ function launchConfetti() {
 }
 
 
-function toggleLang() {
-  appLang = appLang === 'kz' ? 'ru' : 'kz';
-  const btn = document.getElementById('lang-btn');
-  const badge = document.getElementById('logo-badge');
-  if(appLang === 'kz') {
-    if(btn) btn.innerHTML = '🌍 Язык: 🇰🇿 Қаз';
-    if(badge) badge.textContent = 'KZ';
-  } else {
-    if(btn) btn.innerHTML = '🌍 Язык: 🇷🇺 Рус';
-    if(badge) badge.textContent = 'RU';
-  }
+function setAppLang(l) {
+  appLang = l;
+  const btnKz = document.getElementById('ls-kz');
+  const btnRu = document.getElementById('ls-ru');
+  if(btnKz) btnKz.classList.toggle('active', l === 'kz');
+  if(btnRu) btnRu.classList.toggle('active', l === 'ru');
   updateUI();
   render();
 }

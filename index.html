@@ -10,10 +10,15 @@
 <body>
 
 <header>
-  <a href="#" class="logo" onclick="scrollToApp()">
-    Oxford 3000
-    <span class="logo-badge" id="logo-badge">KZ</span>
-  </a>
+  <div style="display:flex;align-items:center;">
+    <a href="#" class="logo" onclick="scrollToApp()">
+      Oxford 3000
+    </a>
+    <div class="lang-switcher">
+      <button class="ls-btn active" id="ls-kz" onclick="setAppLang('kz')">ҚАЗ</button>
+      <button class="ls-btn" id="ls-ru" onclick="setAppLang('ru')">РУС</button>
+    </div>
+  </div>
   <div class="header-stats">
     <div class="hstat">
       <div class="hstat-val" id="hs-total">0</div>
@@ -106,7 +111,6 @@
   </div>
 
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-    <button class="shuffle-btn" onclick="toggleLang()" id="lang-btn" style="background:var(--accent1);color:#fff;border-color:transparent">🌍 Язык: 🇰🇿 Қаз</button>
     <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
     <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn" data-i18n="btn_graph">📊 График прогресса</button>
     <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)" data-i18n="btn_reset">🗑 Сбросить прогресс</button>
