@@ -280,6 +280,48 @@ header {
 .progress-counter { font-size: 13px; color: var(--muted); }
 .progress-pct { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent2); }
 
+/* ДНЕВНАЯ ЦЕЛЬ */
+.goal-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.goal-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.goal-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--accent2));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.goal-fill.done { background: linear-gradient(90deg, var(--green), var(--accent2)); }
+.goal-select {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
 /* STATS BAR */
 .stats-bar {
   display: grid;

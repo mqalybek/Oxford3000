@@ -137,10 +137,24 @@
     </div>
   </div>
 
+  <div class="goal-bar">
+    <span class="goal-label" id="goal-label">🎯 0 / 20</span>
+    <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+    <select class="goal-select" id="goal-select" onchange="setDailyGoal(this.value)">
+      <option value="10">10</option>
+      <option value="20" selected>20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </div>
+
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
     <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
     <button class="shuffle-btn" onclick="toggleTimer()" id="timer-btn">⏱ Таймер: вкл</button>
     <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn" data-i18n="btn_graph">📊 График прогресса</button>
+    <button class="shuffle-btn" onclick="exportProgress()" data-i18n="btn_export">⬇ Экспорт</button>
+    <button class="shuffle-btn" onclick="document.getElementById('import-file').click()" data-i18n="btn_import">⬆ Импорт</button>
+    <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importProgress(this)">
     <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)" data-i18n="btn_reset">🗑 Сбросить прогресс</button>
   </div>
 

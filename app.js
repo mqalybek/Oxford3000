@@ -7,8 +7,9 @@ let deck = [];
 let reviewDeck = [];      // снапшот колоды повторения: не меняется при удалении слов из repeat
 let idx = 0;
 let flipped = false;
-let known = new Set();
-let repeat = new Set();
+let known = new Set();    // производное от srs: слова с коробкой ≥ 1
+let srs = {};             // интервальное повторение: word → { box: 0..5, due: 'YYYY-MM-DD' }
+let dailyGoal = 20;
 let quizAnswered = false;
 let typeAnswered = false;
 let cardDir = true;       // направление вопроса (EN→перевод или наоборот), фиксируется на карточку
@@ -96,7 +97,7 @@ const UI_TEXT = {
   fb_wrong_post: { ru: '</b>', kz: '</b>' },
   fb_ans_pre: { ru: 'Ответ: <b>', kz: 'Жауап: <b>' },
   fb_ans_post: { ru: '</b>', kz: '</b>' },
-  empty_review: { ru: 'Нет слов для повторения.<br>Отмечай слова кнопкой "Повторить"!', kz: 'Қайталайтын сөздер жоқ.<br>"Қайталау" арқылы сөздерді белгілеңіз!' },
+  empty_review: { ru: 'На сегодня нет слов для повторения. 🎉<br>Учи новые слова или возвращайся завтра!', kz: 'Бүгінге қайталайтын сөздер жоқ. 🎉<br>Жаңа сөздер үйреніңіз немесе ертең келіңіз!' },
   empty_level: { ru: 'Нет слов для выбранных уровней.', kz: 'Таңдалған деңгейлер үшін сөздер жоқ.' },
   res_words_learned: { ru: 'слов изучено!', kz: 'сөз жатталды!' },
   res_repeat: { ru: 'Повторить:', kz: 'Қайталау:' },
@@ -105,7 +106,15 @@ const UI_TEXT = {
   res_cards: { ru: 'карточек', kz: 'карта' },
   btn_restart: { ru: 'Начать заново', kz: 'Қайтадан бастау' },
   btn_repeat_errs: { ru: 'Повторить ошибки', kz: 'Қателерді қайталау' },
-  kbd_hint: { ru: 'Пробел — перевернуть · 1/2 — ответ · ←/→ — навигация', kz: 'Бос орын — аудару · 1/2 — жауап · ←/→ — навигация' }
+  kbd_hint: { ru: 'Пробел — перевернуть · 1/2 — ответ · ←/→ — навигация', kz: 'Бос орын — аудару · 1/2 — жауап · ←/→ — навигация' },
+  goal_today: { ru: '🎯 Сегодня:', kz: '🎯 Бүгін:' },
+  goal_select_title: { ru: 'Цель на день (слов)', kz: 'Күндік мақсат (сөз)' },
+  goal_reached: { ru: 'Цель дня достигнута! 🎉', kz: 'Күндік мақсат орындалды! 🎉' },
+  btn_export: { ru: '⬇ Экспорт', kz: '⬇ Экспорт' },
+  btn_import: { ru: '⬆ Импорт', kz: '⬆ Импорт' },
+  confirm_import: { ru: 'Импорт заменит текущий прогресс. Продолжить?', kz: 'Импорт ағымдағы прогресті ауыстырады. Жалғастыру керек пе?' },
+  import_ok: { ru: 'Прогресс импортирован!', kz: 'Прогресс импортталды!' },
+  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Oxford 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Oxford 3000 экспорты ма?' }
 };
 
 function t(key) {
@@ -133,11 +142,14 @@ function updateUI() {
 
   const inp = document.getElementById('type-inp');
   if(inp) inp.placeholder = t('placeholder_type');
+  const goalSel = document.getElementById('goal-select');
+  if(goalSel) goalSel.title = t('goal_select_title');
+  updateGoalUI();
 }
 
 // ===== НАСТРОЙКИ =====
 function saveSettings() {
-  localStorage.setItem('ox_settings', JSON.stringify({ lang: appLang, sound: soundOn, timer: timerOn }));
+  localStorage.setItem('ox_settings', JSON.stringify({ lang: appLang, sound: soundOn, timer: timerOn, goal: dailyGoal }));
 }
 function loadSettings() {
   try {
@@ -145,11 +157,20 @@ function loadSettings() {
     if(s.lang === 'ru' || s.lang === 'kz') appLang = s.lang;
     if(typeof s.sound === 'boolean') soundOn = s.sound;
     if(typeof s.timer === 'boolean') timerOn = s.timer;
+    if([10,20,50,100].includes(s.goal)) dailyGoal = s.goal;
   } catch(e) { /* повреждённые настройки — остаются значения по умолчанию */ }
   const btnKz = document.getElementById('ls-kz');
   const btnRu = document.getElementById('ls-ru');
   if(btnKz) btnKz.classList.toggle('active', appLang === 'kz');
   if(btnRu) btnRu.classList.toggle('active', appLang === 'ru');
+  const sel = document.getElementById('goal-select');
+  if(sel) sel.value = String(dailyGoal);
+}
+
+function setDailyGoal(v) {
+  dailyGoal = Number(v);
+  saveSettings();
+  updateGoalUI();
 }
 
 // ===== СОХРАНЕНИЕ / ЗАГРУЗКА ПРОГРЕССА =====
@@ -182,10 +203,63 @@ function bumpLearnedToday() {
   if(history.length > 60) history = history.slice(-60);
   localStorage.setItem('ox_history', JSON.stringify(history));
   updateStreak();
+  updateGoalUI();
+  if(entry.learned === dailyGoal) {
+    launchConfetti();
+    const lbl = document.getElementById('goal-label');
+    if(lbl) { lbl.textContent = t('goal_reached'); setTimeout(updateGoalUI, 2500); }
+  }
+}
+
+function learnedToday() {
+  const entry = migrateHistory(loadHistory()).find(e => e.date === todayKey());
+  return entry ? entry.learned : 0;
+}
+
+function updateGoalUI() {
+  const lbl = document.getElementById('goal-label');
+  const fill = document.getElementById('goal-fill');
+  if(!lbl || !fill) return;
+  const n = learnedToday();
+  lbl.textContent = `${t('goal_today')} ${n} / ${dailyGoal}`;
+  fill.style.width = Math.min(100, Math.round(n / dailyGoal * 100)) + '%';
+  fill.classList.toggle('done', n >= dailyGoal);
+}
+
+// ===== ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ (система Лейтнера) =====
+// Коробка 0 — не знал/новое (повтор сегодня), 1..5 — интервалы в днях до следующего показа
+const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+
+// Правильный ответ: слово поднимается на коробку выше, следующий показ позже
+function srsCorrect(word) {
+  const box = Math.min((srs[word] ? srs[word].box : 0) + 1, 5);
+  srs[word] = { box, due: addDays(todayKey(), SRS_INTERVALS[box]) };
+  known.add(word);
+}
+
+// Ошибка: слово падает в коробку 0 и доступно к повторению сразу
+function srsWrong(word) {
+  srs[word] = { box: 0, due: todayKey() };
+  known.delete(word);
+}
+
+function dueCount() {
+  const today = todayKey();
+  return Object.keys(srs).reduce((n, w) => n + (srs[w].due <= today ? 1 : 0), 0);
+}
+
+function rebuildKnown() {
+  known = new Set(Object.keys(srs).filter(w => srs[w].box >= 1));
 }
 
 function saveProgress() {
-  localStorage.setItem('ox_progress', JSON.stringify({ known: [...known], repeat: [...repeat] }));
+  localStorage.setItem('ox_progress', JSON.stringify({ v: 2, srs }));
 }
 
 function loadProgress() {
@@ -193,8 +267,15 @@ function loadProgress() {
     const raw = localStorage.getItem('ox_progress');
     if(!raw) return;
     const data = JSON.parse(raw);
-    known = new Set(data.known || []);
-    repeat = new Set(data.repeat || []);
+    if(data.v === 2 && data.srs) {
+      srs = data.srs;
+    } else {
+      // Миграция формата v1 {known, repeat}: выученные — в коробку 3, ошибки — в коробку 0
+      const today = todayKey();
+      (data.known || []).forEach(w => { srs[w] = { box: 3, due: addDays(today, SRS_INTERVALS[3]) }; });
+      (data.repeat || []).forEach(w => { srs[w] = { box: 0, due: today }; });
+    }
+    rebuildKnown();
   } catch(e) { /* повреждённый прогресс — начинаем с чистого */ }
 }
 
@@ -202,11 +283,58 @@ function resetProgress() {
   if(!confirm(t('confirm_reset'))) return;
   localStorage.removeItem('ox_progress');
   localStorage.removeItem('ox_history');
-  known = new Set(); repeat = new Set(); reviewDeck = []; correctStreak = 0;
+  known = new Set(); srs = {}; reviewDeck = []; correctStreak = 0;
   updateStreak();
   if(mode === 'review') buildReviewDeck();
   newCard(0);
   render();
+}
+
+// ===== ЭКСПОРТ / ИМПОРТ ПРОГРЕССА =====
+function exportProgress() {
+  const data = {
+    app: 'oxford3000',
+    version: 2,
+    exported: new Date().toISOString(),
+    settings: { lang: appLang, sound: soundOn, timer: timerOn, goal: dailyGoal },
+    progress: { v: 2, srs },
+    history: loadHistory()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'oxford3000-progress-' + todayKey() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importProgress(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(data.app !== 'oxford3000' || !data.progress) throw new Error('bad format');
+      if(!confirm(t('confirm_import'))) return;
+      localStorage.setItem('ox_progress', JSON.stringify(data.progress));
+      if(Array.isArray(data.history)) localStorage.setItem('ox_history', JSON.stringify(data.history));
+      if(data.settings) localStorage.setItem('ox_settings', JSON.stringify(data.settings));
+      srs = {};
+      loadSettings();
+      loadProgress();
+      updateStreak();
+      updateUI();
+      if(mode === 'review') buildReviewDeck();
+      newCard(0);
+      render();
+      alert(t('import_ok'));
+    } catch(e) {
+      alert(t('import_err'));
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ===== СТРИК: дни, когда выучено хотя бы одно новое слово =====
@@ -388,8 +516,11 @@ function getActiveDeck() {
   return mode === 'review' ? reviewDeck : deck;
 }
 
+// Колода повторения: слова, чей срок показа наступил (отсортированы по сроку)
 function buildReviewDeck() {
-  reviewDeck = WORDS.filter(w => repeat.has(w[0]));
+  const today = todayKey();
+  reviewDeck = WORDS.filter(w => srs[w[0]] && srs[w[0]].due <= today)
+    .sort((a, b) => srs[a[0]].due < srs[b[0]].due ? -1 : 1);
 }
 
 // Сбрасывает состояние текущей карточки (направление, ответы, варианты теста)
@@ -451,7 +582,7 @@ function updateStats() {
   const pct = total > 0 ? Math.round(knownSel/total*100) : 0;
   document.getElementById('s-total').textContent = total;
   document.getElementById('s-known').textContent = knownSel;
-  document.getElementById('s-repeat').textContent = repeat.size;
+  document.getElementById('s-repeat').textContent = dueCount();
   document.getElementById('s-pct').textContent = pct+'%';
   document.getElementById('hs-total').textContent = WORDS.length;
   document.getElementById('hs-known').textContent = known.size;
@@ -471,9 +602,14 @@ function getCard() {
 // Засчитать слово как выученное (общая точка для всех режимов)
 function learnWord(w) {
   const isNew = !known.has(w[0]);
-  known.add(w[0]);
-  repeat.delete(w[0]);
+  srsCorrect(w[0]);
   if(isNew) bumpLearnedToday();
+}
+
+// Отметить ошибку (общая точка для всех режимов)
+function missWord(w) {
+  srsWrong(w[0]);
+  correctStreak = 0;
 }
 
 function makeLevelPill(w) {
@@ -529,9 +665,8 @@ function getRandomOpts(w, count) {
 function failQuiz() {
   if(quizAnswered) return;
   quizAnswered = true;
-  correctStreak = 0;
   const w = quizState.word;
-  repeat.add(w[0]);
+  missWord(w);
   document.querySelectorAll('.opt-btn').forEach((o, i) => {
     o.disabled = true;
     if(quizState.opts[i] && quizState.opts[i][0] === w[0]) o.classList.add('correct');
@@ -610,10 +745,10 @@ function render() {
     <div class="result-panel">
       <div class="result-score">${known.size}</div>
       <div class="result-title">${t('res_words_learned')}</div>
-      <div class="result-sub">${t('res_repeat')} ${repeat.size} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
+      <div class="result-sub">${t('res_repeat')} ${dueCount()} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
       <div class="card-actions" style="justify-content:center">
         <button class="act-btn btn-know" onclick="restart()">${t('btn_restart')}</button>
-        ${repeat.size>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
+        ${dueCount()>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
       </div>
     </div>`;
     return;
@@ -656,7 +791,7 @@ function markKnown() {
   }
   nextCard();
 }
-function markRepeat() { if(getCard()) repeat.add(getCard()[0]); correctStreak=0; nextCard(); }
+function markRepeat() { const w = getCard(); if(w) missWord(w); nextCard(); }
 function skip() { nextCard(); }
 
 function nextCard() {
@@ -680,7 +815,7 @@ function answerQuiz(optIdx) {
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
     speak(w[0]);
   } else {
-    repeat.add(w[0]); correctStreak=0;
+    missWord(w);
   }
   document.getElementById('next-btn').style.display='';
   updateStats();
@@ -734,8 +869,7 @@ function checkType() {
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
   } else {
     fb.innerHTML=`<span style="color:var(--red)">${t('fb_wrong_pre')}${esc(answer)}${t('fb_wrong_post')}</span>`;
-    repeat.add(w[0]);
-    correctStreak=0;
+    missWord(w);
   }
   inp.disabled=true;
   setTimeout(() => { if(typeAnswered) nextCard(); }, 1400);
@@ -747,8 +881,7 @@ function skipType() {
   typeAnswered=true;
   const answer = typeAnswer();
   const w = getCard();
-  repeat.add(w[0]);
-  correctStreak=0;
+  missWord(w);
   document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">${t('fb_ans_pre')}${esc(answer)}${t('fb_ans_post')}</span>`;
   const inp = document.getElementById('type-inp');
   if(inp) inp.disabled=true;

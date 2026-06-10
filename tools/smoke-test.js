@@ -121,12 +121,59 @@ function check(name, cond, extra) {
   const pct = await page.textContent('#s-pct');
   check('процент ≤ 100%', parseInt(pct) <= 100, pct);
 
+  console.log('— Интервальное повторение (SRS)');
+  const srsCheck = await page.evaluate(() => {
+    const today = todayKey();
+    srs = {}; known = new Set();
+    // Правильный ответ продвигает по коробкам с растущими интервалами
+    srsCorrect('test');
+    const b1 = srs['test'].box === 1 && srs['test'].due === addDays(today, 1);
+    srsCorrect('test');
+    const b2 = srs['test'].box === 2 && srs['test'].due === addDays(today, 3);
+    srsCorrect('test'); srsCorrect('test'); srsCorrect('test'); srsCorrect('test');
+    const cap = srs['test'].box === 5 && srs['test'].due === addDays(today, 30);
+    // Ошибка сбрасывает в коробку 0, слово доступно сразу
+    srsWrong('test');
+    const reset = srs['test'].box === 0 && srs['test'].due === today && !known.has('test');
+    return { b1, b2, cap, reset };
+  });
+  check('коробка 1 → повтор через 1 день', srsCheck.b1);
+  check('коробка 2 → повтор через 3 дня', srsCheck.b2);
+  check('потолок: коробка 5, 30 дней', srsCheck.cap);
+  check('ошибка сбрасывает в коробку 0', srsCheck.reset);
+  // Слова с будущим сроком не попадают в колоду повторения
+  const futureCheck = await page.evaluate(() => {
+    srs = {};
+    srs[WORDS[0][0]] = { box: 1, due: addDays(todayKey(), 1) };
+    srs[WORDS[1][0]] = { box: 0, due: todayKey() };
+    buildReviewDeck();
+    return reviewDeck.length === 1 && reviewDeck[0][0] === WORDS[1][0];
+  });
+  check('в повторение попадают только наступившие сроки', futureCheck);
+
+  console.log('— Миграция прогресса v1');
+  const migCheck = await page.evaluate(() => {
+    localStorage.setItem('ox_progress', JSON.stringify({ known: ['apple'], repeat: ['banana'] }));
+    srs = {}; known = new Set();
+    loadProgress();
+    return srs['apple'] && srs['apple'].box === 3 && srs['banana'] && srs['banana'].box === 0 && known.has('apple') && !known.has('banana');
+  });
+  check('v1 {known, repeat} мигрирует в SRS', migCheck);
+
+  console.log('— Дневная цель');
+  const goalLabel = await page.textContent('#goal-label');
+  check('плашка цели отображается', /\d+ \/ \d+/.test(goalLabel), goalLabel);
+  await page.selectOption('#goal-select', '50');
+  await page.waitForTimeout(100);
+  check('смена цели работает', (await page.textContent('#goal-label')).includes('/ 50'));
+  check('цель сохраняется', await page.evaluate(() => JSON.parse(localStorage.getItem('ox_settings')).goal === 50));
+
   console.log('— Сохранение настроек');
   await page.evaluate(() => setAppLang('ru'));
   await page.reload();
   await page.waitForTimeout(300);
   check('язык сохранился после перезагрузки', await page.evaluate(() => appLang === 'ru'));
-  check('прогресс сохранился', parseInt(await page.evaluate(() => known.size)) >= 3);
+  check('прогресс (SRS) сохранился', await page.evaluate(() => known.has('apple') && srs['banana'] && srs['banana'].box === 0));
   check('нет JS-ошибок в конце', errors.length === 0, errors[0]);
 
   await browser.close();
