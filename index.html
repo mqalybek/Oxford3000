@@ -66,23 +66,23 @@
 
 <div class="app-container" id="app">
 
-  <div class="mode-grid">
-    <div class="mode-card active" onclick="setMode('flash')" id="tab-flash">
+  <div class="mode-grid" role="tablist">
+    <button class="mode-card active" onclick="setMode('flash')" id="tab-flash" role="tab" aria-selected="true">
       <div class="mode-icon">🃏</div>
       <div class="mode-name" data-i18n="tab_flash">Карточки</div>
-    </div>
-    <div class="mode-card" onclick="setMode('quiz')" id="tab-quiz">
+    </button>
+    <button class="mode-card" onclick="setMode('quiz')" id="tab-quiz" role="tab" aria-selected="false">
       <div class="mode-icon">🎯</div>
       <div class="mode-name" data-i18n="tab_quiz">Тест 4 варианта</div>
-    </div>
-    <div class="mode-card" onclick="setMode('type')" id="tab-type">
+    </button>
+    <button class="mode-card" onclick="setMode('type')" id="tab-type" role="tab" aria-selected="false">
       <div class="mode-icon">⌨️</div>
       <div class="mode-name" data-i18n="tab_type">Введи перевод</div>
-    </div>
-    <div class="mode-card" onclick="setMode('review')" id="tab-review">
+    </button>
+    <button class="mode-card" onclick="setMode('review')" id="tab-review" role="tab" aria-selected="false">
       <div class="mode-icon">🔁</div>
       <div class="mode-name" data-i18n="tab_review">Повторение</div>
-    </div>
+    </button>
   </div>
 
   <div class="filter-row" style="margin-bottom: 12px;">

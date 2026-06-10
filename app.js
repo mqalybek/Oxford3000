@@ -570,7 +570,9 @@ function setMode(m) {
   if(m === 'review') buildReviewDeck();
   newCard(0);
   ['flash','quiz','type','review'].forEach(x => {
-    document.getElementById('tab-'+x).classList.toggle('active', x===m);
+    const tab = document.getElementById('tab-'+x);
+    tab.classList.toggle('active', x===m);
+    tab.setAttribute('aria-selected', x===m ? 'true' : 'false');
   });
   render();
 }
@@ -898,7 +900,9 @@ function scrollToApp() { document.getElementById('app').scrollIntoView({behavior
 // ===== КЛАВИАТУРА =====
 document.addEventListener('keydown', e => {
   const tag = document.activeElement && document.activeElement.tagName;
-  if(tag === 'INPUT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.ctrlKey || e.metaKey || e.altKey) return;
+  // На сфокусированной кнопке Space/Enter обрабатывает сама кнопка
+  if(tag === 'BUTTON' && (e.code === 'Space' || e.key === 'Enter')) return;
   const d = getActiveDeck();
   if(!d.length) return;
   if(idx >= d.length) {

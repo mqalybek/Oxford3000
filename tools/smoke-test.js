@@ -89,12 +89,10 @@ function check(name, cond, extra) {
   await page.waitForTimeout(100);
   const fb = await page.textContent('#type-fb');
   check('правильный ввод засчитан', /Правильно|Дұрыс/.test(fb), fb);
-  // Подстрока больше НЕ засчитывается
+  // Подстрока больше НЕ засчитывается (раньше любые 4+ буквы из ответа проходили)
   await page.waitForTimeout(1500); // авто-переход к следующей
-  const ans2 = await page.evaluate(() => typeAnswer());
-  const sub = ans2.split(/[;,]/)[0].trim().slice(0, 4);
-  const wrongCheck = await page.evaluate(s => isAnswerCorrect(s, typeAnswer()), sub === ans2.split(/[;,]/)[0].trim() ? 'xyzq' : sub);
-  check('подстрока не засчитывается', sub.length >= ans2.split(/[;,]/)[0].trim().length || !wrongCheck);
+  check('подстрока не засчитывается', !(await page.evaluate(() => isAnswerCorrect('подг', 'подготовка, приготовление'))));
+  check('второй вариант перевода засчитывается', await page.evaluate(() => isAnswerCorrect('приготовление', 'подготовка, приготовление')));
   check('опечатка в 1 букву прощается', await page.evaluate(() => isAnswerCorrect('продлжение', 'продолжение')));
   check('пустой ввод не засчитывается', !(await page.evaluate(() => isAnswerCorrect('', 'слово'))));
 
