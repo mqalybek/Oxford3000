@@ -26,7 +26,7 @@ const UI_TEXT = {
   header_progress: { ru: 'Прогресс', kz: 'Прогресс' },
   header_streak: { ru: 'Дней подряд', kz: 'Қатарынан күн' },
   hero_title: { ru: 'Выучи английский<br>раз и навсегда', kz: 'Ағылшын тілін<br>біржолата үйреніңіз' },
-  hero_subtitle: { ru: '3000 самых важных слов Oxford с переводом на казахский и русский. Карточки, тест, ввод, повторение — четыре режима тренировки.', kz: 'Оксфордтың ең маңызды 3000 сөзі қазақша аудармасымен. Карталар, тест, жазу, қайталау — 4 жаттығу режимі.' },
+  hero_subtitle: { ru: '3000 самых важных английских слов с переводом на казахский и русский. Карточки, тест, ввод, повторение — четыре режима тренировки.', kz: 'Ағылшын тілінің ең маңызды 3000 сөзі қазақша аудармасымен. Карталар, тест, жазу, қайталау — 4 жаттығу режимі.' },
   btn_start: { ru: 'Начать тренировку →', kz: 'Жаттығуды бастау →' },
   lvl_a1: { ru: 'A1 — Начальный', kz: 'A1 — Бастапқы' },
   lvl_a2: { ru: 'A2 — Элементарный', kz: 'A2 — Қарапайым' },
@@ -66,7 +66,7 @@ const UI_TEXT = {
   graph_stat_total: { ru: 'Всего слов', kz: 'Барлық сөздер' },
   graph_stat_known: { ru: 'Изучено', kz: 'Жатталды' },
   graph_stat_left: { ru: 'Осталось', kz: 'Қалды' },
-  footer_title: { ru: 'Перевод на <strong>Қазақ</strong> / Русский языки', kz: '<strong>Қазақша</strong> / Орысша аударма' },
+  footer_title: { ru: '3000 самых важных английских слов · <strong>Қазақша</strong> / Русский', kz: 'Ең маңызды 3000 ағылшын сөзі · <strong>Қазақша</strong> / Орысша' },
   footer_desc: { ru: 'Делись с друзьями — открывается в любом браузере', kz: 'Достарыңызбен бөлісіңіз — кез келген браузерде ашылады' },
   confirm_reset: { ru: 'Сбросить весь прогресс? Это нельзя отменить.', kz: 'Барлық прогресті өшіру керек пе? Бұны кері қайтару мүмкін емес.' },
   btn_back: { ru: '← Назад', kz: '← Артқа' },
@@ -114,7 +114,7 @@ const UI_TEXT = {
   btn_import: { ru: '⬆ Импорт', kz: '⬆ Импорт' },
   confirm_import: { ru: 'Импорт заменит текущий прогресс. Продолжить?', kz: 'Импорт ағымдағы прогресті ауыстырады. Жалғастыру керек пе?' },
   import_ok: { ru: 'Прогресс импортирован!', kz: 'Прогресс импортталды!' },
-  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Oxford 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Oxford 3000 экспорты ма?' }
+  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Sózdik 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Sózdik 3000 экспорты ма?' }
 };
 
 function t(key) {
@@ -293,7 +293,7 @@ function resetProgress() {
 // ===== ЭКСПОРТ / ИМПОРТ ПРОГРЕССА =====
 function exportProgress() {
   const data = {
-    app: 'oxford3000',
+    app: 'sozdik3000',
     version: 2,
     exported: new Date().toISOString(),
     settings: { lang: appLang, sound: soundOn, timer: timerOn, goal: dailyGoal },
@@ -303,7 +303,7 @@ function exportProgress() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'oxford3000-progress-' + todayKey() + '.json';
+  a.download = 'sozdik3000-progress-' + todayKey() + '.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -316,7 +316,8 @@ function importProgress(input) {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if(data.app !== 'oxford3000' || !data.progress) throw new Error('bad format');
+      // 'oxford3000' — старое имя приложения, принимаем для совместимости экспортов
+      if((data.app !== 'sozdik3000' && data.app !== 'oxford3000') || !data.progress) throw new Error('bad format');
       if(!confirm(t('confirm_import'))) return;
       localStorage.setItem('ox_progress', JSON.stringify(data.progress));
       if(Array.isArray(data.history)) localStorage.setItem('ox_history', JSON.stringify(data.history));
