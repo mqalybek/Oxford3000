@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Фон: тёмно-синий скруглённый квадрат -->
+  <!-- Фон: тёмный скруглённый квадрат -->
   <rect width="32" height="32" rx="8" fill="#0F172A"/>
-  <!-- Буква O с градиентом (синий → фиолетовый акцент, стиль Oxford) -->
+  <!-- Буква S с фирменным градиентом (синий → фиолетовый) -->
   <text
     x="16"
     y="23"
@@ -10,8 +10,8 @@
     font-weight="bold"
     text-anchor="middle"
     fill="url(#grad)"
-  >O</text>
-  <!-- Маленькая подчёркивающая линия -->
+  >S</text>
+  <!-- Подчёркивающая линия -->
   <line x1="9" y1="26" x2="23" y2="26" stroke="url(#grad)" stroke-width="2" stroke-linecap="round"/>
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
