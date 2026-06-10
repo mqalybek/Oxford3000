@@ -1,16 +1,21 @@
+// ===== СОСТОЯНИЕ =====
 let appLang = 'kz'; // Default: Kazakh
 let mode = 'flash';
 let activeLevels = new Set(['A1','A2','B1','B2']);
 let activeCats = new Set(['cat_core','cat_people','cat_home','cat_edu','cat_travel','cat_food','cat_health','cat_nature','cat_business','cat_tech','cat_art','cat_sport']);
 let deck = [];
+let reviewDeck = [];      // снапшот колоды повторения: не меняется при удалении слов из repeat
 let idx = 0;
 let flipped = false;
-let known = new Set();
-let repeat = new Set();
+let known = new Set();    // производное от srs: слова с коробкой ≥ 1
+let srs = {};             // интервальное повторение: word → { box: 0..5, due: 'YYYY-MM-DD' }
+let dailyGoal = 20;
 let quizAnswered = false;
 let typeAnswered = false;
-let cardDir = true;
+let cardDir = true;       // направление вопроса (EN→перевод или наоборот), фиксируется на карточку
+let quizState = null;     // { word, opts, timerStarted } — варианты теста, стабильные на карточку
 let soundOn = true;
+let timerOn = true;
 let correctStreak = 0;
 let timerInterval = null;
 let timerSeconds = 10;
@@ -21,7 +26,7 @@ const UI_TEXT = {
   header_progress: { ru: 'Прогресс', kz: 'Прогресс' },
   header_streak: { ru: 'Дней подряд', kz: 'Қатарынан күн' },
   hero_title: { ru: 'Выучи английский<br>раз и навсегда', kz: 'Ағылшын тілін<br>біржолата үйреніңіз' },
-  hero_subtitle: { ru: '3000 самых важных слов Oxford с переводом на русский. Карточки, тесты, ввод — три режима тренировки.', kz: 'Оксфордтың ең маңызды 3000 сөзі. Флеш-карталар, тесттер, жазу — 3 жаттығу режимі.' },
+  hero_subtitle: { ru: '3000 самых важных слов Oxford с переводом на казахский и русский. Карточки, тест, ввод, повторение — четыре режима тренировки.', kz: 'Оксфордтың ең маңызды 3000 сөзі қазақша аудармасымен. Карталар, тест, жазу, қайталау — 4 жаттығу режимі.' },
   btn_start: { ru: 'Начать тренировку →', kz: 'Жаттығуды бастау →' },
   lvl_a1: { ru: 'A1 — Начальный', kz: 'A1 — Бастапқы' },
   lvl_a2: { ru: 'A2 — Элементарный', kz: 'A2 — Қарапайым' },
@@ -54,8 +59,10 @@ const UI_TEXT = {
   btn_graph_hide: { ru: '📊 Скрыть график', kz: '📊 Графикті жасыру' },
   btn_sound_on: { ru: '🔊 Звук: вкл', kz: '🔊 Дыбыс: қосулы' },
   btn_sound_off: { ru: '🔇 Звук: выкл', kz: '🔇 Дыбыс: өшірулі' },
+  btn_timer_on: { ru: '⏱ Таймер: вкл', kz: '⏱ Таймер: қосулы' },
+  btn_timer_off: { ru: '⏱ Таймер: выкл', kz: '⏱ Таймер: өшірулі' },
   btn_reset: { ru: '🗑 Сбросить прогресс', kz: '🗑 Прогресті өшіру' },
-  graph_title: { ru: '📊 График прогресса за 7 дней', kz: '📊 7 күндік прогресс графигі' },
+  graph_title: { ru: '📊 Новые слова за 7 дней', kz: '📊 7 күндегі жаңа сөздер' },
   graph_stat_total: { ru: 'Всего слов', kz: 'Барлық сөздер' },
   graph_stat_known: { ru: 'Изучено', kz: 'Жатталды' },
   graph_stat_left: { ru: 'Осталось', kz: 'Қалды' },
@@ -90,7 +97,7 @@ const UI_TEXT = {
   fb_wrong_post: { ru: '</b>', kz: '</b>' },
   fb_ans_pre: { ru: 'Ответ: <b>', kz: 'Жауап: <b>' },
   fb_ans_post: { ru: '</b>', kz: '</b>' },
-  empty_review: { ru: 'Нет слов для повторения.<br>Отмечай слова кнопкой "Повторить"!', kz: 'Қайталайтын сөздер жоқ.<br>"Қайталау" арқылы сөздерді белгілеңіз!' },
+  empty_review: { ru: 'На сегодня нет слов для повторения. 🎉<br>Учи новые слова или возвращайся завтра!', kz: 'Бүгінге қайталайтын сөздер жоқ. 🎉<br>Жаңа сөздер үйреніңіз немесе ертең келіңіз!' },
   empty_level: { ru: 'Нет слов для выбранных уровней.', kz: 'Таңдалған деңгейлер үшін сөздер жоқ.' },
   res_words_learned: { ru: 'слов изучено!', kz: 'сөз жатталды!' },
   res_repeat: { ru: 'Повторить:', kz: 'Қайталау:' },
@@ -98,7 +105,16 @@ const UI_TEXT = {
   res_passed: { ru: 'Пройдено:', kz: 'Өтілді:' },
   res_cards: { ru: 'карточек', kz: 'карта' },
   btn_restart: { ru: 'Начать заново', kz: 'Қайтадан бастау' },
-  btn_repeat_errs: { ru: 'Повторить ошибки', kz: 'Қателерді қайталау' }
+  btn_repeat_errs: { ru: 'Повторить ошибки', kz: 'Қателерді қайталау' },
+  kbd_hint: { ru: 'Пробел — перевернуть · 1/2 — ответ · ←/→ — навигация', kz: 'Бос орын — аудару · 1/2 — жауап · ←/→ — навигация' },
+  goal_today: { ru: '🎯 Сегодня:', kz: '🎯 Бүгін:' },
+  goal_select_title: { ru: 'Цель на день (слов)', kz: 'Күндік мақсат (сөз)' },
+  goal_reached: { ru: 'Цель дня достигнута! 🎉', kz: 'Күндік мақсат орындалды! 🎉' },
+  btn_export: { ru: '⬇ Экспорт', kz: '⬇ Экспорт' },
+  btn_import: { ru: '⬆ Импорт', kz: '⬆ Импорт' },
+  confirm_import: { ru: 'Импорт заменит текущий прогресс. Продолжить?', kz: 'Импорт ағымдағы прогресті ауыстырады. Жалғастыру керек пе?' },
+  import_ok: { ru: 'Прогресс импортирован!', kz: 'Прогресс импортталды!' },
+  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Oxford 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Oxford 3000 экспорты ма?' }
 };
 
 function t(key) {
@@ -106,65 +122,240 @@ function t(key) {
   return UI_TEXT[key][appLang];
 }
 
+// Экранирование пользовательских/словарных строк перед вставкой в HTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function updateUI() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.innerHTML = t(el.getAttribute('data-i18n'));
   });
+  document.documentElement.lang = appLang === 'kz' ? 'kk' : 'ru';
   document.getElementById('sound-btn').textContent = soundOn ? t('btn_sound_on') : t('btn_sound_off');
+  const timerBtn = document.getElementById('timer-btn');
+  if(timerBtn) timerBtn.textContent = timerOn ? t('btn_timer_on') : t('btn_timer_off');
   const graphBtn = document.getElementById('graph-btn');
   const area = document.getElementById('graph-area');
   if(area && area.style.display !== 'none') graphBtn.textContent = t('btn_graph_hide');
   else graphBtn.textContent = t('btn_graph');
-  
+
   const inp = document.getElementById('type-inp');
   if(inp) inp.placeholder = t('placeholder_type');
+  const goalSel = document.getElementById('goal-select');
+  if(goalSel) goalSel.title = t('goal_select_title');
+  updateGoalUI();
 }
 
+// ===== НАСТРОЙКИ =====
+function saveSettings() {
+  localStorage.setItem('ox_settings', JSON.stringify({ lang: appLang, sound: soundOn, timer: timerOn, goal: dailyGoal }));
+}
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('ox_settings') || '{}');
+    if(s.lang === 'ru' || s.lang === 'kz') appLang = s.lang;
+    if(typeof s.sound === 'boolean') soundOn = s.sound;
+    if(typeof s.timer === 'boolean') timerOn = s.timer;
+    if([10,20,50,100].includes(s.goal)) dailyGoal = s.goal;
+  } catch(e) { /* повреждённые настройки — остаются значения по умолчанию */ }
+  const btnKz = document.getElementById('ls-kz');
+  const btnRu = document.getElementById('ls-ru');
+  if(btnKz) btnKz.classList.toggle('active', appLang === 'kz');
+  if(btnRu) btnRu.classList.toggle('active', appLang === 'ru');
+  const sel = document.getElementById('goal-select');
+  if(sel) sel.value = String(dailyGoal);
+}
 
-// SAVE / LOAD
-function saveProgress() {
-  const today = new Date().toISOString().slice(0,10);
-  let history = JSON.parse(localStorage.getItem('ox_history') || '[]');
-  const todayEntry = history.find(e => e.date === today);
-  if(todayEntry) todayEntry.known = known.size;
-  else history.push({date: today, known: known.size});
-  if(history.length > 30) history = history.slice(-30);
-  localStorage.setItem('ox_progress', JSON.stringify({known:[...known],repeat:[...repeat]}));
+function setDailyGoal(v) {
+  dailyGoal = Number(v);
+  saveSettings();
+  updateGoalUI();
+}
+
+// ===== СОХРАНЕНИЕ / ЗАГРУЗКА ПРОГРЕССА =====
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('ox_history') || '[]'); }
+  catch(e) { return []; }
+}
+
+// Миграция старого формата истории {date, known} → {date, known, learned}
+function migrateHistory(history) {
+  if(!history.length || 'learned' in history[history.length-1]) return history;
+  let prev = 0;
+  return history.map(e => {
+    const learned = 'learned' in e ? e.learned : Math.max(0, (e.known || 0) - prev);
+    prev = e.known || 0;
+    return { date: e.date, known: e.known || 0, learned };
+  });
+}
+
+// Засчитывает новое выученное слово в историю текущего дня
+function bumpLearnedToday() {
+  const today = todayKey();
+  let history = migrateHistory(loadHistory());
+  let entry = history.find(e => e.date === today);
+  if(!entry) { entry = { date: today, known: 0, learned: 0 }; history.push(entry); }
+  entry.learned++;
+  entry.known = known.size;
+  if(history.length > 60) history = history.slice(-60);
   localStorage.setItem('ox_history', JSON.stringify(history));
   updateStreak();
+  updateGoalUI();
+  if(entry.learned === dailyGoal) {
+    launchConfetti();
+    const lbl = document.getElementById('goal-label');
+    if(lbl) { lbl.textContent = t('goal_reached'); setTimeout(updateGoalUI, 2500); }
+  }
+}
+
+function learnedToday() {
+  const entry = migrateHistory(loadHistory()).find(e => e.date === todayKey());
+  return entry ? entry.learned : 0;
+}
+
+function updateGoalUI() {
+  const lbl = document.getElementById('goal-label');
+  const fill = document.getElementById('goal-fill');
+  if(!lbl || !fill) return;
+  const n = learnedToday();
+  lbl.textContent = `${t('goal_today')} ${n} / ${dailyGoal}`;
+  fill.style.width = Math.min(100, Math.round(n / dailyGoal * 100)) + '%';
+  fill.classList.toggle('done', n >= dailyGoal);
+}
+
+// ===== ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ (система Лейтнера) =====
+// Коробка 0 — не знал/новое (повтор сегодня), 1..5 — интервалы в днях до следующего показа
+const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+
+// Правильный ответ: слово поднимается на коробку выше, следующий показ позже
+function srsCorrect(word) {
+  const box = Math.min((srs[word] ? srs[word].box : 0) + 1, 5);
+  srs[word] = { box, due: addDays(todayKey(), SRS_INTERVALS[box]) };
+  known.add(word);
+}
+
+// Ошибка: слово падает в коробку 0 и доступно к повторению сразу
+function srsWrong(word) {
+  srs[word] = { box: 0, due: todayKey() };
+  known.delete(word);
+}
+
+function dueCount() {
+  const today = todayKey();
+  return Object.keys(srs).reduce((n, w) => n + (srs[w].due <= today ? 1 : 0), 0);
+}
+
+function rebuildKnown() {
+  known = new Set(Object.keys(srs).filter(w => srs[w].box >= 1));
+}
+
+function saveProgress() {
+  localStorage.setItem('ox_progress', JSON.stringify({ v: 2, srs }));
 }
 
 function loadProgress() {
-  const raw = localStorage.getItem('ox_progress');
-  if(!raw) return;
-  const data = JSON.parse(raw);
-  known = new Set(data.known || []);
-  repeat = new Set(data.repeat || []);
+  try {
+    const raw = localStorage.getItem('ox_progress');
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.v === 2 && data.srs) {
+      srs = data.srs;
+    } else {
+      // Миграция формата v1 {known, repeat}: выученные — в коробку 3, ошибки — в коробку 0
+      const today = todayKey();
+      (data.known || []).forEach(w => { srs[w] = { box: 3, due: addDays(today, SRS_INTERVALS[3]) }; });
+      (data.repeat || []).forEach(w => { srs[w] = { box: 0, due: today }; });
+    }
+    rebuildKnown();
+  } catch(e) { /* повреждённый прогресс — начинаем с чистого */ }
 }
 
 function resetProgress() {
   if(!confirm(t('confirm_reset'))) return;
   localStorage.removeItem('ox_progress');
   localStorage.removeItem('ox_history');
-  known = new Set(); repeat = new Set(); correctStreak = 0;
-  updateStats(); render();
+  known = new Set(); srs = {}; reviewDeck = []; correctStreak = 0;
+  updateStreak();
+  if(mode === 'review') buildReviewDeck();
+  newCard(0);
+  render();
 }
 
-// STREAK
+// ===== ЭКСПОРТ / ИМПОРТ ПРОГРЕССА =====
+function exportProgress() {
+  const data = {
+    app: 'oxford3000',
+    version: 2,
+    exported: new Date().toISOString(),
+    settings: { lang: appLang, sound: soundOn, timer: timerOn, goal: dailyGoal },
+    progress: { v: 2, srs },
+    history: loadHistory()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'oxford3000-progress-' + todayKey() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importProgress(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(data.app !== 'oxford3000' || !data.progress) throw new Error('bad format');
+      if(!confirm(t('confirm_import'))) return;
+      localStorage.setItem('ox_progress', JSON.stringify(data.progress));
+      if(Array.isArray(data.history)) localStorage.setItem('ox_history', JSON.stringify(data.history));
+      if(data.settings) localStorage.setItem('ox_settings', JSON.stringify(data.settings));
+      srs = {};
+      loadSettings();
+      loadProgress();
+      updateStreak();
+      updateUI();
+      if(mode === 'review') buildReviewDeck();
+      newCard(0);
+      render();
+      alert(t('import_ok'));
+    } catch(e) {
+      alert(t('import_err'));
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ===== СТРИК: дни, когда выучено хотя бы одно новое слово =====
 function updateStreak() {
-  let history = JSON.parse(localStorage.getItem('ox_history') || '[]');
+  const history = migrateHistory(loadHistory());
+  const byDate = new Map(history.map(e => [e.date, e]));
   let streak = 0;
-  let check = new Date();
-  for(let i=0; i<365; i++) {
-    const d = check.toISOString().slice(0,10);
-    if(history.find(e => e.date === d && e.known > 0)) { streak++; check.setDate(check.getDate()-1); }
+  const check = new Date();
+  // Если сегодня ещё не занимался — стрик не сгорает, отсчёт со вчерашнего дня
+  const todayEntry = byDate.get(todayKey());
+  if(!todayEntry || !todayEntry.learned) check.setDate(check.getDate() - 1);
+  for(let i = 0; i < 365; i++) {
+    const e = byDate.get(check.toISOString().slice(0,10));
+    if(e && e.learned > 0) { streak++; check.setDate(check.getDate() - 1); }
     else break;
   }
   const el = document.getElementById('hs-streak');
   if(el) el.textContent = streak + (streak > 0 ? '🔥' : '');
 }
 
-// SOUND
+// ===== ЗВУК =====
 function speak(text) {
   if(!soundOn || !window.speechSynthesis) return;
   const utt = new SpeechSynthesisUtterance(text);
@@ -174,9 +365,16 @@ function speak(text) {
 }
 function toggleSound() {
   soundOn = !soundOn;
+  saveSettings();
   updateUI();
 }
-
+function toggleTimer() {
+  timerOn = !timerOn;
+  saveSettings();
+  updateUI();
+  if(!timerOn) stopTimer();
+  if(mode === 'quiz') render();
+}
 
 function getTrans(w) {
   if (!w) return '';
@@ -184,7 +382,7 @@ function getTrans(w) {
   return w.length > 4 ? w[4] : (w.length > 3 ? w[3] : '');
 }
 
-// TIMER
+// ===== ТАЙМЕР =====
 function startTimer(onTimeout) {
   clearInterval(timerInterval);
   timerSeconds = 10;
@@ -204,7 +402,7 @@ function updateTimerDisplay() {
   d.style.color = color; d.style.borderColor = color;
 }
 
-// CONFETTI
+// ===== КОНФЕТТИ =====
 function launchConfetti() {
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
@@ -230,18 +428,18 @@ function launchConfetti() {
   draw();
 }
 
-
 function setAppLang(l) {
   appLang = l;
   const btnKz = document.getElementById('ls-kz');
   const btnRu = document.getElementById('ls-ru');
   if(btnKz) btnKz.classList.toggle('active', l === 'kz');
   if(btnRu) btnRu.classList.toggle('active', l === 'ru');
+  saveSettings();
   updateUI();
   render();
 }
 
-// GRAPH
+// ===== ГРАФИК =====
 function toggleGraph() {
   const area = document.getElementById('graph-area');
   const btn = document.getElementById('graph-btn');
@@ -251,37 +449,38 @@ function toggleGraph() {
 }
 
 function drawGraph() {
-  const history = JSON.parse(localStorage.getItem('ox_history') || '[]');
+  const history = migrateHistory(loadHistory());
   const canvas = document.getElementById('progress-chart');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
   canvas.width = canvas.parentElement.offsetWidth - 40 || 500; canvas.height = 120;
   const days = [];
+  const locale = appLang === 'kz' ? 'kk' : 'ru';
   for(let i=6; i>=0; i--) {
     const d = new Date(); d.setDate(d.getDate()-i);
     const key = d.toISOString().slice(0,10);
     const entry = history.find(e=>e.date===key);
-    days.push({label:d.toLocaleDateString('ru',{weekday:'short'}), known: entry ? entry.known : 0});
+    days.push({label:d.toLocaleDateString(locale,{weekday:'short'}), learned: entry ? entry.learned : 0});
   }
-  const max = Math.max(...days.map(d=>d.known), 10);
+  const max = Math.max(...days.map(d=>d.learned), 10);
   const W=canvas.width, H=canvas.height, padL=10, padR=10, padT=14, padB=22;
   const gW=W-padL-padR, gH=H-padT-padB, gap=gW/days.length, barW=gap*0.55;
   ctx.clearRect(0,0,W,H);
-  [0.5,1].forEach(t => {
+  [0.5,1].forEach(f => {
     ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
-    const y=padT+gH*(1-t); ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    const y=padT+gH*(1-f); ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
   });
   days.forEach((d,i) => {
     const x = padL + i*gap + gap/2 - barW/2;
-    const barH = d.known > 0 ? Math.max((d.known/max)*gH, 4) : 3;
+    const barH = d.learned > 0 ? Math.max((d.learned/max)*gH, 4) : 3;
     const y = padT + gH - barH;
     const grad = ctx.createLinearGradient(0,y,0,padT+gH);
     grad.addColorStop(0,'#6c63ff'); grad.addColorStop(1,'#a78bfa');
-    ctx.fillStyle = d.known > 0 ? grad : 'rgba(255,255,255,0.08)';
+    ctx.fillStyle = d.learned > 0 ? grad : 'rgba(255,255,255,0.08)';
     ctx.beginPath(); ctx.roundRect(x,y,barW,barH,3); ctx.fill();
     ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.font='10px sans-serif'; ctx.textAlign='center';
     ctx.fillText(d.label, x+barW/2, H-5);
-    if(d.known>0){ ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='bold 10px sans-serif'; ctx.fillText(d.known, x+barW/2, y-3); }
+    if(d.learned>0){ ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='bold 10px sans-serif'; ctx.fillText(d.learned, x+barW/2, y-3); }
   });
   const statsEl = document.getElementById('graph-stats');
   if(statsEl) {
@@ -308,16 +507,41 @@ function getCat(w) {
   return w.length > 5 ? w[5] : 'cat_core';
 }
 
+function inSelection(w) {
+  return activeLevels.has(getBaseLevel(w)) && activeCats.has(getCat(w));
+}
+
+// ===== КОЛОДЫ =====
+function getActiveDeck() {
+  return mode === 'review' ? reviewDeck : deck;
+}
+
+// Колода повторения: слова, чей срок показа наступил (отсортированы по сроку)
+function buildReviewDeck() {
+  const today = todayKey();
+  reviewDeck = WORDS.filter(w => srs[w[0]] && srs[w[0]].due <= today)
+    .sort((a, b) => srs[a[0]].due < srs[b[0]].due ? -1 : 1);
+}
+
+// Сбрасывает состояние текущей карточки (направление, ответы, варианты теста)
+function newCard(newIdx) {
+  if(typeof newIdx === 'number') idx = newIdx;
+  flipped = false; quizAnswered = false; typeAnswered = false;
+  cardDir = Math.random() < 0.5;
+  quizState = null;
+  stopTimer();
+}
+
 function buildDeck() {
-  deck = WORDS.filter(w => activeLevels.has(getBaseLevel(w)) && activeCats.has(getCat(w)));
-  idx = 0; flipped = false; quizAnswered = false; typeAnswered = false;
-  updateStats();
+  deck = WORDS.filter(inSelection);
+  newCard(0);
   render();
 }
 
 function shuffleDeck() {
-  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
-  idx=0; flipped=false; quizAnswered=false; typeAnswered=false;
+  const d = getActiveDeck();
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  newCard(0);
   render();
 }
 
@@ -342,49 +566,64 @@ function toggleCat(c) {
 }
 
 function setMode(m) {
-  mode=m; idx=0; flipped=false; quizAnswered=false; typeAnswered=false;
-  ['flash','quiz','type','review'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('active', t===m);
+  mode = m;
+  if(m === 'review') buildReviewDeck();
+  newCard(0);
+  ['flash','quiz','type','review'].forEach(x => {
+    const tab = document.getElementById('tab-'+x);
+    tab.classList.toggle('active', x===m);
+    tab.setAttribute('aria-selected', x===m ? 'true' : 'false');
   });
   render();
 }
 
 function updateStats() {
-  const total = WORDS.filter(w=>activeLevels.has(getBaseLevel(w)) && activeCats.has(getCat(w))).length;
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
-  const pct = total>0 ? Math.round(known.size/total*100) : 0;
+  const selection = WORDS.filter(inSelection);
+  const total = selection.length;
+  const knownSel = selection.reduce((n,w) => n + (known.has(w[0]) ? 1 : 0), 0);
+  const pct = total > 0 ? Math.round(knownSel/total*100) : 0;
   document.getElementById('s-total').textContent = total;
-  document.getElementById('s-known').textContent = known.size;
-  document.getElementById('s-repeat').textContent = repeat.size;
+  document.getElementById('s-known').textContent = knownSel;
+  document.getElementById('s-repeat').textContent = dueCount();
   document.getElementById('s-pct').textContent = pct+'%';
-  document.getElementById('hs-total').textContent = total;
+  document.getElementById('hs-total').textContent = WORDS.length;
   document.getElementById('hs-known').textContent = known.size;
-  document.getElementById('hs-pct').textContent = pct+'%';
-  const cur = d.length;
+  document.getElementById('hs-pct').textContent = (WORDS.length ? Math.round(known.size/WORDS.length*100) : 0)+'%';
+  const cur = getActiveDeck().length;
   const fill = cur>0 ? Math.round(idx/cur*100) : 0;
   document.getElementById('prog').style.width = fill+'%';
-  document.getElementById('counter').textContent = cur>0 ? (idx+1)+' / '+cur : '';
+  document.getElementById('counter').textContent = cur>0 && idx<cur ? (idx+1)+' / '+cur : '';
   document.getElementById('pct-txt').textContent = cur>0 ? fill+'%' : '';
   saveProgress();
 }
 
 function getCard() {
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
-  return d[idx] || null;
+  return getActiveDeck()[idx] || null;
+}
+
+// Засчитать слово как выученное (общая точка для всех режимов)
+function learnWord(w) {
+  const isNew = !known.has(w[0]);
+  srsCorrect(w[0]);
+  if(isNew) bumpLearnedToday();
+}
+
+// Отметить ошибку (общая точка для всех режимов)
+function missWord(w) {
+  srsWrong(w[0]);
+  correctStreak = 0;
 }
 
 function makeLevelPill(w) {
-  return `<span class="level-pill lp-${getBaseLevel(w)}">${w[2]}</span>`;
+  return `<span class="level-pill lp-${getBaseLevel(w)}">${esc(w[2])}</span>`;
 }
 
 function renderFlash() {
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
-  const w = d[idx];
-  const dir = Math.random()<0.5;
-  const front = dir ? w[0] : getTrans(w);
-  const back = dir ? getTrans(w) : w[0];
-  const frontLabel = dir ? t('lbl_eng_word') : (appLang==='kz'?t('lbl_kz_trans_lbl'):t('lbl_ru_trans_lbl'));
-  const backLabel = dir ? (appLang==='kz'?t('lbl_kz_trans'):t('lbl_ru_trans')) : t('lbl_eng_word');
+  const w = getCard();
+  const front = cardDir ? w[0] : getTrans(w);
+  const back = cardDir ? getTrans(w) : w[0];
+  const frontLabel = cardDir ? t('lbl_eng_word') : (appLang==='kz'?t('lbl_kz_trans_lbl'):t('lbl_ru_trans_lbl'));
+  const backLabel = cardDir ? (appLang==='kz'?t('lbl_kz_trans'):t('lbl_ru_trans')) : t('lbl_eng_word');
   return `
   <div class="card-actions" style="justify-content:flex-start;margin-bottom:12px">
     <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">${t('btn_back')}</button>
@@ -393,15 +632,15 @@ function renderFlash() {
     <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
       <div class="card-face card-front-face">
         <div class="card-eyebrow">${frontLabel}</div>
-        <div class="card-word-main">${front}</div>
-        <div class="card-pos-tag">${w[1]}</div>
+        <div class="card-word-main">${esc(front)}</div>
+        <div class="card-pos-tag">${esc(w[1])}</div>
         ${makeLevelPill(w)}
         <div class="card-hint">${t('card_hint')}</div>
       </div>
       <div class="card-face card-back-face">
         <div class="card-eyebrow">${backLabel}</div>
-        <div class="card-translation">${back}</div>
-        <div class="card-pos-tag">${w[1]}</div>
+        <div class="card-translation">${esc(back)}</div>
+        <div class="card-pos-tag">${esc(w[1])}</div>
         ${makeLevelPill(w)}
         <div class="card-hint" style="margin-top:12px">${t('card_hint_knew')}</div>
       </div>
@@ -415,48 +654,48 @@ function renderFlash() {
     <div class="card-actions">
       <button class="act-btn" onclick="skip()">${t('btn_skip')}</button>
     </div>
-  </div>`;
+  </div>
+  <div class="kbd-hint">${t('kbd_hint')}</div>`;
 }
 
 function getRandomOpts(w, count) {
-  const others = WORDS.filter(x=>x[0]!==w[0] && activeLevels.has(getBaseLevel(x)) && activeCats.has(getCat(x)));
+  const others = WORDS.filter(x=>x[0]!==w[0] && inSelection(x));
   return [...others.sort(()=>Math.random()-.5).slice(0,count-1), w].sort(()=>Math.random()-.5);
 }
 
+// Тест не пройден (таймаут): подсветить правильный ответ, слово — на повторение
+function failQuiz() {
+  if(quizAnswered) return;
+  quizAnswered = true;
+  const w = quizState.word;
+  missWord(w);
+  document.querySelectorAll('.opt-btn').forEach((o, i) => {
+    o.disabled = true;
+    if(quizState.opts[i] && quizState.opts[i][0] === w[0]) o.classList.add('correct');
+  });
+  const nb = document.getElementById('next-btn'); if(nb) nb.style.display='';
+  updateStats();
+}
+
 function renderQuiz() {
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
-  const w = d[idx];
-  const dir = Math.random()<0.5;
-  const question = dir ? w[0] : getTrans(w);
-  const qLabel = dir ? (appLang==='kz'?t('q_translate_kz'):t('q_translate_ru')) : (appLang==='kz'?t('q_guess_en_kz'):t('q_guess_en_ru'));
-  const opts = getRandomOpts(w,4);
-  if(!quizAnswered) setTimeout(() => {
-    if(dir) speak(w[0]);
-    startTimer(() => {
-      if(!quizAnswered) {
-        quizAnswered=true; correctStreak=0; repeat.add(w[0]);
-        document.querySelectorAll('.opt-btn').forEach(o => {
-          o.disabled=true;
-          if(o.textContent===(dir?getTrans(w):w[0])) o.classList.add('correct');
-        });
-        const nb=document.getElementById('next-btn'); if(nb) nb.style.display='';
-        updateStats();
-      }
-    });
-  }, 50);
+  const w = getCard();
+  if(!quizState || quizState.word !== w) {
+    quizState = { word: w, opts: getRandomOpts(w, 4), timerStarted: false };
+  }
+  const question = cardDir ? w[0] : getTrans(w);
+  const qLabel = cardDir ? (appLang==='kz'?t('q_translate_kz'):t('q_translate_ru')) : (appLang==='kz'?t('q_guess_en_kz'):t('q_guess_en_ru'));
   return `
   <div class="quiz-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="quiz-eyebrow" style="margin-bottom:0">${qLabel}</div>
-      <div id="timer-display" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;min-width:40px;text-align:center;border:2px solid var(--green);border-radius:8px;padding:2px 8px;color:var(--green);transition:color .3s,border-color .3s">10s</div>
+      ${timerOn ? `<div id="timer-display" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;min-width:40px;text-align:center;border:2px solid var(--green);border-radius:8px;padding:2px 8px;color:var(--green);transition:color .3s,border-color .3s">${timerSeconds}s</div>` : ''}
     </div>
-    <div class="quiz-q">${question}</div>
-    <div class="quiz-meta">${w[1]} · ${w[2]}</div>
+    <div class="quiz-q">${esc(question)}</div>
+    <div class="quiz-meta">${esc(w[1])} · ${esc(w[2])}</div>
     <div class="quiz-opts">
-      ${opts.map(o=>{
-        const ans = dir ? getTrans(o) : o[0];
-        const isCorrect = o[0]===w[0];
-        return `<button class="opt-btn" onclick="answerQuiz(this,${isCorrect},${dir},'${w[0].replace(/'/g,"\\'")}')">${ans}</button>`;
+      ${quizState.opts.map((o,i)=>{
+        const ans = cardDir ? getTrans(o) : o[0];
+        return `<button class="opt-btn" onclick="answerQuiz(${i})">${esc(ans)}</button>`;
       }).join('')}
     </div>
   </div>
@@ -465,19 +704,22 @@ function renderQuiz() {
   </div>`;
 }
 
+// Текущий правильный ответ режима «Введи перевод» (не кладём в DOM, чтобы не подсматривали)
+function typeAnswer() {
+  const w = getCard();
+  return cardDir ? getTrans(w) : w[0];
+}
+
 function renderType() {
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
-  const w = d[idx];
-  const dir = Math.random()<0.5;
-  const question = dir ? w[0] : getTrans(w);
-  const answer = dir ? getTrans(w) : w[0];
-  const qLabel = dir ? (appLang==='kz'?t('t_translate_kz'):t('t_translate_ru')) : (appLang==='kz'?t('t_guess_en_kz'):t('t_guess_en_ru'));
+  const w = getCard();
+  const question = cardDir ? w[0] : getTrans(w);
+  const qLabel = cardDir ? (appLang==='kz'?t('t_translate_kz'):t('t_translate_ru')) : (appLang==='kz'?t('t_guess_en_kz'):t('t_guess_en_ru'));
   return `
   <div class="type-panel">
     <div class="quiz-eyebrow">${qLabel}</div>
-    <div class="quiz-q">${question}</div>
-    <div class="quiz-meta">${w[1]} · ${w[2]}</div>
-    <input class="type-input" id="type-inp" placeholder="${t('placeholder_type')}" data-answer="${answer.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autofocus>
+    <div class="quiz-q">${esc(question)}</div>
+    <div class="quiz-meta">${esc(w[1])} · ${esc(w[2])}</div>
+    <input class="type-input" id="type-inp" placeholder="${t('placeholder_type')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="type-feedback" id="type-fb"></div>
     <div class="card-actions" style="margin-top:14px">
       ${!typeAnswered
@@ -489,7 +731,7 @@ function renderType() {
 }
 
 function render() {
-  const d = mode==='review' ? [...repeat].map(r => WORDS.find(w => w[0] === r) || [r, '', '', '']) : deck;
+  const d = getActiveDeck();
   updateStats();
   const area = document.getElementById('main-area');
   area.className = 'fade-up';
@@ -505,17 +747,29 @@ function render() {
     <div class="result-panel">
       <div class="result-score">${known.size}</div>
       <div class="result-title">${t('res_words_learned')}</div>
-      <div class="result-sub">${t('res_repeat')} ${repeat.size} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
+      <div class="result-sub">${t('res_repeat')} ${dueCount()} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
       <div class="card-actions" style="justify-content:center">
         <button class="act-btn btn-know" onclick="restart()">${t('btn_restart')}</button>
-        ${repeat.size>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
+        ${dueCount()>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
       </div>
     </div>`;
     return;
   }
   if(mode==='flash' || mode==='review') area.innerHTML = renderFlash();
-  else if(mode==='quiz') area.innerHTML = renderQuiz();
-  else area.innerHTML = renderType();
+  else if(mode==='quiz') {
+    area.innerHTML = renderQuiz();
+    // Озвучка и таймер — один раз на карточку, а не при каждой перерисовке
+    if(!quizAnswered && !quizState.timerStarted) {
+      quizState.timerStarted = true;
+      if(cardDir) speak(quizState.word[0]);
+      if(timerOn) startTimer(failQuiz);
+    }
+  }
+  else {
+    area.innerHTML = renderType();
+    const inp = document.getElementById('type-inp');
+    if(inp && !typeAnswered) inp.focus();
+  }
 }
 
 function flipCard() {
@@ -533,86 +787,146 @@ function flipCard() {
 function markKnown() {
   const w = getCard();
   if(w) {
-    known.add(w[0]); repeat.delete(w[0]);
+    learnWord(w);
     correctStreak++;
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
   }
   nextCard();
 }
-function markRepeat() { if(getCard()) repeat.add(getCard()[0]); correctStreak=0; nextCard(); }
+function markRepeat() { const w = getCard(); if(w) missWord(w); nextCard(); }
 function skip() { nextCard(); }
 
 function nextCard() {
-  stopTimer();
-  idx++; flipped=false; quizAnswered=false; typeAnswered=false;
+  newCard(idx + 1);
   render();
 }
 
-function answerQuiz(btn, isCorrect, dir, word) {
-  if(quizAnswered) return;
+function answerQuiz(optIdx) {
+  if(quizAnswered || !quizState) return;
   quizAnswered=true;
   stopTimer();
-  const w = getCard();
-  document.querySelectorAll('.opt-btn').forEach(o => {
+  const w = quizState.word;
+  const isCorrect = quizState.opts[optIdx] && quizState.opts[optIdx][0] === w[0];
+  document.querySelectorAll('.opt-btn').forEach((o, i) => {
     o.disabled=true;
-    const correctText = dir ? getTrans(w) : w[0];
-    if(o.textContent===correctText) o.classList.add('correct');
-    else if(o===btn && !isCorrect) o.classList.add('wrong');
+    if(quizState.opts[i] && quizState.opts[i][0] === w[0]) o.classList.add('correct');
+    else if(i === optIdx && !isCorrect) o.classList.add('wrong');
   });
   if(isCorrect) {
-    known.add(w[0]); repeat.delete(w[0]); correctStreak++;
+    learnWord(w); correctStreak++;
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
     speak(w[0]);
   } else {
-    repeat.add(w[0]); correctStreak=0;
+    missWord(w);
   }
   document.getElementById('next-btn').style.display='';
   updateStats();
 }
 
+// Нормализация ответа: регистр, ё→е, скобки, лишние пробелы
+function normalizeAnswer(s) {
+  return s.toLowerCase()
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/ё/g, 'е')
+    .replace(/[!?.]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Расстояние Левенштейна — допускаем одну опечатку в длинных словах
+function levenshtein(a, b) {
+  if(Math.abs(a.length - b.length) > 1) return 99;
+  const m = a.length, n = b.length;
+  let prev = Array.from({length: n+1}, (_, j) => j);
+  for(let i = 1; i <= m; i++) {
+    const cur = [i];
+    for(let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+// Принимаем любой из вариантов перевода (разделители «,» и «;»), с одной опечаткой для слов от 5 букв
+function isAnswerCorrect(input, answer) {
+  const val = normalizeAnswer(input);
+  if(!val) return false;
+  const variants = answer.split(/[;,]/).map(normalizeAnswer).filter(Boolean);
+  return variants.some(v => v === val || (v.length >= 5 && levenshtein(v, val) <= 1));
+}
+
 function checkType() {
   if(typeAnswered) return;
   const inp = document.getElementById('type-inp');
-  const answer = inp.getAttribute('data-answer');
-  const val = inp.value.trim().toLowerCase();
-  const correct = answer.toLowerCase();
-  const isCorrect = correct.split(',').some(a=>val===a.trim()) || val===correct || correct.includes(val) && val.length>3;
+  const answer = typeAnswer();
+  const isCorrect = isAnswerCorrect(inp.value, answer);
   typeAnswered=true;
   const w = getCard();
   const fb = document.getElementById('type-fb');
   if(isCorrect) {
     fb.innerHTML=`<span style="color:var(--green)">${t('fb_correct')}</span>`;
-    known.add(w[0]);
+    learnWord(w);
+    correctStreak++;
+    if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
   } else {
-    fb.innerHTML=`<span style="color:var(--red)">${t('fb_wrong_pre')}${answer}${t('fb_wrong_post')}</span>`;
-    repeat.add(w[0]);
+    fb.innerHTML=`<span style="color:var(--red)">${t('fb_wrong_pre')}${esc(answer)}${t('fb_wrong_post')}</span>`;
+    missWord(w);
   }
   inp.disabled=true;
-  setTimeout(render, 1200);
+  setTimeout(() => { if(typeAnswered) nextCard(); }, 1400);
   updateStats();
 }
 
 function skipType() {
   if(typeAnswered) return;
   typeAnswered=true;
-  const inp = document.getElementById('type-inp');
-  const answer = inp.getAttribute('data-answer');
+  const answer = typeAnswer();
   const w = getCard();
-  repeat.add(w[0]);
-  document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">${t('fb_ans_pre')}${answer}${t('fb_ans_post')}</span>`;
-  inp.disabled=true;
+  missWord(w);
+  document.getElementById('type-fb').innerHTML=`<span style="color:var(--muted)">${t('fb_ans_pre')}${esc(answer)}${t('fb_ans_post')}</span>`;
+  const inp = document.getElementById('type-inp');
+  if(inp) inp.disabled=true;
   render();
   updateStats();
 }
 
 function goBack() {
-  if(idx > 0) { idx--; flipped=false; render(); }
+  if(idx > 0) { newCard(idx - 1); render(); }
 }
-function restart() { idx=0; flipped=false; quizAnswered=false; typeAnswered=false; render(); }
+function restart() { newCard(0); render(); }
 function scrollToApp() { document.getElementById('app').scrollIntoView({behavior:'smooth'}); return false; }
 
+// ===== КЛАВИАТУРА =====
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement && document.activeElement.tagName;
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.ctrlKey || e.metaKey || e.altKey) return;
+  // На сфокусированной кнопке Space/Enter обрабатывает сама кнопка
+  if(tag === 'BUTTON' && (e.code === 'Space' || e.key === 'Enter')) return;
+  const d = getActiveDeck();
+  if(!d.length) return;
+  if(idx >= d.length) {
+    if(e.key === 'Enter') { e.preventDefault(); restart(); }
+    return;
+  }
+  if(mode === 'flash' || mode === 'review') {
+    if(e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+    else if(flipped && e.key === '1') markRepeat();
+    else if(flipped && e.key === '2') markKnown();
+    else if(e.key === 'ArrowRight') skip();
+    else if(e.key === 'ArrowLeft') goBack();
+  } else if(mode === 'quiz') {
+    if(!quizAnswered && ['1','2','3','4'].includes(e.key)) answerQuiz(Number(e.key) - 1);
+    else if(quizAnswered && (e.key === 'Enter' || e.key === 'ArrowRight')) nextCard();
+  } else if(mode === 'type') {
+    if(typeAnswered && (e.key === 'Enter' || e.key === 'ArrowRight')) nextCard();
+  }
+});
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+loadSettings();
 loadProgress();
 updateStreak();
-updateUI(); // Initial localization render
+updateUI();
 buildDeck();
 shuffleDeck();
