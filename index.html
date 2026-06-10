@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="kk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oxford 3000 — Тренажёр английских слов</title>
+<title>Oxford 3000 — Тренажёр английских слов с переводом на казахский и русский</title>
+<meta name="description" content="3000 самых важных английских слов Oxford с переводом на казахский и русский языки. Бесплатный тренажёр: карточки, тесты, ввод перевода, повторение. Ағылшын тілін тегін үйреніңіз.">
+<meta name="theme-color" content="#0d0f14">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Oxford 3000 — тренажёр английских слов">
+<meta property="og:description" content="3000 самых важных английских слов с переводом на казахский и русский. Карточки, тесты, ввод, повторение — бесплатно и в любом браузере.">
+<meta property="og:image" content="icons/icon-512.png">
+<meta name="twitter:card" content="summary">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -151,5 +161,11 @@
 
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+// Офлайн-режим (PWA): работает только по https/localhost
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
 </body>
 </html>
