@@ -128,8 +128,21 @@ const UI_TEXT = {
   srs_due_7d:    { ru: '7 дней', kz: '7 күн' },
   srs_due_later: { ru: '14+ дней', kz: '14+ күн' },
   srs_velocity:  { ru: 'Темп (7 дн.)', kz: 'Қарқын (7 күн)' },
-  srs_wd_day:    { ru: 'сл/день', kz: 'сөз/күн' }
+  srs_wd_day:    { ru: 'сл/день', kz: 'сөз/күн' },
+  hero_eyebrow:  { ru: 'тренажёр · 3000 слов', kz: 'жаттықтырғыш · 3000 сөз' }
 };
+
+// Витрина hero: проверенная вручную IPA-транскрипция для «живой статьи»
+const SHOWCASE = [
+  { w: 'language',  ipa: '/ˈlæŋɡwɪdʒ/', pos: 'noun',  lvl: 'A1', kz: 'тіл',      ru: 'язык' },
+  { w: 'beautiful', ipa: '/ˈbjuːtɪfl/',  pos: 'adj.',  lvl: 'A1', kz: 'әдемі',    ru: 'красивый' },
+  { w: 'remember',  ipa: '/rɪˈmembə/',   pos: 'verb',  lvl: 'A2', kz: 'есте сақтау', ru: 'помнить' },
+  { w: 'knowledge', ipa: '/ˈnɒlɪdʒ/',    pos: 'noun',  lvl: 'B1', kz: 'білім',    ru: 'знание' },
+  { w: 'achieve',   ipa: '/əˈtʃiːv/',     pos: 'verb',  lvl: 'B1', kz: 'қол жеткізу', ru: 'достигать' },
+  { w: 'curious',   ipa: '/ˈkjʊəriəs/',  pos: 'adj.',  lvl: 'B2', kz: 'қызық',    ru: 'любопытный' }
+];
+let heroIdx = 0;
+let heroTimer = null;
 
 function t(key) {
   if(!UI_TEXT[key]) return key;
@@ -432,7 +445,7 @@ function launchConfetti() {
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
   const pieces = Array.from({length:120}, () => ({
     x:Math.random()*canvas.width, y:Math.random()*canvas.height - canvas.height,
-    r:Math.random()*6+4, c:['#6c63ff','#34d399','#fbbf24','#f87171','#a78bfa','#60a5fa'][Math.floor(Math.random()*6)],
+    r:Math.random()*6+4, c:['#C8841E','#2E4F6B','#3E6B53','#B04A39','#E0A458','#5C7C99'][Math.floor(Math.random()*6)],
     vx:(Math.random()-0.5)*4, vy:Math.random()*4+2, angle:Math.random()*360, va:(Math.random()-0.5)*8
   }));
   let frame = 0;
@@ -750,17 +763,23 @@ function renderFlash() {
     <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
       <div class="card-face card-front-face">
         <div class="card-eyebrow">${frontLabel}</div>
-        <div class="card-word-main">${esc(front)}</div>
+        <div class="card-row">
+          <div class="card-word-main">${esc(front)}</div>
+          ${makeLevelPill(w)}
+        </div>
         <div class="card-pos-tag">${esc(w[1])}</div>
-        ${makeLevelPill(w)}
+        <div class="card-rule"></div>
         <div class="card-hint">${t('card_hint')}</div>
       </div>
       <div class="card-face card-back-face">
         <div class="card-eyebrow">${backLabel}</div>
-        <div class="card-translation">${esc(back)}</div>
+        <div class="card-row">
+          <div class="card-translation">${esc(back)}</div>
+          ${makeLevelPill(w)}
+        </div>
         <div class="card-pos-tag">${esc(w[1])}</div>
-        ${makeLevelPill(w)}
-        <div class="card-hint" style="margin-top:12px">${t('card_hint_knew')}</div>
+        <div class="card-rule"></div>
+        <div class="card-hint">${t('card_hint_knew')}</div>
       </div>
     </div>
   </div>
@@ -932,6 +951,7 @@ function answerQuiz(optIdx) {
   });
   if(isCorrect) {
     learnWord(w); correctStreak++;
+    flashAcute(document.querySelector('.quiz-panel'));
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
     speak(w[0]);
   } else {
@@ -986,6 +1006,7 @@ function checkType() {
     fb.innerHTML=`<span style="color:var(--green)">${t('fb_correct')}</span>`;
     learnWord(w);
     correctStreak++;
+    flashAcute(document.querySelector('.type-panel'));
     if(correctStreak > 0 && correctStreak % 10 === 0) launchConfetti();
   } else {
     fb.innerHTML=`<span style="color:var(--red)">${t('fb_wrong_pre')}${esc(answer)}${t('fb_wrong_post')}</span>`;
@@ -1014,6 +1035,54 @@ function goBack() {
 }
 function restart() { newCard(0); render(); }
 function scrollToApp() { document.getElementById('app').scrollIntoView({behavior:'smooth'}); return false; }
+
+// ===== HERO: живая словарная статья =====
+function renderHero(animate) {
+  const s = SHOWCASE[heroIdx % SHOWCASE.length];
+  const entry = document.getElementById('hero-entry');
+  if(!entry) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('he-word', s.w);
+  set('he-level', s.lvl);
+  set('he-ipa', s.ipa);
+  set('he-pos', s.pos);
+  const senses = document.getElementById('he-senses');
+  if(senses) senses.innerHTML =
+    `<li><span class="sense-lang">қаз</span> ${esc(s.kz)}</li>` +
+    `<li><span class="sense-lang">рус</span> ${esc(s.ru)}</li>`;
+  if(animate) {
+    entry.classList.remove('assemble');
+    void entry.offsetWidth; // перезапуск анимации
+    entry.classList.add('assemble');
+  }
+}
+
+function startHeroRotation() {
+  renderHero(true);
+  clearInterval(heroTimer);
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return; // не крутим карусель при reduced-motion
+  heroTimer = setInterval(() => {
+    // Крутим, только пока hero на экране
+    if(window.scrollY < window.innerHeight) { heroIdx++; renderHero(true); }
+  }, 4200);
+}
+
+// Янтарный знак-акут «правильно» — фирменный росчерк вместо галочки
+function flashAcute(container) {
+  if(!container) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'acute-mark');
+  svg.setAttribute('viewBox', '0 0 26 26');
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('d', 'M6 20 L20 6');
+  svg.appendChild(path);
+  if(getComputedStyle(container).position === 'static') container.style.position = 'relative';
+  container.appendChild(svg);
+  setTimeout(() => svg.remove(), 800);
+}
 
 // ===== КЛАВИАТУРА =====
 document.addEventListener('keydown', e => {
@@ -1048,3 +1117,4 @@ updateStreak();
 updateUI();
 buildDeck();
 shuffleDeck();
+startHeroRotation();
