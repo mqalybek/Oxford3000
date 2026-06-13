@@ -152,11 +152,14 @@
     <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
     <button class="shuffle-btn" onclick="toggleTimer()" id="timer-btn">⏱ Таймер: вкл</button>
     <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn" data-i18n="btn_graph">📊 График прогресса</button>
+    <button class="shuffle-btn" onclick="toggleSrsStats()" id="srs-stats-btn" data-i18n="btn_srs_stats">📦 SRS статистика</button>
     <button class="shuffle-btn" onclick="exportProgress()" data-i18n="btn_export">⬇ Экспорт</button>
     <button class="shuffle-btn" onclick="document.getElementById('import-file').click()" data-i18n="btn_import">⬆ Импорт</button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importProgress(this)">
     <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)" data-i18n="btn_reset">🗑 Сбросить прогресс</button>
   </div>
+
+  <div id="srs-stats-area" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--card-radius);padding:20px;margin-bottom:16px"></div>
 
   <div id="graph-area" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--card-radius);padding:20px;margin-bottom:16px">
     <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)" data-i18n="graph_title">📊 График прогресса за 7 дней</div>

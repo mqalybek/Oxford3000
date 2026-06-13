@@ -114,7 +114,21 @@ const UI_TEXT = {
   btn_import: { ru: '⬆ Импорт', kz: '⬆ Импорт' },
   confirm_import: { ru: 'Импорт заменит текущий прогресс. Продолжить?', kz: 'Импорт ағымдағы прогресті ауыстырады. Жалғастыру керек пе?' },
   import_ok: { ru: 'Прогресс импортирован!', kz: 'Прогресс импортталды!' },
-  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Sózdik 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Sózdik 3000 экспорты ма?' }
+  import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Sózdik 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Sózdik 3000 экспорты ма?' },
+  btn_srs_stats: { ru: '📦 SRS статистика', kz: '📦 SRS статистикасы' },
+  btn_srs_hide:  { ru: '📦 Скрыть SRS', kz: '📦 SRS жасыру' },
+  srs_title:     { ru: 'Распределение по коробкам (система Лейтнера)', kz: 'Коробкалар бойынша бөлу (Лейтнер жүйесі)' },
+  srs_box0:      { ru: 'Коробка 0 — новые / ошибки', kz: 'Коробка 0 — жаңа / қате' },
+  srs_box_n:     { ru: 'Коробка', kz: 'Коробка' },
+  srs_interval:  { ru: 'дн.', kz: 'күн' },
+  srs_notstarted:{ ru: 'Не начато', kz: 'Басталмаған' },
+  srs_due_title: { ru: 'К повторению', kz: 'Қайталауға' },
+  srs_due_today: { ru: 'Сегодня', kz: 'Бүгін' },
+  srs_due_3d:    { ru: '3 дня', kz: '3 күн' },
+  srs_due_7d:    { ru: '7 дней', kz: '7 күн' },
+  srs_due_later: { ru: '14+ дней', kz: '14+ күн' },
+  srs_velocity:  { ru: 'Темп (7 дн.)', kz: 'Қарқын (7 күн)' },
+  srs_wd_day:    { ru: 'сл/день', kz: 'сөз/күн' }
 };
 
 function t(key) {
@@ -139,6 +153,12 @@ function updateUI() {
   const area = document.getElementById('graph-area');
   if(area && area.style.display !== 'none') graphBtn.textContent = t('btn_graph_hide');
   else graphBtn.textContent = t('btn_graph');
+  const srsBtn = document.getElementById('srs-stats-btn');
+  const srsArea = document.getElementById('srs-stats-area');
+  if(srsBtn) {
+    srsBtn.textContent = (srsArea && srsArea.style.display !== 'none') ? t('btn_srs_hide') : t('btn_srs_stats');
+  }
+  if(srsArea && srsArea.style.display !== 'none') drawSrsStats();
 
   const inp = document.getElementById('type-inp');
   if(inp) inp.placeholder = t('placeholder_type');
@@ -494,6 +514,103 @@ function drawGraph() {
       <div style="font-size:20px;font-weight:700;color:${s.color};font-family:Syne,sans-serif">${s.val}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.label}</div></div>`).join('');
   }
+}
+
+// ===== SRS СТАТИСТИКА =====
+function toggleSrsStats() {
+  const area = document.getElementById('srs-stats-area');
+  const btn = document.getElementById('srs-stats-btn');
+  if(area.style.display === 'none') {
+    area.style.display = '';
+    btn.textContent = t('btn_srs_hide');
+    drawSrsStats();
+  } else {
+    area.style.display = 'none';
+    btn.textContent = t('btn_srs_stats');
+  }
+}
+
+function drawSrsStats() {
+  const area = document.getElementById('srs-stats-area');
+  if(!area || area.style.display === 'none') return;
+
+  const today = todayKey();
+  const intervals = SRS_INTERVALS; // [0,1,3,7,14,30]
+  const boxLabels = ['0', '1 (+1 '+t('srs_interval')+')', '2 (+3 '+t('srs_interval')+')',
+                     '3 (+7 '+t('srs_interval')+')', '4 (+14 '+t('srs_interval')+')', '5 (+30 '+t('srs_interval')+')'];
+  const boxColors = ['var(--red)','#f97316','var(--amber)','var(--blue)','var(--green)','#a78bfa'];
+
+  // Count words per box (only words that have been touched)
+  const boxCounts = [0,0,0,0,0,0];
+  Object.values(srs).forEach(s => { if(s.box >= 0 && s.box <= 5) boxCounts[s.box]++; });
+  const notStarted = WORDS.length - Object.keys(srs).length;
+  const maxBox = Math.max(...boxCounts, 1);
+
+  // Due schedule
+  const d1 = addDays(today, 1), d3 = addDays(today, 3), d7 = addDays(today, 7);
+  let dueToday = 0, due3d = 0, due7d = 0, dueLater = 0;
+  Object.values(srs).forEach(s => {
+    if(s.due <= today) dueToday++;
+    else if(s.due <= d1) due3d++;
+    else if(s.due <= d3) due3d++;
+    else if(s.due <= d7) due7d++;
+    else dueLater++;
+  });
+
+  // Learning velocity (avg per day over last 7 days)
+  const history = migrateHistory(loadHistory());
+  const last7 = [];
+  for(let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    const entry = history.find(e => e.date === key);
+    last7.push(entry ? entry.learned : 0);
+  }
+  const activeDays = last7.filter(n => n > 0).length;
+  const totalLearned7 = last7.reduce((a,b) => a+b, 0);
+  const velocity = activeDays > 0 ? Math.round(totalLearned7 / 7 * 10) / 10 : 0;
+
+  // Box distribution bars
+  const boxRows = boxCounts.map((count, i) => {
+    const pct = Math.round(count / maxBox * 100);
+    const label = i === 0 ? t('srs_box0') : `${t('srs_box_n')} ${i} (+${intervals[i]} ${t('srs_interval')})`;
+    return `<div class="srs-box-row">
+      <div class="srs-box-label">${label}</div>
+      <div class="srs-box-bar-wrap">
+        <div class="srs-box-bar" style="width:${Math.max(pct,count>0?2:0)}%;background:${boxColors[i]}"></div>
+      </div>
+      <div class="srs-box-count" style="color:${boxColors[i]}">${count}</div>
+    </div>`;
+  }).join('');
+
+  // Not-started row
+  const notStartedPct = Math.round(notStarted / Math.max(notStarted, maxBox) * 100);
+  const notStartedRow = `<div class="srs-box-row">
+    <div class="srs-box-label" style="color:var(--muted)">${t('srs_notstarted')}</div>
+    <div class="srs-box-bar-wrap">
+      <div class="srs-box-bar" style="width:${Math.min(notStartedPct,100)}%;background:rgba(255,255,255,0.1)"></div>
+    </div>
+    <div class="srs-box-count" style="color:var(--muted)">${notStarted}</div>
+  </div>`;
+
+  area.innerHTML = `
+  <div class="srs-title">${t('srs_title')}</div>
+  <div class="srs-boxes">${boxRows}${notStartedRow}</div>
+  <div class="srs-grid">
+    <div class="srs-section">
+      <div class="srs-section-title">${t('srs_due_title')}</div>
+      <div class="srs-due-row">
+        <div class="srs-due-cell"><div class="srs-due-num" style="color:var(--red)">${dueToday}</div><div class="srs-due-lbl">${t('srs_due_today')}</div></div>
+        <div class="srs-due-cell"><div class="srs-due-num" style="color:var(--amber)">${due3d}</div><div class="srs-due-lbl">${t('srs_due_3d')}</div></div>
+        <div class="srs-due-cell"><div class="srs-due-num" style="color:var(--blue)">${due7d}</div><div class="srs-due-lbl">${t('srs_due_7d')}</div></div>
+        <div class="srs-due-cell"><div class="srs-due-num" style="color:var(--muted)">${dueLater}</div><div class="srs-due-lbl">${t('srs_due_later')}</div></div>
+      </div>
+    </div>
+    <div class="srs-section">
+      <div class="srs-section-title">${t('srs_velocity')}</div>
+      <div class="srs-velocity"><span class="srs-vel-num">${velocity}</span> <span class="srs-vel-unit">${t('srs_wd_day')}</span></div>
+    </div>
+  </div>`;
 }
 
 function getBaseLevel(w) {

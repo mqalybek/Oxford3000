@@ -1,6 +1,6 @@
 // Service worker: офлайн-режим через кэширование оболочки приложения.
 // При изменении любого файла поднимите версию кэша.
-const CACHE = 'sozdik3000-v2';
+const CACHE = 'sozdik3000-v3';
 const ASSETS = [
   './',
   './index.html',
