@@ -50,19 +50,19 @@ const UI_TEXT = {
   cat_tech: { ru: 'Технологии', kz: 'IT/Ғылым' },
   cat_art: { ru: 'Искусство', kz: 'Өнер' },
   cat_sport: { ru: 'Спорт', kz: 'Спорт' },
-  btn_shuffle: { ru: '🔀 Перемешать', kz: '🔀 Араластыру' },
+  btn_shuffle: { ru: 'Перемешать', kz: 'Араластыру' },
   stat_total: { ru: 'Всего', kz: 'Барлығы' },
   stat_known: { ru: 'Знаю', kz: 'Білемін' },
   stat_repeat: { ru: 'Повторить', kz: 'Қайталау' },
   stat_progress: { ru: 'Прогресс', kz: 'Прогресс' },
-  btn_graph: { ru: '📊 График прогресса', kz: '📊 Прогресс графигі' },
-  btn_graph_hide: { ru: '📊 Скрыть график', kz: '📊 Графикті жасыру' },
-  btn_sound_on: { ru: '🔊 Звук: вкл', kz: '🔊 Дыбыс: қосулы' },
-  btn_sound_off: { ru: '🔇 Звук: выкл', kz: '🔇 Дыбыс: өшірулі' },
-  btn_timer_on: { ru: '⏱ Таймер: вкл', kz: '⏱ Таймер: қосулы' },
-  btn_timer_off: { ru: '⏱ Таймер: выкл', kz: '⏱ Таймер: өшірулі' },
-  btn_reset: { ru: '🗑 Сбросить прогресс', kz: '🗑 Прогресті өшіру' },
-  graph_title: { ru: '📊 Новые слова за 7 дней', kz: '📊 7 күндегі жаңа сөздер' },
+  btn_graph: { ru: 'График прогресса', kz: 'Прогресс графигі' },
+  btn_graph_hide: { ru: 'Скрыть график', kz: 'Графикті жасыру' },
+  btn_sound_on: { ru: 'Звук: вкл', kz: 'Дыбыс: қосулы' },
+  btn_sound_off: { ru: 'Звук: выкл', kz: 'Дыбыс: өшірулі' },
+  btn_timer_on: { ru: 'Таймер: вкл', kz: 'Таймер: қосулы' },
+  btn_timer_off: { ru: 'Таймер: выкл', kz: 'Таймер: өшірулі' },
+  btn_reset: { ru: 'Сбросить прогресс', kz: 'Прогресті өшіру' },
+  graph_title: { ru: 'Новые слова за 7 дней', kz: '7 күндегі жаңа сөздер' },
   graph_stat_total: { ru: 'Всего слов', kz: 'Барлық сөздер' },
   graph_stat_known: { ru: 'Изучено', kz: 'Жатталды' },
   graph_stat_left: { ru: 'Осталось', kz: 'Қалды' },
@@ -97,7 +97,7 @@ const UI_TEXT = {
   fb_wrong_post: { ru: '</b>', kz: '</b>' },
   fb_ans_pre: { ru: 'Ответ: <b>', kz: 'Жауап: <b>' },
   fb_ans_post: { ru: '</b>', kz: '</b>' },
-  empty_review: { ru: 'На сегодня нет слов для повторения. 🎉<br>Учи новые слова или возвращайся завтра!', kz: 'Бүгінге қайталайтын сөздер жоқ. 🎉<br>Жаңа сөздер үйреніңіз немесе ертең келіңіз!' },
+  empty_review: { ru: 'На сегодня нет слов для повторения.<br>Учи новые слова или возвращайся завтра!', kz: 'Бүгінге қайталайтын сөздер жоқ.<br>Жаңа сөздер үйреніңіз немесе ертең келіңіз!' },
   empty_level: { ru: 'Нет слов для выбранных уровней.', kz: 'Таңдалған деңгейлер үшін сөздер жоқ.' },
   res_words_learned: { ru: 'слов изучено!', kz: 'сөз жатталды!' },
   res_repeat: { ru: 'Повторить:', kz: 'Қайталау:' },
@@ -107,16 +107,16 @@ const UI_TEXT = {
   btn_restart: { ru: 'Начать заново', kz: 'Қайтадан бастау' },
   btn_repeat_errs: { ru: 'Повторить ошибки', kz: 'Қателерді қайталау' },
   kbd_hint: { ru: 'Пробел — перевернуть · 1/2 — ответ · ←/→ — навигация', kz: 'Бос орын — аудару · 1/2 — жауап · ←/→ — навигация' },
-  goal_today: { ru: '🎯 Сегодня:', kz: '🎯 Бүгін:' },
+  goal_today: { ru: 'Сегодня:', kz: 'Бүгін:' },
   goal_select_title: { ru: 'Цель на день (слов)', kz: 'Күндік мақсат (сөз)' },
-  goal_reached: { ru: 'Цель дня достигнута! 🎉', kz: 'Күндік мақсат орындалды! 🎉' },
+  goal_reached: { ru: 'Цель дня достигнута!', kz: 'Күндік мақсат орындалды!' },
   btn_export: { ru: '⬇ Экспорт', kz: '⬇ Экспорт' },
   btn_import: { ru: '⬆ Импорт', kz: '⬆ Импорт' },
   confirm_import: { ru: 'Импорт заменит текущий прогресс. Продолжить?', kz: 'Импорт ағымдағы прогресті ауыстырады. Жалғастыру керек пе?' },
   import_ok: { ru: 'Прогресс импортирован!', kz: 'Прогресс импортталды!' },
   import_err: { ru: 'Не удалось прочитать файл. Это точно экспорт Sózdik 3000?', kz: 'Файлды оқу мүмкін болмады. Бұл Sózdik 3000 экспорты ма?' },
-  btn_srs_stats: { ru: '📦 SRS статистика', kz: '📦 SRS статистикасы' },
-  btn_srs_hide:  { ru: '📦 Скрыть SRS', kz: '📦 SRS жасыру' },
+  btn_srs_stats: { ru: 'SRS статистика', kz: 'SRS статистикасы' },
+  btn_srs_hide:  { ru: 'Скрыть SRS', kz: 'SRS жасыру' },
   srs_title:     { ru: 'Распределение по коробкам (система Лейтнера)', kz: 'Коробкалар бойынша бөлу (Лейтнер жүйесі)' },
   srs_box0:      { ru: 'Коробка 0 — новые / ошибки', kz: 'Коробка 0 — жаңа / қате' },
   srs_box_n:     { ru: 'Коробка', kz: 'Коробка' },
@@ -144,6 +144,55 @@ const SHOWCASE = [
 let heroIdx = 0;
 let heroTimer = null;
 
+// ===== КАСТОМНЫЕ ЛИНЕЙНЫЕ ИКОНКИ (вместо эмодзи) =====
+// Единый стиль: обводка currentColor, viewBox 24, без заливки
+const ICONS = {
+  // категории
+  core:    '<path d="M4 5h16v10H9l-4 4v-4H4z"/>',
+  people:  '<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.8"/><path d="M17.5 13.2a5.5 5.5 0 0 1 3 4.8"/>',
+  home:    '<path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+  edu:     '<path d="M12 5l9 4-9 4-9-4 9-4z"/><path d="M6 11v4c0 1.2 2.7 2.6 6 2.6s6-1.4 6-2.6v-4"/><path d="M21 9v4"/>',
+  travel:  '<path d="M3 11l17-6-6 17-3-7-8-4z"/>',
+  food:    '<path d="M8 3v18"/><path d="M5.5 3v4.5a2.5 2.5 0 0 0 5 0V3"/><path d="M16.5 3c-1.3 0-2 2-2 4.6s.8 4 2 4 2-1.4 2-4-.7-4.6-2-4.6z"/><path d="M16.5 11.6V21"/>',
+  health:  '<path d="M3 12h4l2-5 3 10 2.5-7H21"/>',
+  nature:  '<path d="M5 19c0-8 6-13 14-14 1 8-5 15-14 14z"/><path d="M9 15c2-3.5 4.5-5 8-6"/>',
+  business:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/><path d="M3 13h18"/>',
+  tech:    '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+  art:     '<path d="M3 21c0-2.6 1.6-4 3.4-4 1.4 0 2.4 1 2.4 2.3S7.8 21 6 21H3z"/><path d="M9 16.5L17.5 8a2.1 2.1 0 0 1 3 3L12 19.5"/>',
+  sport:   '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c3.2 3 3.2 14 0 17"/><path d="M3.5 12h17"/>',
+  // режимы
+  flash:   '<rect x="4" y="7" width="13" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4H19a1.5 1.5 0 0 1 1.5 1.5V15"/>',
+  quiz:    '<path d="M4 7h7"/><path d="M4 12h7"/><path d="M4 17h7"/><path d="M14.5 7.5l1.5 1.5L19.5 5.5"/><path d="M14.5 16l1.5 1.5L19.5 14"/>',
+  type:    '<path d="M4 16.2V20h3.8L18.5 9.3 14.7 5.5 4 16.2z"/><path d="M13 7.2l3.8 3.8"/>',
+  review:  '<path d="M20 12a8 8 0 1 0-1.6 4.8"/><path d="M20 5.5V11h-5.5"/>',
+  // тулбар и прочее
+  sound:   '<path d="M4 9.5v5h3.5L13 19V5L7.5 9.5H4z"/><path d="M16 9.5a4 4 0 0 1 0 5"/>',
+  mute:    '<path d="M4 9.5v5h3.5L13 19V5L7.5 9.5H4z"/><path d="M16.5 10l4 4M20.5 10l-4 4"/>',
+  timer:   '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 2.5h5"/>',
+  graph:   '<path d="M5 20v-5"/><path d="M12 20V8"/><path d="M19 20v-9"/><path d="M3.5 20h17"/>',
+  srs:     '<path d="M3 7.5l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 16.5l9 4 9-4"/>',
+  export:  '<path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><path d="M5 19h14"/>',
+  import:  '<path d="M12 14V4"/><path d="M8 8l4-4 4 4"/><path d="M5 19h14"/>',
+  reset:   '<path d="M5 7h14"/><path d="M9.5 7V5h5v2"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v6M14 11v6"/>',
+  shuffle: '<path d="M4 7h3.5l8.5 10H20"/><path d="M4 17h3.5l3-3.6"/><path d="M16.5 5.5L20 7l-3.5 1.5"/><path d="M16.5 15.5L20 17l-3.5 1.5"/>',
+  goal:    '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/>',
+  flame:   '<path d="M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z"/>'
+};
+
+function svgIcon(name, cls) {
+  const inner = ICONS[name];
+  if (!inner) return '';
+  return `<svg class="ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+}
+
+// Заполняет все элементы с data-ic соответствующей иконкой
+function paintIcons() {
+  document.querySelectorAll('[data-ic]').forEach(el => {
+    const name = el.getAttribute('data-ic');
+    if (ICONS[name]) el.innerHTML = svgIcon(name);
+  });
+}
+
 function t(key) {
   if(!UI_TEXT[key]) return key;
   return UI_TEXT[key][appLang];
@@ -159,18 +208,19 @@ function updateUI() {
     el.innerHTML = t(el.getAttribute('data-i18n'));
   });
   document.documentElement.lang = appLang === 'kz' ? 'kk' : 'ru';
-  document.getElementById('sound-btn').textContent = soundOn ? t('btn_sound_on') : t('btn_sound_off');
-  const timerBtn = document.getElementById('timer-btn');
-  if(timerBtn) timerBtn.textContent = timerOn ? t('btn_timer_on') : t('btn_timer_off');
-  const graphBtn = document.getElementById('graph-btn');
+  // Текст кнопок пишем в .btn-tx, чтобы не затирать иконку
+  const setBtn = (id, text) => {
+    const tx = document.querySelector('#' + id + ' .btn-tx');
+    if(tx) tx.textContent = text;
+  };
+  setBtn('sound-btn', soundOn ? t('btn_sound_on') : t('btn_sound_off'));
+  const soundIc = document.querySelector('#sound-btn .btn-ic');
+  if(soundIc) soundIc.innerHTML = svgIcon(soundOn ? 'sound' : 'mute');
+  setBtn('timer-btn', timerOn ? t('btn_timer_on') : t('btn_timer_off'));
   const area = document.getElementById('graph-area');
-  if(area && area.style.display !== 'none') graphBtn.textContent = t('btn_graph_hide');
-  else graphBtn.textContent = t('btn_graph');
-  const srsBtn = document.getElementById('srs-stats-btn');
+  setBtn('graph-btn', (area && area.style.display !== 'none') ? t('btn_graph_hide') : t('btn_graph'));
   const srsArea = document.getElementById('srs-stats-area');
-  if(srsBtn) {
-    srsBtn.textContent = (srsArea && srsArea.style.display !== 'none') ? t('btn_srs_hide') : t('btn_srs_stats');
-  }
+  setBtn('srs-stats-btn', (srsArea && srsArea.style.display !== 'none') ? t('btn_srs_hide') : t('btn_srs_stats'));
   if(srsArea && srsArea.style.display !== 'none') drawSrsStats();
 
   const inp = document.getElementById('type-inp');
@@ -386,7 +436,7 @@ function updateStreak() {
     else break;
   }
   const el = document.getElementById('hs-streak');
-  if(el) el.textContent = streak + (streak > 0 ? '🔥' : '');
+  if(el) el.innerHTML = streak + (streak > 0 ? ' ' + svgIcon('flame', 'ic-flame') : '');
 }
 
 // ===== ЗВУК =====
@@ -481,10 +531,10 @@ function setAppLang(l) {
 // ===== ГРАФИК =====
 function toggleGraph() {
   const area = document.getElementById('graph-area');
-  const btn = document.getElementById('graph-btn');
+  const tx = document.querySelector('#graph-btn .btn-tx');
   if(area.style.display === 'none') {
-    area.style.display = ''; btn.textContent = t('btn_graph_hide'); drawGraph();
-  } else { area.style.display = 'none'; btn.textContent = t('btn_graph'); }
+    area.style.display = ''; if(tx) tx.textContent = t('btn_graph_hide'); drawGraph();
+  } else { area.style.display = 'none'; if(tx) tx.textContent = t('btn_graph'); }
 }
 
 function drawGraph() {
@@ -537,14 +587,14 @@ function drawGraph() {
 // ===== SRS СТАТИСТИКА =====
 function toggleSrsStats() {
   const area = document.getElementById('srs-stats-area');
-  const btn = document.getElementById('srs-stats-btn');
+  const tx = document.querySelector('#srs-stats-btn .btn-tx');
   if(area.style.display === 'none') {
     area.style.display = '';
-    btn.textContent = t('btn_srs_hide');
+    if(tx) tx.textContent = t('btn_srs_hide');
     drawSrsStats();
   } else {
     area.style.display = 'none';
-    btn.textContent = t('btn_srs_stats');
+    if(tx) tx.textContent = t('btn_srs_stats');
   }
 }
 
@@ -1124,6 +1174,7 @@ document.addEventListener('keydown', e => {
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 loadSettings();
 loadProgress();
+paintIcons();
 updateStreak();
 updateUI();
 buildDeck();

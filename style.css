@@ -20,7 +20,8 @@
   --indigo: #2E4F6B;
   --indigo-deep: #223C52;
   --indigo-soft: rgba(46,79,107,0.10);
-  --amber: #C8841E;          /* фирменный знак ó */
+  --amber: #C8841E;          /* фирменный знак ó — заливки, декор, крупное */
+  --amber-text: #8A5A12;     /* янтарь для мелкого текста (контраст WCAG AA) */
   --amber-soft: rgba(200,132,30,0.16);
   --brick: #B04A39;          /* только семантика ошибки */
   --brick-soft: rgba(176,74,57,0.12);
@@ -170,7 +171,7 @@ header {
   color: var(--ink-muted);
   margin-bottom: 22px;
 }
-.hero-eyebrow::before { content: '´ '; color: var(--amber); font-weight: 700; }
+.hero-eyebrow::before { content: '´ '; color: var(--amber-text); font-weight: 700; }
 
 /* Карточка-статья (используется и в hero, и в обучении) */
 .entry {
@@ -243,7 +244,7 @@ header {
 .sense-num {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--amber);
+  color: var(--amber-text);
   font-weight: 600;
   min-width: 14px;
 }
@@ -299,6 +300,20 @@ header {
 .chip-dot { width: 7px; height: 7px; border-radius: 2px; }
 
 /* ============================================================
+   КАСТОМНЫЕ ИКОНКИ
+   ============================================================ */
+.ic {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  vertical-align: middle;
+}
+.btn-ic { display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+.ic-flame { width: 0.95em; height: 0.95em; color: var(--amber-text); vertical-align: -2px; }
+
+/* ============================================================
    ПРИЛОЖЕНИЕ
    ============================================================ */
 .app-container { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
@@ -320,7 +335,10 @@ header {
 .mode-card:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .mode-card:hover { border-color: var(--ink-muted); transform: translateY(-1px); }
 .mode-card.active { border-color: var(--indigo); background: var(--indigo-soft); box-shadow: inset 0 0 0 1px var(--indigo); }
-.mode-icon { font-size: 20px; margin-bottom: 5px; }
+.mode-icon { display: flex; justify-content: center; margin-bottom: 6px; color: var(--ink-muted); }
+.mode-icon .ic { width: 22px; height: 22px; stroke-width: 1.6; }
+.mode-card:hover .mode-icon { color: var(--ink); }
+.mode-card.active .mode-icon { color: var(--indigo); }
 .mode-name { font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.2; }
 
 /* Фильтры */
@@ -340,9 +358,12 @@ header {
 }
 .lvl-btn.active-A1 { background: var(--forest-soft); color: var(--forest); border-color: var(--forest); }
 .lvl-btn.active-A2 { background: var(--indigo-soft); color: var(--indigo); border-color: var(--indigo); }
-.lvl-btn.active-B1 { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+.lvl-btn.active-B1 { background: var(--amber-soft); color: var(--amber-text); border-color: var(--amber); }
 .lvl-btn.active-B2 { background: var(--brick-soft); color: var(--brick); border-color: var(--brick); }
 .cat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 5px 11px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--rule-strong);
@@ -353,12 +374,16 @@ header {
   color: var(--ink-muted);
   transition: all .18s;
 }
+.cat-btn .ic { width: 15px; height: 15px; }
 .cat-btn.active { background: var(--indigo-soft); color: var(--indigo); border-color: var(--indigo); }
 .cat-btn:hover { color: var(--ink); }
 
 .shuffle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin-left: auto;
-  padding: 6px 15px;
+  padding: 6px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--rule-strong);
   font-size: 13px;
@@ -369,6 +394,9 @@ header {
   font-family: var(--font-body);
 }
 .shuffle-btn:hover { background: var(--paper-sunken); color: var(--ink); border-color: var(--ink-muted); }
+.shuffle-btn .ic { width: 16px; height: 16px; }
+.btn-danger { color: var(--brick); border-color: rgba(176,74,57,0.4); }
+.btn-danger:hover { background: var(--brick); color: #fff; border-color: var(--brick); }
 
 /* Прогресс */
 .progress-wrap { margin-bottom: 14px; }
@@ -447,7 +475,7 @@ header {
   color: var(--ink-muted);
   margin-bottom: 14px;
 }
-.card-eyebrow::before { content: '´ '; color: var(--amber); font-weight: 700; }
+.card-eyebrow::before { content: '´ '; color: var(--amber-text); font-weight: 700; }
 .card-word-main {
   font-family: var(--font-display);
   font-size: clamp(34px, 6vw, 48px);
@@ -480,7 +508,7 @@ header {
 }
 .lp-A1 { color: var(--forest); background: var(--forest-soft); }
 .lp-A2 { color: var(--indigo); background: var(--indigo-soft); }
-.lp-B1 { color: var(--amber); background: var(--amber-soft); }
+.lp-B1 { color: var(--amber-text); background: var(--amber-soft); }
 .lp-B2 { color: var(--brick); background: var(--brick-soft); }
 .card-rule { height: 1px; background: var(--rule-strong); margin: 16px 0; }
 .card-hint { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); margin-top: 18px; letter-spacing: 0.04em; }
@@ -513,7 +541,7 @@ header {
    ============================================================ */
 .quiz-panel, .type-panel { background: var(--paper-raised); border: 1px solid var(--rule-strong); border-radius: var(--radius); box-shadow: 0 18px 40px -30px rgba(26,23,20,0.5); padding: 30px 32px; margin-bottom: 18px; }
 .quiz-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 12px; }
-.quiz-eyebrow::before { content: '´ '; color: var(--amber); font-weight: 700; }
+.quiz-eyebrow::before { content: '´ '; color: var(--amber-text); font-weight: 700; }
 .quiz-q { font-family: var(--font-display); font-size: clamp(28px,5vw,40px); font-weight: 600; color: var(--ink); letter-spacing: -0.8px; line-height: 1.05; }
 .quiz-meta { font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); margin-top: 8px; margin-bottom: 24px; }
 #timer-display { font-family: var(--font-mono) !important; }
