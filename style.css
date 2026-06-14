@@ -456,7 +456,9 @@ header {
   letter-spacing: -1px;
   line-height: 1.05;
 }
-.card-pos-tag { font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--ink-muted); margin-top: 8px; }
+.card-pos-tag { font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--ink-muted); }
+.card-pron { display: flex; align-items: baseline; gap: 12px; margin-top: 9px; flex-wrap: wrap; }
+.card-ipa { font-family: var(--font-mono); font-size: 15px; color: var(--indigo); }
 .card-translation {
   font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 38px);

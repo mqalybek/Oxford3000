@@ -416,6 +416,11 @@ function getTrans(w) {
   return w.length > 4 ? w[4] : (w.length > 3 ? w[3] : '');
 }
 
+// IPA-транскрипция слова (7-е поле), если есть
+function getIPA(w) {
+  return (w && w.length > 6 && w[6]) ? w[6] : '';
+}
+
 // ===== ТАЙМЕР =====
 function startTimer(onTimeout) {
   clearInterval(timerInterval);
@@ -749,6 +754,12 @@ function makeLevelPill(w) {
   return `<span class="level-pill lp-${getBaseLevel(w)}">${esc(w[2])}</span>`;
 }
 
+// Строка произношения: IPA (на английской стороне) + часть речи
+function posLine(w, isEnglish) {
+  const ipa = isEnglish ? getIPA(w) : '';
+  return `<div class="card-pron">${ipa ? `<span class="card-ipa">${esc(ipa)}</span>` : ''}<span class="card-pos-tag">${esc(w[1])}</span></div>`;
+}
+
 function renderFlash() {
   const w = getCard();
   const front = cardDir ? w[0] : getTrans(w);
@@ -767,7 +778,7 @@ function renderFlash() {
           <div class="card-word-main">${esc(front)}</div>
           ${makeLevelPill(w)}
         </div>
-        <div class="card-pos-tag">${esc(w[1])}</div>
+        ${posLine(w, cardDir)}
         <div class="card-rule"></div>
         <div class="card-hint">${t('card_hint')}</div>
       </div>
@@ -777,7 +788,7 @@ function renderFlash() {
           <div class="card-translation">${esc(back)}</div>
           ${makeLevelPill(w)}
         </div>
-        <div class="card-pos-tag">${esc(w[1])}</div>
+        ${posLine(w, !cardDir)}
         <div class="card-rule"></div>
         <div class="card-hint">${t('card_hint_knew')}</div>
       </div>
@@ -828,7 +839,7 @@ function renderQuiz() {
       ${timerOn ? `<div id="timer-display" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;min-width:40px;text-align:center;border:2px solid var(--green);border-radius:8px;padding:2px 8px;color:var(--green);transition:color .3s,border-color .3s">${timerSeconds}s</div>` : ''}
     </div>
     <div class="quiz-q">${esc(question)}</div>
-    <div class="quiz-meta">${esc(w[1])} · ${esc(w[2])}</div>
+    <div class="quiz-meta">${cardDir && getIPA(w) ? `<span class="card-ipa">${esc(getIPA(w))}</span> · ` : ''}${esc(w[1])} · ${esc(w[2])}</div>
     <div class="quiz-opts">
       ${quizState.opts.map((o,i)=>{
         const ans = cardDir ? getTrans(o) : o[0];
@@ -855,7 +866,7 @@ function renderType() {
   <div class="type-panel">
     <div class="quiz-eyebrow">${qLabel}</div>
     <div class="quiz-q">${esc(question)}</div>
-    <div class="quiz-meta">${esc(w[1])} · ${esc(w[2])}</div>
+    <div class="quiz-meta">${cardDir && getIPA(w) ? `<span class="card-ipa">${esc(getIPA(w))}</span> · ` : ''}${esc(w[1])} · ${esc(w[2])}</div>
     <input class="type-input" id="type-inp" placeholder="${t('placeholder_type')}" onkeydown="if(event.key==='Enter')checkType()" ${typeAnswered?'disabled':''} autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="type-feedback" id="type-fb"></div>
     <div class="card-actions" style="margin-top:14px">
