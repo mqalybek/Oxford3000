@@ -20,6 +20,71 @@
 </head>
 <body>
 
+<!-- Интро при первом визите: лондонская линейная графика собирается и захлопывается книгой Sózdik -->
+<div id="intro" class="intro" aria-hidden="true">
+  <div class="intro-stage">
+    <svg class="intro-scene" viewBox="0 0 1000 560" role="img" aria-label="London">
+      <!-- небо: солнце, облака, птицы -->
+      <g class="il il-sky">
+        <circle class="st-amber" cx="852" cy="96" r="30"/>
+        <path class="st-amber" d="M852 50v-16M852 158v16M806 96h-16M898 96h16M819 63l-11-11M896 140l11 11M819 129l-11 11M896 52l11-11"/>
+        <path d="M120 120c-14 0-22 10-12 18 4 14 30 12 34 2 14 4 26-10 14-18-2-12-22-12-26-2z"/>
+        <path d="M610 70c-12 0-18 8-10 15 3 11 25 10 28 2 12 3 22-9 12-15-2-10-18-10-22-2z"/>
+        <path d="M430 110l10-8 10 8M460 100l9-7 9 7"/>
+      </g>
+      <!-- Биг-Бен -->
+      <g class="il il-ben">
+        <path d="M150 178 L182 116 L214 178 Z"/>
+        <path d="M170 116 L182 96 L194 116"/>
+        <rect x="153" y="178" width="58" height="278"/>
+        <circle cx="182" cy="214" r="19"/>
+        <path d="M182 214 V200M182 214 L194 220"/>
+        <path d="M153 250h58M153 300h58M153 350h58"/>
+        <rect x="145" y="436" width="74" height="22"/>
+      </g>
+      <!-- Тауэрский мост -->
+      <g class="il il-bridge">
+        <rect x="498" y="252" width="46" height="204"/>
+        <rect x="710" y="252" width="46" height="204"/>
+        <path d="M498 252 L521 226 L544 252M710 252 L733 226 L756 252"/>
+        <path d="M521 226 V214M733 226 V214"/>
+        <rect x="544" y="262" width="166" height="26"/>
+        <path d="M521 300 Q627 348 733 300"/>
+        <path d="M498 300 Q452 350 432 430 L432 456M756 300 Q802 350 822 430 L822 456"/>
+        <path d="M432 456 H822"/>
+      </g>
+      <!-- Даблдекер -->
+      <g class="il il-bus">
+        <rect class="fill-brick" x="300" y="380" width="170" height="66" rx="11"/>
+        <path class="st-brick" d="M300 414h170"/>
+        <rect class="st-brick" x="312" y="388" width="24" height="18" rx="3"/>
+        <rect class="st-brick" x="344" y="388" width="24" height="18" rx="3"/>
+        <rect class="st-brick" x="376" y="388" width="24" height="18" rx="3"/>
+        <rect class="st-brick" x="312" y="420" width="30" height="20" rx="3"/>
+        <rect class="st-brick" x="430" y="420" width="28" height="20" rx="3"/>
+        <circle cx="336" cy="452" r="13"/>
+        <circle cx="438" cy="452" r="13"/>
+      </g>
+      <!-- Телефонная будка -->
+      <g class="il il-phone">
+        <rect class="fill-brick" x="858" y="356" width="44" height="100" rx="5"/>
+        <rect class="st-brick" x="854" y="346" width="52" height="14" rx="3"/>
+        <path class="st-brick" d="M866 372h28M866 392h28M866 412h28M880 366v54"/>
+      </g>
+      <!-- земля -->
+      <line class="il il-ground" x1="60" y1="456" x2="940" y2="456"/>
+    </svg>
+    <div class="intro-book">
+      <div class="book-cover">
+        <div class="book-title">S<span class="o-acute">ó</span>zdik</div>
+        <div class="book-sub">3000</div>
+        <div class="book-mark">´</div>
+      </div>
+    </div>
+  </div>
+  <button class="intro-skip" onclick="dismissIntro()" aria-label="Пропустить">Пропустить ✕</button>
+</div>
+
 <header>
   <div style="display:flex;align-items:center;">
     <a href="#" class="logo" onclick="scrollToApp()">
@@ -190,6 +255,7 @@
 <footer>
   <p><strong>Sózdik 3000</strong> · <span data-i18n="footer_title">3000 самых важных английских слов · Қазақша / Русский</span></p>
   <p style="margin-top:6px;font-size:12px" data-i18n="footer_desc">Делись с друзьями — открывается в любом браузере</p>
+  <button class="intro-replay" onclick="playIntro()"><span class="btn-ic" data-ic="play"></span><span data-i18n="btn_intro">Заставка</span></button>
 </footer>
 
 <script src="data.js"></script>
