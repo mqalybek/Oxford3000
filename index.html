@@ -83,19 +83,19 @@
 
   <div class="mode-grid" role="tablist">
     <button class="mode-card active" onclick="setMode('flash')" id="tab-flash" role="tab" aria-selected="true">
-      <div class="mode-icon">🃏</div>
+      <div class="mode-icon" data-ic="flash"></div>
       <div class="mode-name" data-i18n="tab_flash">Карточки</div>
     </button>
     <button class="mode-card" onclick="setMode('quiz')" id="tab-quiz" role="tab" aria-selected="false">
-      <div class="mode-icon">🎯</div>
+      <div class="mode-icon" data-ic="quiz"></div>
       <div class="mode-name" data-i18n="tab_quiz">Тест 4 варианта</div>
     </button>
     <button class="mode-card" onclick="setMode('type')" id="tab-type" role="tab" aria-selected="false">
-      <div class="mode-icon">⌨️</div>
+      <div class="mode-icon" data-ic="type"></div>
       <div class="mode-name" data-i18n="tab_type">Введи перевод</div>
     </button>
     <button class="mode-card" onclick="setMode('review')" id="tab-review" role="tab" aria-selected="false">
-      <div class="mode-icon">🔁</div>
+      <div class="mode-icon" data-ic="review"></div>
       <div class="mode-name" data-i18n="tab_review">Повторение</div>
     </button>
   </div>
@@ -106,23 +106,23 @@
     <button class="lvl-btn active-A2" id="lbtn-A2" onclick="toggleLevel('A2')">A2</button>
     <button class="lvl-btn active-B1" id="lbtn-B1" onclick="toggleLevel('B1')">B1</button>
     <button class="lvl-btn active-B2" id="lbtn-B2" onclick="toggleLevel('B2')">B2</button>
-    <button class="shuffle-btn" onclick="shuffleDeck()" data-i18n="btn_shuffle">🔀 Перемешать</button>
+    <button class="shuffle-btn" onclick="shuffleDeck()"><span class="btn-ic" data-ic="shuffle"></span><span class="btn-tx" data-i18n="btn_shuffle">Перемешать</span></button>
   </div>
 
   <div class="filter-row" id="cat-filters" style="gap:6px">
     <span class="filter-label" data-i18n="lbl_cat" style="width:100%; display:block; margin-bottom: 4px;">Категории:</span>
-    <button class="cat-btn active" id="cbtn-cat_core" onclick="toggleCat('cat_core')">🗣️ <span data-i18n="cat_core">Негізгі</span></button>
-    <button class="cat-btn active" id="cbtn-cat_people" onclick="toggleCat('cat_people')">👨‍👩‍👧 <span data-i18n="cat_people">Адамдар</span></button>
-    <button class="cat-btn active" id="cbtn-cat_home" onclick="toggleCat('cat_home')">🏠 <span data-i18n="cat_home">Үй</span></button>
-    <button class="cat-btn active" id="cbtn-cat_edu" onclick="toggleCat('cat_edu')">🎓 <span data-i18n="cat_edu">Білім</span></button>
-    <button class="cat-btn active" id="cbtn-cat_travel" onclick="toggleCat('cat_travel')">✈️ <span data-i18n="cat_travel">Саяхат</span></button>
-    <button class="cat-btn active" id="cbtn-cat_food" onclick="toggleCat('cat_food')">🍔 <span data-i18n="cat_food">Тамақ</span></button>
-    <button class="cat-btn active" id="cbtn-cat_health" onclick="toggleCat('cat_health')">💊 <span data-i18n="cat_health">Здоровье</span></button>
-    <button class="cat-btn active" id="cbtn-cat_nature" onclick="toggleCat('cat_nature')">🌿 <span data-i18n="cat_nature">Природа</span></button>
-    <button class="cat-btn active" id="cbtn-cat_business" onclick="toggleCat('cat_business')">💼 <span data-i18n="cat_business">Бизнес</span></button>
-    <button class="cat-btn active" id="cbtn-cat_tech" onclick="toggleCat('cat_tech')">💻 <span data-i18n="cat_tech">IT</span></button>
-    <button class="cat-btn active" id="cbtn-cat_art" onclick="toggleCat('cat_art')">🎭 <span data-i18n="cat_art">Өнер</span></button>
-    <button class="cat-btn active" id="cbtn-cat_sport" onclick="toggleCat('cat_sport')">🏀 <span data-i18n="cat_sport">Спорт</span></button>
+    <button class="cat-btn active" id="cbtn-cat_core" onclick="toggleCat('cat_core')"><span class="btn-ic" data-ic="core"></span><span data-i18n="cat_core">Негізгі</span></button>
+    <button class="cat-btn active" id="cbtn-cat_people" onclick="toggleCat('cat_people')"><span class="btn-ic" data-ic="people"></span><span data-i18n="cat_people">Адамдар</span></button>
+    <button class="cat-btn active" id="cbtn-cat_home" onclick="toggleCat('cat_home')"><span class="btn-ic" data-ic="home"></span><span data-i18n="cat_home">Үй</span></button>
+    <button class="cat-btn active" id="cbtn-cat_edu" onclick="toggleCat('cat_edu')"><span class="btn-ic" data-ic="edu"></span><span data-i18n="cat_edu">Білім</span></button>
+    <button class="cat-btn active" id="cbtn-cat_travel" onclick="toggleCat('cat_travel')"><span class="btn-ic" data-ic="travel"></span><span data-i18n="cat_travel">Саяхат</span></button>
+    <button class="cat-btn active" id="cbtn-cat_food" onclick="toggleCat('cat_food')"><span class="btn-ic" data-ic="food"></span><span data-i18n="cat_food">Тамақ</span></button>
+    <button class="cat-btn active" id="cbtn-cat_health" onclick="toggleCat('cat_health')"><span class="btn-ic" data-ic="health"></span><span data-i18n="cat_health">Здоровье</span></button>
+    <button class="cat-btn active" id="cbtn-cat_nature" onclick="toggleCat('cat_nature')"><span class="btn-ic" data-ic="nature"></span><span data-i18n="cat_nature">Природа</span></button>
+    <button class="cat-btn active" id="cbtn-cat_business" onclick="toggleCat('cat_business')"><span class="btn-ic" data-ic="business"></span><span data-i18n="cat_business">Бизнес</span></button>
+    <button class="cat-btn active" id="cbtn-cat_tech" onclick="toggleCat('cat_tech')"><span class="btn-ic" data-ic="tech"></span><span data-i18n="cat_tech">IT</span></button>
+    <button class="cat-btn active" id="cbtn-cat_art" onclick="toggleCat('cat_art')"><span class="btn-ic" data-ic="art"></span><span data-i18n="cat_art">Өнер</span></button>
+    <button class="cat-btn active" id="cbtn-cat_sport" onclick="toggleCat('cat_sport')"><span class="btn-ic" data-ic="sport"></span><span data-i18n="cat_sport">Спорт</span></button>
   </div>
 
   <div class="stats-bar">
@@ -153,7 +153,8 @@
   </div>
 
   <div class="goal-bar">
-    <span class="goal-label" id="goal-label">🎯 0 / 20</span>
+    <span class="btn-ic" data-ic="goal"></span>
+    <span class="goal-label" id="goal-label">0 / 20</span>
     <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
     <select class="goal-select" id="goal-select" onchange="setDailyGoal(this.value)">
       <option value="10">10</option>
@@ -164,20 +165,20 @@
   </div>
 
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-    <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn">🔊 Звук: вкл</button>
-    <button class="shuffle-btn" onclick="toggleTimer()" id="timer-btn">⏱ Таймер: вкл</button>
-    <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn" data-i18n="btn_graph">📊 График прогресса</button>
-    <button class="shuffle-btn" onclick="toggleSrsStats()" id="srs-stats-btn" data-i18n="btn_srs_stats">📦 SRS статистика</button>
-    <button class="shuffle-btn" onclick="exportProgress()" data-i18n="btn_export">⬇ Экспорт</button>
-    <button class="shuffle-btn" onclick="document.getElementById('import-file').click()" data-i18n="btn_import">⬆ Импорт</button>
+    <button class="shuffle-btn" onclick="toggleSound()" id="sound-btn"><span class="btn-ic" data-ic="sound"></span><span class="btn-tx"></span></button>
+    <button class="shuffle-btn" onclick="toggleTimer()" id="timer-btn"><span class="btn-ic" data-ic="timer"></span><span class="btn-tx"></span></button>
+    <button class="shuffle-btn" onclick="toggleGraph()" id="graph-btn"><span class="btn-ic" data-ic="graph"></span><span class="btn-tx"></span></button>
+    <button class="shuffle-btn" onclick="toggleSrsStats()" id="srs-stats-btn"><span class="btn-ic" data-ic="srs"></span><span class="btn-tx"></span></button>
+    <button class="shuffle-btn" onclick="exportProgress()"><span class="btn-ic" data-ic="export"></span><span class="btn-tx" data-i18n="btn_export">Экспорт</span></button>
+    <button class="shuffle-btn" onclick="document.getElementById('import-file').click()"><span class="btn-ic" data-ic="import"></span><span class="btn-tx" data-i18n="btn_import">Импорт</span></button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importProgress(this)">
-    <button class="shuffle-btn" onclick="resetProgress()" style="color:var(--red);border-color:rgba(248,113,113,0.35)" data-i18n="btn_reset">🗑 Сбросить прогресс</button>
+    <button class="shuffle-btn btn-danger" onclick="resetProgress()"><span class="btn-ic" data-ic="reset"></span><span class="btn-tx" data-i18n="btn_reset">Сбросить прогресс</span></button>
   </div>
 
   <div id="srs-stats-area" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--card-radius);padding:20px;margin-bottom:16px"></div>
 
   <div id="graph-area" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--card-radius);padding:20px;margin-bottom:16px">
-    <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)" data-i18n="graph_title">📊 График прогресса за 7 дней</div>
+    <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:16px;font-weight:600;margin-bottom:14px;color:var(--text)"><span class="btn-ic" data-ic="graph"></span><span data-i18n="graph_title">Новые слова за 7 дней</span></div>
     <canvas id="progress-chart" height="120"></canvas>
     <div style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="graph-stats"></div>
   </div>
