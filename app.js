@@ -129,7 +129,8 @@ const UI_TEXT = {
   srs_due_later: { ru: '14+ дней', kz: '14+ күн' },
   srs_velocity:  { ru: 'Темп (7 дн.)', kz: 'Қарқын (7 күн)' },
   srs_wd_day:    { ru: 'сл/день', kz: 'сөз/күн' },
-  hero_eyebrow:  { ru: 'тренажёр · 3000 слов', kz: 'жаттықтырғыш · 3000 сөз' }
+  hero_eyebrow:  { ru: 'тренажёр · 3000 слов', kz: 'жаттықтырғыш · 3000 сөз' },
+  btn_intro:     { ru: 'Заставка', kz: 'Кіріспе' }
 };
 
 // Витрина hero: проверенная вручную IPA-транскрипция для «живой статьи»
@@ -176,7 +177,8 @@ const ICONS = {
   reset:   '<path d="M5 7h14"/><path d="M9.5 7V5h5v2"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v6M14 11v6"/>',
   shuffle: '<path d="M4 7h3.5l8.5 10H20"/><path d="M4 17h3.5l3-3.6"/><path d="M16.5 5.5L20 7l-3.5 1.5"/><path d="M16.5 15.5L20 17l-3.5 1.5"/>',
   goal:    '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/>',
-  flame:   '<path d="M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z"/>'
+  flame:   '<path d="M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z"/>',
+  play:    '<path d="M7 5l11 7-11 7z"/>'
 };
 
 function svgIcon(name, cls) {
@@ -1097,6 +1099,42 @@ function goBack() {
 function restart() { newCard(0); render(); }
 function scrollToApp() { document.getElementById('app').scrollIntoView({behavior:'smooth'}); return false; }
 
+// ===== ИНТРО (Лондон → книга Sózdik) =====
+let introTimer = null;
+function prefersReducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function dismissIntro() {
+  const o = document.getElementById('intro');
+  if(!o) return;
+  o.classList.add('done');
+  clearTimeout(introTimer);
+  setTimeout(() => { o.style.display = 'none'; }, 500);
+}
+function initIntro() {
+  const o = document.getElementById('intro');
+  if(!o) return;
+  let seen = false;
+  try { seen = localStorage.getItem('ox_intro_seen') === '1'; } catch(e) {}
+  if(seen || prefersReducedMotion()) { o.style.display = 'none'; return; }
+  try { localStorage.setItem('ox_intro_seen', '1'); } catch(e) {}
+  introTimer = setTimeout(() => { o.style.display = 'none'; }, 4900);
+}
+// Повторный показ заставки по кнопке: перезапускаем анимацию через клон узла
+function playIntro() {
+  if(prefersReducedMotion()) return;
+  const o = document.getElementById('intro');
+  if(!o) return;
+  const fresh = o.cloneNode(true);
+  fresh.classList.remove('done');
+  fresh.style.display = '';
+  o.parentNode.replaceChild(fresh, o);
+  paintIcons();
+  clearTimeout(introTimer);
+  introTimer = setTimeout(() => { const c = document.getElementById('intro'); if(c) c.style.display = 'none'; }, 4900);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ===== HERO: живая словарная статья =====
 function renderHero(animate) {
   const s = SHOWCASE[heroIdx % SHOWCASE.length];
@@ -1173,6 +1211,7 @@ document.addEventListener('keydown', e => {
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 loadSettings();
+initIntro();
 loadProgress();
 paintIcons();
 updateStreak();

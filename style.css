@@ -314,6 +314,134 @@ header {
 .ic-flame { width: 0.95em; height: 0.95em; color: var(--amber-text); vertical-align: -2px; }
 
 /* ============================================================
+   ИНТРО: Лондон собирается и захлопывается книгой Sózdik
+   ============================================================ */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none; /* не перехватывает клики — приложение под ним остаётся рабочим */
+  animation: introFade .6s ease 4.1s forwards;
+}
+.intro.done { animation: introFade .5s ease forwards; }
+@keyframes introFade { to { opacity: 0; visibility: hidden; } }
+
+.intro-stage { position: relative; width: min(92vw, 860px); aspect-ratio: 1000 / 560; }
+.intro-scene { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.intro-scene * {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.intro-scene .fill-brick { fill: var(--brick-soft); stroke: var(--brick); }
+.intro-scene .st-brick { stroke: var(--brick); }
+.intro-scene .st-amber { stroke: var(--amber); }
+.intro-scene circle, .intro-scene rect, .intro-scene path, .intro-scene line { stroke: var(--ink); }
+.intro-scene .fill-brick { fill: var(--brick-soft); }
+
+/* поэтапная «сборка» достопримечательностей */
+.il { opacity: 0; transform: translateY(20px); transform-box: fill-box; transform-origin: center bottom; animation: ilUp .7s cubic-bezier(.2,.7,.2,1) forwards; }
+.il-ground { animation-delay: .1s; }
+.il-ben    { animation-delay: .35s; }
+.il-bridge { animation-delay: .6s; }
+.il-bus    { animation-delay: .95s; }
+.il-phone  { animation-delay: 1.15s; }
+.il-sky    { animation-delay: 1.3s; }
+@keyframes ilUp { to { opacity: 1; transform: translateY(0); } }
+
+/* сцена отступает, книга закрывается поверх неё */
+.intro-scene { animation: sceneRecede .9s cubic-bezier(.4,0,.2,1) 2.3s forwards; }
+@keyframes sceneRecede { to { transform: scale(.8) translateY(-6px); opacity: .18; } }
+
+.intro-book { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; perspective: 1900px; }
+.book-cover {
+  position: relative;
+  width: min(58vw, 300px);
+  aspect-ratio: 3 / 3.9;
+  border-radius: 5px 11px 11px 5px;
+  background: linear-gradient(135deg, var(--indigo), var(--indigo-deep));
+  box-shadow: 0 30px 70px -25px rgba(26,23,20,0.6), inset 0 0 0 1px rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform-origin: left center;
+  transform: rotateY(-108deg);
+  opacity: 0;
+  animation: bookClose .9s cubic-bezier(.45,0,.2,1) 2.3s forwards;
+}
+@keyframes bookClose {
+  0%   { opacity: 0; transform: rotateY(-108deg); }
+  35%  { opacity: 1; }
+  100% { opacity: 1; transform: rotateY(0deg); }
+}
+/* корешок и обрез страниц */
+.book-cover::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--amber); border-radius: 5px 0 0 5px; }
+.book-cover::after { content: ''; position: absolute; right: -4px; top: 8px; bottom: 8px; width: 6px; background: repeating-linear-gradient(var(--paper), var(--paper) 2px, var(--paper-sunken) 2px, var(--paper-sunken) 3px); border-radius: 0 3px 3px 0; }
+.book-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(34px, 7vw, 52px);
+  letter-spacing: -1px;
+  color: var(--paper);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: bookTitleIn .6s ease 3.05s forwards;
+}
+.book-title .o-acute { color: var(--amber); }
+.book-sub { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.3em; color: rgba(255,255,255,0.6); margin-top: 8px; opacity: 0; animation: bookTitleIn .6s ease 3.25s forwards; }
+.book-mark { position: absolute; top: 22px; right: 26px; font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--amber); opacity: 0; animation: bookTitleIn .5s ease 3.4s forwards; }
+@keyframes bookTitleIn { to { opacity: 1; transform: translateY(0); } }
+
+.intro-skip {
+  position: absolute;
+  bottom: 26px;
+  right: 26px;
+  pointer-events: auto;
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 7px 13px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.intro-skip:hover { color: var(--ink); border-color: var(--ink-muted); }
+
+.intro-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 14px auto 0;
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.intro-replay:hover { color: var(--ink); border-color: var(--ink-muted); }
+.intro-replay .ic { width: 13px; height: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro { display: none !important; }
+}
+
+/* ============================================================
    ПРИЛОЖЕНИЕ
    ============================================================ */
 .app-container { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
