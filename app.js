@@ -307,7 +307,7 @@ function updateGoalUI() {
   if(!lbl || !fill) return;
   const n = learnedToday();
   lbl.textContent = `${t('goal_today')} ${n} / ${dailyGoal}`;
-  fill.style.width = Math.min(100, Math.round(n / dailyGoal * 100)) + '%';
+  fill.style.transform = 'scaleX(' + Math.min(1, n / dailyGoal) + ')';
   fill.classList.toggle('done', n >= dailyGoal);
 }
 
@@ -779,7 +779,7 @@ function updateStats() {
   document.getElementById('hs-pct').textContent = (WORDS.length ? Math.round(known.size/WORDS.length*100) : 0)+'%';
   const cur = getActiveDeck().length;
   const fill = cur>0 ? Math.round(idx/cur*100) : 0;
-  document.getElementById('prog').style.width = fill+'%';
+  document.getElementById('prog').style.transform = 'scaleX(' + (fill/100) + ')';
   document.getElementById('counter').textContent = cur>0 && idx<cur ? (idx+1)+' / '+cur : '';
   document.getElementById('pct-txt').textContent = cur>0 ? fill+'%' : '';
   saveProgress();
