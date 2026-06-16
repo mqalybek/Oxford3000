@@ -46,6 +46,10 @@
   --radius-sm: 8px;
   --card-radius: 12px;
 
+  /* Кривые движения — сильнее встроенных CSS-easings */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+
   --font-display: 'Spectral', Georgia, 'Times New Roman', serif;
   --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
@@ -280,11 +284,12 @@ header {
   border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
-  transition: transform .2s, background .2s, box-shadow .2s;
+  transition: transform .2s var(--ease-out), background .2s, box-shadow .2s;
   text-decoration: none;
   box-shadow: 0 10px 24px -12px rgba(46,79,107,0.7);
 }
 .hero-cta:hover { transform: translateY(-2px); background: var(--indigo-deep); box-shadow: 0 16px 30px -14px rgba(46,79,107,0.8); }
+.hero-cta:active { transform: scale(.97); }
 .hero-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 28px; }
 .chip {
   display: inline-flex;
@@ -455,13 +460,14 @@ header {
   padding: 13px 10px;
   text-align: center;
   cursor: pointer;
-  transition: border-color .18s, background .18s, transform .18s;
+  transition: border-color .18s, background .18s, box-shadow .18s, transform .18s var(--ease-out);
   user-select: none;
   font: inherit;
   color: inherit;
 }
 .mode-card:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
-.mode-card:hover { border-color: var(--ink-muted); transform: translateY(-1px); }
+.mode-card:hover { border-color: var(--ink-muted); transform: translateY(-3px); box-shadow: 0 12px 24px -16px rgba(26,23,20,0.55); }
+.mode-card:active { transform: scale(.97); }
 .mode-card.active { border-color: var(--indigo); background: var(--indigo-soft); box-shadow: inset 0 0 0 1px var(--indigo); }
 .mode-icon { display: flex; justify-content: center; margin-bottom: 6px; color: var(--ink-muted); }
 .mode-icon .ic { width: 22px; height: 22px; stroke-width: 1.6; }
@@ -482,8 +488,9 @@ header {
   cursor: pointer;
   background: transparent;
   color: var(--ink-muted);
-  transition: all .18s;
+  transition: border-color .18s, background .18s, color .18s, transform .12s var(--ease-out);
 }
+.lvl-btn:active { transform: scale(.95); }
 .lvl-btn.active-A1 { background: var(--forest-soft); color: var(--forest); border-color: var(--forest); }
 .lvl-btn.active-A2 { background: var(--indigo-soft); color: var(--indigo); border-color: var(--indigo); }
 .lvl-btn.active-B1 { background: var(--amber-soft); color: var(--amber-text); border-color: var(--amber); }
@@ -500,11 +507,12 @@ header {
   cursor: pointer;
   background: transparent;
   color: var(--ink-muted);
-  transition: all .18s;
+  transition: border-color .18s, background .18s, color .18s, transform .12s var(--ease-out);
 }
 .cat-btn .ic { width: 15px; height: 15px; }
 .cat-btn.active { background: var(--indigo-soft); color: var(--indigo); border-color: var(--indigo); }
 .cat-btn:hover { color: var(--ink); }
+.cat-btn:active { transform: scale(.95); }
 
 .shuffle-btn {
   display: inline-flex;
@@ -518,10 +526,11 @@ header {
   cursor: pointer;
   background: transparent;
   color: var(--ink-muted);
-  transition: all .18s;
+  transition: border-color .18s, background .18s, color .18s, transform .12s var(--ease-out);
   font-family: var(--font-body);
 }
 .shuffle-btn:hover { background: var(--paper-sunken); color: var(--ink); border-color: var(--ink-muted); }
+.shuffle-btn:active { transform: scale(.96); }
 .shuffle-btn .ic { width: 16px; height: 16px; }
 .btn-danger { color: var(--brick); border-color: rgba(176,74,57,0.4); }
 .btn-danger:hover { background: var(--brick); color: #fff; border-color: var(--brick); }
@@ -529,7 +538,7 @@ header {
 /* Прогресс */
 .progress-wrap { margin-bottom: 14px; }
 .progress-track { height: 3px; background: var(--paper-sunken); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--indigo); border-radius: 2px; transition: width .4s ease; }
+.progress-fill { height: 100%; width: 100%; background: var(--indigo); border-radius: 2px; transform: scaleX(0); transform-origin: left center; transition: transform .4s var(--ease-out); }
 .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 7px; }
 .progress-counter { font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); }
 .progress-pct { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--indigo); }
@@ -547,7 +556,7 @@ header {
 }
 .goal-label { font-family: var(--font-mono); font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--ink); }
 .goal-track { flex: 1; height: 6px; background: var(--paper-sunken); border-radius: 3px; overflow: hidden; }
-.goal-fill { height: 100%; background: var(--amber); border-radius: 3px; transition: width .4s ease; }
+.goal-fill { height: 100%; width: 100%; background: var(--amber); border-radius: 3px; transform: scaleX(0); transform-origin: left center; transition: transform .4s var(--ease-out); }
 .goal-fill.done { background: var(--forest); }
 .goal-select {
   background: var(--paper-raised);
@@ -653,9 +662,10 @@ header {
   cursor: pointer;
   background: var(--paper-raised);
   color: var(--ink);
-  transition: all .18s;
+  transition: border-color .18s, background .18s, color .18s, transform .12s var(--ease-out);
 }
 .act-btn:hover { background: var(--paper-sunken); border-color: var(--ink-muted); }
+.act-btn:active { transform: scale(.97); }
 .act-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
 .act-btn.btn-know { background: var(--forest-soft); color: var(--forest); border-color: var(--forest); }
 .act-btn.btn-know:hover { background: var(--forest); color: #fff; }
@@ -707,7 +717,10 @@ header {
   justify-content: center;
 }
 .quiz-opts { counter-reset: opt; }
-.opt-btn:hover:not([disabled]) { border-color: var(--indigo); transform: translateX(3px); }
+@media (hover: hover) and (pointer: fine) {
+  .opt-btn:hover:not([disabled]) { border-color: var(--indigo); transform: translateX(3px); }
+}
+.opt-btn:active:not([disabled]) { transform: scale(.98); }
 .opt-btn.correct { background: var(--forest-soft); border-color: var(--forest); color: var(--forest); }
 .opt-btn.correct::before { border-color: var(--forest); color: var(--forest); }
 .opt-btn.wrong { background: var(--brick-soft); border-color: var(--brick); color: var(--brick); }
@@ -800,8 +813,8 @@ footer strong { color: var(--ink); font-family: var(--font-display); }
 /* ============================================================
    ДВИЖЕНИЕ
    ============================================================ */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.fade-up { animation: fadeUp .4s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp .35s var(--ease-out) both; }
 
 /* Сборка hero-статьи при загрузке */
 @keyframes assembleUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -830,6 +843,26 @@ footer strong { color: var(--ink); font-family: var(--font-display); }
 }
 .acute-mark path { stroke: var(--amber); stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: acuteDraw .45s ease forwards; }
 @keyframes acuteDraw { to { stroke-dashoffset: 0; } }
+
+/* Обратная связь в тесте */
+@keyframes optShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.opt-btn.wrong { animation: optShake .4s var(--ease-out) both; }
+@keyframes optPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.opt-btn.correct { animation: optPop .32s var(--ease-out) both; }
+
+/* Появление крупного счёта на экране результата */
+@keyframes scoreIn { from { opacity: 0; transform: scale(.82) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.result-score { animation: scoreIn .5s var(--ease-out) both; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
