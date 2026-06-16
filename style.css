@@ -460,13 +460,13 @@ header {
   padding: 13px 10px;
   text-align: center;
   cursor: pointer;
-  transition: border-color .18s, background .18s, transform .18s;
+  transition: border-color .18s, background .18s, box-shadow .18s, transform .18s var(--ease-out);
   user-select: none;
   font: inherit;
   color: inherit;
 }
 .mode-card:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
-.mode-card:hover { border-color: var(--ink-muted); transform: translateY(-1px); }
+.mode-card:hover { border-color: var(--ink-muted); transform: translateY(-3px); box-shadow: 0 12px 24px -16px rgba(26,23,20,0.55); }
 .mode-card:active { transform: scale(.97); }
 .mode-card.active { border-color: var(--indigo); background: var(--indigo-soft); box-shadow: inset 0 0 0 1px var(--indigo); }
 .mode-icon { display: flex; justify-content: center; margin-bottom: 6px; color: var(--ink-muted); }
@@ -813,8 +813,8 @@ footer strong { color: var(--ink); font-family: var(--font-display); }
 /* ============================================================
    ДВИЖЕНИЕ
    ============================================================ */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.fade-up { animation: fadeUp .4s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp .35s var(--ease-out) both; }
 
 /* Сборка hero-статьи при загрузке */
 @keyframes assembleUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -843,6 +843,26 @@ footer strong { color: var(--ink); font-family: var(--font-display); }
 }
 .acute-mark path { stroke: var(--amber); stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: acuteDraw .45s ease forwards; }
 @keyframes acuteDraw { to { stroke-dashoffset: 0; } }
+
+/* Обратная связь в тесте */
+@keyframes optShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.opt-btn.wrong { animation: optShake .4s var(--ease-out) both; }
+@keyframes optPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.opt-btn.correct { animation: optPop .32s var(--ease-out) both; }
+
+/* Появление крупного счёта на экране результата */
+@keyframes scoreIn { from { opacity: 0; transform: scale(.82) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.result-score { animation: scoreIn .5s var(--ease-out) both; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }

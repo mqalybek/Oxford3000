@@ -945,7 +945,7 @@ function render() {
   if(idx>=d.length) {
     area.innerHTML = `
     <div class="result-panel">
-      <div class="result-score">${known.size}</div>
+      <div class="result-score" id="res-score">0</div>
       <div class="result-title">${t('res_words_learned')}</div>
       <div class="result-sub">${t('res_repeat')} ${dueCount()} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
       <div class="card-actions" style="justify-content:center">
@@ -953,6 +953,7 @@ function render() {
         ${dueCount()>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
       </div>
     </div>`;
+    countUp(document.getElementById('res-score'), known.size);
     return;
   }
   if(mode==='flash' || mode==='review') area.innerHTML = renderFlash();
@@ -1181,6 +1182,20 @@ function flashAcute(container) {
   if(getComputedStyle(container).position === 'static') container.style.position = 'relative';
   container.appendChild(svg);
   setTimeout(() => svg.remove(), 800);
+}
+
+// Плавный набор числа от 0 до target (экран результата)
+function countUp(el, target) {
+  if(!el) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = target; return; }
+  const dur = 650, start = performance.now();
+  function step(now) {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3); // кубическая ease-out
+    el.textContent = Math.round(target * eased);
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 // ===== КЛАВИАТУРА =====
