@@ -130,7 +130,14 @@ const UI_TEXT = {
   srs_velocity:  { ru: 'Темп (7 дн.)', kz: 'Қарқын (7 күн)' },
   srs_wd_day:    { ru: 'сл/день', kz: 'сөз/күн' },
   hero_eyebrow:  { ru: 'тренажёр · 3000 слов', kz: 'жаттықтырғыш · 3000 сөз' },
-  btn_intro:     { ru: 'Заставка', kz: 'Кіріспе' }
+  btn_intro:     { ru: 'Заставка', kz: 'Кіріспе' },
+  btn_share:     { ru: 'Поделиться', kz: 'Бөлісу' },
+  share_eyebrow: { ru: 'МОЙ ПРОГРЕСС', kz: 'МЕНІҢ ПРОГРЕСІМ' },
+  share_learned: { ru: 'слов выучено', kz: 'сөз жатталды' },
+  share_streak:  { ru: 'дней подряд', kz: 'күн қатарынан' },
+  share_done:    { ru: 'пройдено', kz: 'аяқталды' },
+  share_cta:     { ru: 'Учи английский бесплатно', kz: 'Ағылшын тілін тегін үйрен' },
+  share_title:   { ru: 'Мой прогресс в Sózdik 3000', kz: 'Sózdik 3000-дегі прогресім' }
 };
 
 // Витрина hero: проверенная вручную IPA-транскрипция для «живой статьи»
@@ -178,7 +185,8 @@ const ICONS = {
   shuffle: '<path d="M4 7h3.5l8.5 10H20"/><path d="M4 17h3.5l3-3.6"/><path d="M16.5 5.5L20 7l-3.5 1.5"/><path d="M16.5 15.5L20 17l-3.5 1.5"/>',
   goal:    '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/>',
   flame:   '<path d="M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z"/>',
-  play:    '<path d="M7 5l11 7-11 7z"/>'
+  play:    '<path d="M7 5l11 7-11 7z"/>',
+  share:   '<path d="M12 4v11"/><path d="M8 8l4-4 4 4"/><path d="M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/>'
 };
 
 function svgIcon(name, cls) {
@@ -424,7 +432,7 @@ function importProgress(input) {
 }
 
 // ===== СТРИК: дни, когда выучено хотя бы одно новое слово =====
-function updateStreak() {
+function currentStreak() {
   const history = migrateHistory(loadHistory());
   const byDate = new Map(history.map(e => [e.date, e]));
   let streak = 0;
@@ -437,6 +445,10 @@ function updateStreak() {
     if(e && e.learned > 0) { streak++; check.setDate(check.getDate() - 1); }
     else break;
   }
+  return streak;
+}
+function updateStreak() {
+  const streak = currentStreak();
   const el = document.getElementById('hs-streak');
   if(el) el.innerHTML = streak + (streak > 0 ? ' ' + svgIcon('flame', 'ic-flame') : '');
 }
@@ -952,6 +964,9 @@ function render() {
         <button class="act-btn btn-know" onclick="restart()">${t('btn_restart')}</button>
         ${dueCount()>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
       </div>
+      <div class="card-actions" style="justify-content:center;margin-top:4px">
+        <button class="act-btn" onclick="shareCard()">${svgIcon('share')} ${t('btn_share')}</button>
+      </div>
     </div>`;
     countUp(document.getElementById('res-score'), known.size);
     return;
@@ -1196,6 +1211,170 @@ function countUp(el, target) {
     if(p < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
+}
+
+// ===== КАРТОЧКА ПРОГРЕССА ДЛЯ СТОРИС =====
+// Фирменная палитра «The Lexicon» (повтор :root для канваса)
+const CARD = {
+  paper:  '#FBFAF8', raised: '#FFFFFF', sunken: '#F4F1EA',
+  ink:    '#1A1714', inkSoft: '#463F36', muted: '#6B6358',
+  indigo: '#2E4F6B', amber: '#C8841E', amberText: '#8A5A12',
+  forest: '#3E6B53', brick: '#B04A39',
+  rule:   'rgba(26,23,20,0.12)', ruleStrong: 'rgba(26,23,20,0.20)'
+};
+const CARD_LEVELS = ['A1','A2','B1','B2'];
+const CARD_LEVEL_COLOR = { A1: CARD.forest, A2: CARD.indigo, B1: CARD.amber, B2: CARD.brick };
+
+// Дожидаемся загрузки веб-шрифтов, иначе канвас нарисует системным
+async function ensureCardFonts() {
+  if(!document.fonts || !document.fonts.load) return;
+  const faces = ['700 96px Spectral','600 280px Spectral','500 46px Spectral',
+                 '700 40px Manrope','800 96px Manrope','600 30px Manrope',
+                 '500 30px "JetBrains Mono"'];
+  try { await Promise.all(faces.map(f => document.fonts.load(f))); } catch(e) {}
+}
+
+// Текст по центру с опциональным трекингом
+function cardText(ctx, text, x, y, font, color, opts = {}) {
+  ctx.font = font; ctx.fillStyle = color;
+  ctx.textAlign = opts.align || 'center';
+  ctx.textBaseline = opts.baseline || 'alphabetic';
+  if('letterSpacing' in ctx) ctx.letterSpacing = (opts.spacing || 0) + 'px';
+  ctx.fillText(text, x, y);
+  if('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+}
+
+// Логотип Sózdik с янтарной буквой ó
+function drawWordmark(ctx, cx, y) {
+  const parts = [['S', CARD.ink], ['ó', CARD.amber], ['zdik', CARD.ink]];
+  ctx.font = '700 96px Spectral'; ctx.textBaseline = 'alphabetic';
+  if('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+  const total = parts.reduce((w, [tx]) => w + ctx.measureText(tx).width, 0);
+  let x = cx - total / 2;
+  ctx.textAlign = 'left';
+  for(const [tx, c] of parts) { ctx.fillStyle = c; ctx.fillText(tx, x, y); x += ctx.measureText(tx).width; }
+}
+
+// Фирменный язычок пламени (filled), на основе линейной иконки flame
+function drawFlame(ctx, cx, cy, size, color) {
+  const p = new Path2D('M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z');
+  ctx.save();
+  ctx.translate(cx - size / 2, cy - size / 2);
+  ctx.scale(size / 24, size / 24);
+  ctx.fillStyle = color; ctx.fill(p);
+  ctx.restore();
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+  else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+}
+
+function cardLevelStats() {
+  return CARD_LEVELS.map(l => {
+    const tot = WORDS.filter(w => getBaseLevel(w) === l);
+    const kn = tot.reduce((n, w) => n + (known.has(w[0]) ? 1 : 0), 0);
+    return { l, kn, tot: tot.length };
+  });
+}
+
+// Рисует карточку 1080×1920 и возвращает Blob (PNG)
+async function renderShareCard() {
+  await ensureCardFonts();
+  const W = 1080, H = 1920, cx = W / 2;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+
+  // Фон-бумага
+  ctx.fillStyle = CARD.paper; ctx.fillRect(0, 0, W, H);
+
+  // Двойная редакционная рамка
+  ctx.strokeStyle = CARD.ruleStrong; ctx.lineWidth = 2;
+  roundRectPath(ctx, 40, 40, W - 80, H - 80, 26); ctx.stroke();
+  ctx.strokeStyle = CARD.rule; ctx.lineWidth = 1;
+  roundRectPath(ctx, 54, 54, W - 108, H - 108, 20); ctx.stroke();
+
+  // Шапка: логотип + 3000
+  drawWordmark(ctx, cx, 250);
+  cardText(ctx, '3000', cx, 326, '500 46px Spectral', CARD.amber, { spacing: 16 });
+
+  // Тонкая линейка
+  ctx.strokeStyle = CARD.rule; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(220, 408); ctx.lineTo(W - 220, 408); ctx.stroke();
+  cardText(ctx, appLang === 'kz' ? 'МЕНІҢ ПРОГРЕСІМ' : 'МОЙ ПРОГРЕСС', cx, 500,
+           '500 30px "JetBrains Mono"', CARD.muted, { spacing: 8 });
+
+  // Главное число — выучено слов
+  cardText(ctx, String(known.size), cx, 790, '600 300px Spectral', CARD.forest);
+  cardText(ctx, t('share_learned'), cx, 880, '700 44px Manrope', CARD.ink, { spacing: 1 });
+
+  // Разделитель
+  ctx.strokeStyle = CARD.rule; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(220, 980); ctx.lineTo(W - 220, 980); ctx.stroke();
+
+  // Два показателя: стрик и процент
+  const streak = currentStreak();
+  const total = WORDS.length;
+  const pct = total ? Math.round(known.size / total * 100) : 0;
+  // вертикальный разделитель между колонками
+  ctx.strokeStyle = CARD.rule; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx, 1070); ctx.lineTo(cx, 1240); ctx.stroke();
+  // стрик (левая колонка)
+  const lx = 312;
+  if(streak > 0) drawFlame(ctx, lx - 78, 1150, 96, CARD.amber);
+  cardText(ctx, String(streak), lx + (streak > 0 ? 28 : 0), 1185, '800 120px Manrope', CARD.amber);
+  cardText(ctx, t('share_streak'), lx, 1255, '600 30px Manrope', CARD.muted, { spacing: 1 });
+  // процент (правая колонка)
+  const rx = 768;
+  cardText(ctx, pct + '%', rx, 1185, '800 120px Manrope', CARD.indigo);
+  cardText(ctx, t('share_done'), rx, 1255, '600 30px Manrope', CARD.muted, { spacing: 1 });
+
+  // Прогресс-бар
+  const trX = 120, trW = W - 240, trY = 1360, trH = 32;
+  ctx.fillStyle = CARD.sunken; roundRectPath(ctx, trX, trY, trW, trH, 16); ctx.fill();
+  const fillW = Math.max(trH, trW * pct / 100);
+  ctx.fillStyle = CARD.forest; roundRectPath(ctx, trX, trY, fillW, trH, 16); ctx.fill();
+
+  // Разбивка по уровням
+  const stats = cardLevelStats();
+  const colXs = [225, 435, 645, 855];
+  stats.forEach((s, i) => {
+    const x = colXs[i], c = CARD_LEVEL_COLOR[s.l];
+    cardText(ctx, s.l, x, 1530, '500 30px "JetBrains Mono"', c, { spacing: 2 });
+    cardText(ctx, String(s.kn), x, 1610, '800 60px Manrope', c);
+    cardText(ctx, '/ ' + s.tot, x, 1655, '500 26px "JetBrains Mono"', CARD.muted);
+  });
+
+  // Подвал
+  ctx.strokeStyle = CARD.rule; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(220, 1730); ctx.lineTo(W - 220, 1730); ctx.stroke();
+  cardText(ctx, t('share_cta'), cx, 1800, '700 38px Manrope', CARD.ink, { spacing: 1 });
+  let host = (location.host + location.pathname).toLowerCase()
+    .replace(/index\.html?$/, '').replace(/\/+$/, '');
+  if(!host) host = 'sózdik 3000';
+  cardText(ctx, host, cx, 1850, '500 30px "JetBrains Mono"', CARD.amberText, { spacing: 2 });
+
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+
+// Делится карточкой через Web Share API (мобайл) либо скачивает PNG
+async function shareCard() {
+  let blob;
+  try { blob = await renderShareCard(); } catch(e) { return; }
+  if(!blob) return;
+  const file = new File([blob], 'sozdik3000-progress.png', { type: 'image/png' });
+  const shareData = { files: [file], title: t('share_title'), text: t('share_cta') };
+  if(navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share(shareData); return; }
+    catch(e) { if(e && e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sozdik3000-progress.png';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ===== КЛАВИАТУРА =====
