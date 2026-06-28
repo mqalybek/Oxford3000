@@ -1152,15 +1152,54 @@ function playIntro() {
 }
 
 // ===== HERO: живая словарная статья =====
+// Алфавитный индекс всех заголовков (для направляющих слов колонтитула)
+let _sortedWords = null;
+function sortedWords() {
+  if(!_sortedWords) _sortedWords = WORDS.map(w => w[0]).slice().sort((a, b) => a.localeCompare(b, 'en'));
+  return _sortedWords;
+}
+// Ближайшие соседи слова по алфавиту — как guide words на странице словаря
+function guideNeighbors(word) {
+  const arr = sortedWords();
+  let lo = 0, hi = arr.length - 1, idx = 0;
+  while(lo <= hi) {
+    const mid = (lo + hi) >> 1, c = arr[mid].localeCompare(word, 'en');
+    if(c === 0) { idx = mid; break; }
+    if(c < 0) { lo = mid + 1; idx = lo; } else { hi = mid - 1; idx = hi; }
+  }
+  idx = Math.max(0, Math.min(arr.length - 1, idx));
+  return {
+    left: arr[Math.max(0, idx - 1)],
+    right: arr[Math.min(arr.length - 1, idx + 1)],
+    section: (word[0] || '').toUpperCase()
+  };
+}
+// Раскладывает заголовок на буквы-спаны со ступенчатой задержкой набора
+function setHeadword(word) {
+  const el = document.getElementById('he-word');
+  if(!el) return;
+  el.textContent = '';
+  [...word].forEach((ch, i) => {
+    const sp = document.createElement('span');
+    sp.className = 'gl';
+    sp.textContent = ch === ' ' ? ' ' : ch;
+    sp.style.animationDelay = (0.045 * i) + 's';
+    el.appendChild(sp);
+  });
+}
 function renderHero(animate) {
   const s = SHOWCASE[heroIdx % SHOWCASE.length];
   const entry = document.getElementById('hero-entry');
   if(!entry) return;
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-  set('he-word', s.w);
+  setHeadword(s.w);
   set('he-level', s.lvl);
   set('he-ipa', s.ipa);
   set('he-pos', s.pos);
+  const g = guideNeighbors(s.w);
+  set('he-guide-l', g.left);
+  set('he-guide-r', g.right);
+  set('he-folio', g.section);
   const senses = document.getElementById('he-senses');
   if(senses) senses.innerHTML =
     `<li><span class="sense-lang">қаз</span> ${esc(s.kz)}</li>` +
