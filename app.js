@@ -548,6 +548,7 @@ function toggleGraph() {
   const tx = document.querySelector('#graph-btn .btn-tx');
   if(area.style.display === 'none') {
     area.style.display = ''; if(tx) tx.textContent = t('btn_graph_hide'); drawGraph();
+    area.classList.remove('fade-up'); void area.offsetWidth; area.classList.add('fade-up');
   } else { area.style.display = 'none'; if(tx) tx.textContent = t('btn_graph'); }
 }
 
@@ -606,6 +607,7 @@ function toggleSrsStats() {
     area.style.display = '';
     if(tx) tx.textContent = t('btn_srs_hide');
     drawSrsStats();
+    area.classList.remove('fade-up'); void area.offsetWidth; area.classList.add('fade-up');
   } else {
     area.style.display = 'none';
     if(tx) tx.textContent = t('btn_srs_stats');
@@ -659,7 +661,7 @@ function drawSrsStats() {
     return `<div class="srs-box-row">
       <div class="srs-box-label">${label}</div>
       <div class="srs-box-bar-wrap">
-        <div class="srs-box-bar" style="width:${Math.max(pct,count>0?2:0)}%;background:${boxColors[i]}"></div>
+        <div class="srs-box-bar" style="transform:scaleX(${Math.max(pct,count>0?2:0)/100});background:${boxColors[i]}"></div>
       </div>
       <div class="srs-box-count" style="color:${boxColors[i]}">${count}</div>
     </div>`;
@@ -670,7 +672,7 @@ function drawSrsStats() {
   const notStartedRow = `<div class="srs-box-row">
     <div class="srs-box-label" style="color:var(--muted)">${t('srs_notstarted')}</div>
     <div class="srs-box-bar-wrap">
-      <div class="srs-box-bar" style="width:${Math.min(notStartedPct,100)}%;background:rgba(255,255,255,0.1)"></div>
+      <div class="srs-box-bar" style="transform:scaleX(${Math.min(notStartedPct,100)/100});background:var(--rule)"></div>
     </div>
     <div class="srs-box-count" style="color:var(--muted)">${notStarted}</div>
   </div>`;
