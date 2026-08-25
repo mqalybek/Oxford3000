@@ -24,38 +24,53 @@ function check(name, cond, extra) {
   await page.goto(URL);
   await page.waitForTimeout(300);
 
-  console.log('— Загрузка и статистика');
+  console.log('— Загрузка и экран занятия');
   check('нет JS-ошибок при загрузке', errors.length === 0, errors[0]);
   const total = await page.textContent('#hs-total');
   check('в шапке всего слов > 3000', parseInt(total) > 3000, total);
-  const sTotal = parseInt(await page.textContent('#s-total'));
-  check('колода построена', sTotal > 3000, sTotal);
+  check('колода построена', await page.evaluate(() => deck.length) > 3000);
+  check('экран старта показан', await page.$eval('#lesson-start', el => !el.hidden));
+  check('карточки скрыты до старта', await page.$eval('#main-area', el => el.hidden));
+  check('полоса урока скрыта до старта', await page.$eval('#lesson-bar', el => el.hidden));
+  const planNew = parseInt(await page.textContent('#ls-new'));
+  check('в плане есть новые слова', planNew > 0, planNew);
+
+  console.log('— Старт занятия');
+  await page.click('#ls-go');
+  await page.waitForTimeout(200);
+  check('занятие идёт', await page.evaluate(() => sessionActive));
+  check('экран старта спрятан', await page.$eval('#lesson-start', el => el.hidden));
+  check('карточки показаны', await page.$eval('#main-area', el => !el.hidden));
+  check('колода урока = плану', await page.evaluate(() => sessionDeck.length) === planNew, planNew);
 
   console.log('— Карточки (flash)');
   await page.click('#fc');
   await page.waitForTimeout(100);
   check('карточка перевернулась', await page.$eval('#fc', el => el.classList.contains('flipped')));
-  const cnt0 = await page.textContent('#counter');
+  const cnt0 = await page.textContent('#lb-count');
   await page.click('.btn-know'); // «Знал»
   await page.waitForTimeout(100);
-  check('счётчик сдвинулся', (await page.textContent('#counter')) !== cnt0);
-  check('«Знаю» = 1', (await page.textContent('#s-known')) === '1');
+  check('счётчик урока сдвинулся', (await page.textContent('#lb-count')) !== cnt0);
+  check('«Знаю» = 1', await page.evaluate(() => known.size) === 1);
   check('стрик появился', (await page.textContent('#hs-streak')).includes('1'));
 
   // «Не знал» → слово в повторение
   await page.click('#fc'); await page.waitForTimeout(50);
   await page.click('.btn-repeat');
   await page.waitForTimeout(100);
-  check('«Повторить» = 1', (await page.textContent('#s-repeat')) === '1');
+  check('«Повторить» = 1', await page.evaluate(() => dueCount()) === 1);
 
   console.log('— Клавиатура');
   await page.keyboard.press('Space'); await page.waitForTimeout(50);
   check('Space переворачивает', await page.$eval('#fc', el => el.classList.contains('flipped')));
   await page.keyboard.press('2'); await page.waitForTimeout(100);
-  check('клавиша 2 = «Знал»', (await page.textContent('#s-known')) === '2');
+  check('клавиша 2 = «Знал»', await page.evaluate(() => known.size) === 2);
 
   console.log('— Тест (quiz)');
+  await page.evaluate(() => endSession());
+  await page.waitForTimeout(100);
   await page.click('#tab-quiz');
+  await page.evaluate(() => startSession());
   await page.waitForTimeout(150);
   const opts = await page.$$('.opt-btn');
   check('4 варианта ответа', opts.length === 4);
@@ -78,7 +93,7 @@ function check(name, cond, extra) {
   check('вопрос сменился после nextCard', q1.w !== qBefore || true); // информативно
 
   console.log('— Ввод (type)');
-  await page.click('#tab-type');
+  await page.evaluate(() => { endSession(); setMode('type'); startSession(); });
   await page.waitForTimeout(150);
   const ans = await page.evaluate(() => typeAnswer());
   check('ответа нет в DOM (защита от подглядывания)', !(await page.content()).includes(`data-answer`));
@@ -97,7 +112,7 @@ function check(name, cond, extra) {
   check('пустой ввод не засчитывается', !(await page.evaluate(() => isAnswerCorrect('', 'слово'))));
 
   console.log('— Повторение (review)');
-  await page.click('#tab-review');
+  await page.evaluate(() => { endSession(); setMode('review'); });
   await page.waitForTimeout(150);
   const reviewLen = await page.evaluate(() => reviewDeck.length);
   check('колода повторения не пуста', reviewLen >= 1, reviewLen);
@@ -109,15 +124,16 @@ function check(name, cond, extra) {
   check('снапшот повторения стабилен', lenBefore === lenAfter, `${lenBefore} → ${lenAfter}`);
 
   console.log('— Проценты и фильтры');
-  await page.click('#tab-flash');
+  await page.evaluate(() => { endSession(); setMode('flash'); });
   // Оставляем только маленькую категорию — процент не должен превышать 100
   await page.evaluate(() => {
     activeCats = new Set(['cat_edu']);
     buildDeck();
   });
   await page.waitForTimeout(100);
-  const pct = await page.textContent('#s-pct');
-  check('процент ≤ 100%', parseInt(pct) <= 100, pct);
+  const pct = parseInt(await page.textContent('#hs-pct'));
+  check('процент ≤ 100%', pct <= 100, pct);
+  check('план учитывает фильтр', await page.evaluate(() => planSession().fresh.every(w => getCat(w) === 'cat_edu')));
 
   console.log('— Интервальное повторение (SRS)');
   const srsCheck = await page.evaluate(() => {
@@ -158,13 +174,25 @@ function check(name, cond, extra) {
   });
   check('v1 {known, repeat} мигрирует в SRS', migCheck);
 
+  console.log('— Шторка настроек');
+  await page.evaluate(() => { activeCats = new Set(['cat_core','cat_people','cat_home','cat_edu','cat_travel','cat_food','cat_health','cat_nature','cat_business','cat_tech','cat_art','cat_sport']); buildDeck(); });
+  await page.click('#sheet-open-btn').catch(() => page.evaluate(() => openSheet()));
+  await page.waitForTimeout(350);
+  check('шторка открывается', await page.$eval('#sheet', el => !el.hidden));
+  await page.evaluate(() => closeSheet());
+  await page.waitForTimeout(350);
+  check('шторка закрывается', await page.$eval('#sheet', el => el.hidden));
+
   console.log('— Дневная цель');
   const goalLabel = await page.textContent('#goal-label');
   check('плашка цели отображается', /\d+ \/ \d+/.test(goalLabel), goalLabel);
+  await page.evaluate(() => openSheet());
+  await page.waitForTimeout(350);
   await page.selectOption('#goal-select', '50');
   await page.waitForTimeout(100);
   check('смена цели работает', (await page.textContent('#goal-label')).includes('/ 50'));
   check('цель сохраняется', await page.evaluate(() => JSON.parse(localStorage.getItem('ox_settings')).goal === 50));
+  check('план пересчитан под новую цель', await page.evaluate(() => { closeSheet(); return planSession().fresh.length <= 50; }));
 
   console.log('— Сохранение настроек');
   await page.evaluate(() => setAppLang('ru'));
