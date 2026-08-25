@@ -20,6 +20,13 @@ let correctStreak = 0;
 let timerInterval = null;
 let timerSeconds = 10;
 
+// ===== ЗАНЯТИЕ (конечная сессия вместо бесконечной ленты) =====
+const SESSION_MAX = 30;   // потолок карточек за урок: ~5-7 минут
+let sessionActive = false;
+let sessionDeck = [];
+let sessionPlan = { fresh: [], due: [] };
+let sessionNewLearned = 0;  // сколько новых слов закрыто за этот урок
+
 const UI_TEXT = {
   header_words: { ru: 'Слов', kz: 'Сөздер' },
   header_known: { ru: 'Знаю', kz: 'Білемін' },
@@ -36,8 +43,36 @@ const UI_TEXT = {
   tab_quiz: { ru: 'Тест 4 варианта', kz: 'Тест 4 нұсқа' },
   tab_type: { ru: 'Введи перевод', kz: 'Аударманы жаз' },
   tab_review: { ru: 'Повторение', kz: 'Қайталау' },
-  lbl_level: { ru: 'Уровень:', kz: 'Деңгей:' },
-  lbl_cat: { ru: 'Категории:', kz: 'Категориялар:' },
+  tab_flash_short: { ru: 'Карточки', kz: 'Карталар' },
+  tab_quiz_short: { ru: 'Тест', kz: 'Тест' },
+  tab_type_short: { ru: 'Ввод', kz: 'Жазу' },
+
+  // Занятие
+  ls_today: { ru: 'Урок на сегодня', kz: 'Бүгінгі сабақ' },
+  ls_new: { ru: 'новых', kz: 'жаңа сөз' },
+  ls_due: { ru: 'повторить', kz: 'қайталау' },
+  ls_start: { ru: 'Начать урок', kz: 'Сабақты бастау' },
+  ls_continue: { ru: 'Продолжить урок', kz: 'Сабақты жалғастыру' },
+  ls_minutes: { ru: 'мин', kz: 'мин' },
+  ls_all_done: { ru: 'На сегодня всё пройдено', kz: 'Бүгінге бәрі орындалды' },
+  ls_extra: { ru: 'Позаниматься ещё', kz: 'Тағы жаттығу' },
+  ls_empty: { ru: 'В выбранных фильтрах нет слов', kz: 'Таңдалған сүзгіде сөз жоқ' },
+  done_title: { ru: 'Урок пройден', kz: 'Сабақ аяқталды' },
+  done_new: { ru: 'новых слов', kz: 'жаңа сөз' },
+  done_streak: { ru: 'дней подряд', kz: 'күн қатарынан' },
+  done_again: { ru: 'Ещё урок', kz: 'Тағы сабақ' },
+  done_finish: { ru: 'Завершить', kz: 'Аяқтау' },
+  aria_exit: { ru: 'Завершить урок', kz: 'Сабақты аяқтау' },
+
+  btn_settings: { ru: 'Настройки', kz: 'Параметрлер' },
+  lbl_goal: { ru: 'Цель на день', kz: 'Күндік мақсат' },
+  lbl_goal_today: { ru: 'Сегодня пройдено', kz: 'Бүгін өтілді' },
+  lbl_stats: { ru: 'Статистика', kz: 'Статистика' },
+  lbl_data: { ru: 'Данные', kz: 'Деректер' },
+  scope_all_cats: { ru: 'все категории', kz: 'барлық санат' },
+  scope_cats: { ru: 'категорий', kz: 'санат' },
+  lbl_level: { ru: 'Уровень', kz: 'Деңгей' },
+  lbl_cat: { ru: 'Категории', kz: 'Категориялар' },
   cat_core: { ru: 'Основные', kz: 'Негізгі' },
   cat_people: { ru: 'Люди', kz: 'Адамдар' },
   cat_home: { ru: 'Дом', kz: 'Үй' },
@@ -186,7 +221,10 @@ const ICONS = {
   goal:    '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/>',
   flame:   '<path d="M12 3c1.2 4-2 5.2-2 8.2a2.5 2.5 0 0 0 5 0c0-1-.4-1.9-1-2.6 2.2 1 3.4 3 3.4 5.2a5.4 5.4 0 0 1-10.8 0C6.6 9.5 10.8 7.7 12 3z"/>',
   play:    '<path d="M7 5l11 7-11 7z"/>',
-  share:   '<path d="M12 4v11"/><path d="M8 8l4-4 4 4"/><path d="M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/>'
+  share:   '<path d="M12 4v11"/><path d="M8 8l4-4 4 4"/><path d="M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6"/>',
+  settings:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4L6 18M18 18l-1.6-1.6M7.6 7.6L6 6"/>',
+  close:   '<path d="M6 6l12 12M18 6L6 18"/>',
+  check:   '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
 };
 
 function svgIcon(name, cls) {
@@ -228,10 +266,10 @@ function updateUI() {
   if(soundIc) soundIc.innerHTML = svgIcon(soundOn ? 'sound' : 'mute');
   setBtn('timer-btn', timerOn ? t('btn_timer_on') : t('btn_timer_off'));
   const area = document.getElementById('graph-area');
-  setBtn('graph-btn', (area && area.style.display !== 'none') ? t('btn_graph_hide') : t('btn_graph'));
+  setBtn('graph-btn', (area && !area.hidden) ? t('btn_graph_hide') : t('btn_graph'));
   const srsArea = document.getElementById('srs-stats-area');
-  setBtn('srs-stats-btn', (srsArea && srsArea.style.display !== 'none') ? t('btn_srs_hide') : t('btn_srs_stats'));
-  if(srsArea && srsArea.style.display !== 'none') drawSrsStats();
+  setBtn('srs-stats-btn', (srsArea && !srsArea.hidden) ? t('btn_srs_hide') : t('btn_srs_stats'));
+  if(srsArea && !srsArea.hidden) drawSrsStats();
 
   const inp = document.getElementById('type-inp');
   if(inp) inp.placeholder = t('placeholder_type');
@@ -264,6 +302,7 @@ function setDailyGoal(v) {
   dailyGoal = Number(v);
   saveSettings();
   updateGoalUI();
+  if(typeof renderLessonStart === 'function' && !sessionActive) renderLessonStart();
 }
 
 // ===== СОХРАНЕНИЕ / ЗАГРУЗКА ПРОГРЕССА =====
@@ -546,10 +585,10 @@ function setAppLang(l) {
 function toggleGraph() {
   const area = document.getElementById('graph-area');
   const tx = document.querySelector('#graph-btn .btn-tx');
-  if(area.style.display === 'none') {
-    area.style.display = ''; if(tx) tx.textContent = t('btn_graph_hide'); drawGraph();
+  if(area.hidden) {
+    area.hidden = false; if(tx) tx.textContent = t('btn_graph_hide'); drawGraph();
     area.classList.remove('fade-up'); void area.offsetWidth; area.classList.add('fade-up');
-  } else { area.style.display = 'none'; if(tx) tx.textContent = t('btn_graph'); }
+  } else { area.hidden = true; if(tx) tx.textContent = t('btn_graph'); }
 }
 
 function drawGraph() {
@@ -603,13 +642,13 @@ function drawGraph() {
 function toggleSrsStats() {
   const area = document.getElementById('srs-stats-area');
   const tx = document.querySelector('#srs-stats-btn .btn-tx');
-  if(area.style.display === 'none') {
-    area.style.display = '';
+  if(area.hidden) {
+    area.hidden = false;
     if(tx) tx.textContent = t('btn_srs_hide');
     drawSrsStats();
     area.classList.remove('fade-up'); void area.offsetWidth; area.classList.add('fade-up');
   } else {
-    area.style.display = 'none';
+    area.hidden = true;
     if(tx) tx.textContent = t('btn_srs_stats');
   }
 }
@@ -715,7 +754,141 @@ function inSelection(w) {
 
 // ===== КОЛОДЫ =====
 function getActiveDeck() {
+  if(sessionActive) return sessionDeck;
   return mode === 'review' ? reviewDeck : deck;
+}
+
+// ===== ЗАНЯТИЕ =====
+// План на сегодня: просроченные повторения + новые слова до дневной цели.
+// Новые берём от простого к сложному (A1 → B2), внутри уровня — вперемешку,
+// чтобы урок не начинался каждый раз с одних и тех же слов.
+const LEVEL_ORDER = { A1: 0, A2: 1, B1: 2, B2: 3 };
+function planSession() {
+  const today = todayKey();
+  const pool = WORDS.filter(inSelection);
+  const due = pool.filter(w => srs[w[0]] && srs[w[0]].due <= today);
+  const remaining = Math.max(0, dailyGoal - learnedToday());
+  let fresh = [];
+  if(remaining > 0) {
+    const candidates = pool.filter(w => !srs[w[0]])
+      .sort((a, b) => LEVEL_ORDER[getBaseLevel(a)] - LEVEL_ORDER[getBaseLevel(b)]);
+    // берём запас из ближайших по сложности и тасуем — свежесть без потери порядка уровней
+    const window = candidates.slice(0, Math.max(remaining * 3, remaining));
+    for(let i = window.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [window[i], window[j]] = [window[j], window[i]];
+    }
+    fresh = window.slice(0, remaining);
+  }
+  sessionPlan = { fresh, due };
+  return sessionPlan;
+}
+
+function sessionLength(plan) {
+  return Math.min(plan.fresh.length + plan.due.length, SESSION_MAX);
+}
+
+// Экран старта: единственное решение, которое нужно принять
+function renderLessonStart() {
+  const plan = planSession();
+  const total = sessionLength(plan);
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('ls-new', plan.fresh.length);
+  set('ls-due', plan.due.length);
+
+  const go = document.getElementById('ls-go');
+  const time = document.getElementById('ls-time');
+  const poolEmpty = WORDS.filter(inSelection).length === 0;
+  if(go) {
+    const lbl = go.querySelector('[data-i18n]');
+    if(poolEmpty) {
+      go.disabled = true;
+      if(lbl) lbl.textContent = t('ls_empty');
+    } else if(total === 0) {
+      go.disabled = false;
+      if(lbl) lbl.textContent = t('ls_extra');
+    } else {
+      go.disabled = false;
+      if(lbl) lbl.textContent = t('ls_start');
+    }
+  }
+  if(time) {
+    time.textContent = poolEmpty ? ''
+      : total === 0 ? t('ls_all_done')
+      : '≈ ' + Math.max(1, Math.round(total * 12 / 60)) + ' ' + t('ls_minutes');
+  }
+
+  // Область охвата: какие уровни и категории выбраны
+  const scope = document.getElementById('ls-scope');
+  if(scope) {
+    const lv = ['A1','A2','B1','B2'].filter(l => activeLevels.has(l));
+    const lvTxt = lv.length === 4 ? 'A1–B2' : lv.join(', ');
+    const catTxt = activeCats.size === 12
+      ? t('scope_all_cats')
+      : activeCats.size + ' ' + t('scope_cats');
+    scope.textContent = lvTxt + ' · ' + catTxt;
+  }
+}
+
+function startSession() {
+  const plan = sessionPlan.fresh.length || sessionPlan.due.length ? sessionPlan : planSession();
+  let d = [...plan.due, ...plan.fresh];
+  // Если на сегодня всё закрыто — даём свободную тренировку по выбранным фильтрам
+  if(d.length === 0) {
+    d = WORDS.filter(inSelection).slice();
+    for(let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+    d = d.slice(0, SESSION_MAX);
+  } else {
+    // повторения и новые чередуются, чтобы урок не делился на два скучных блока
+    for(let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+    d = d.slice(0, SESSION_MAX);
+  }
+  if(d.length === 0) return;
+  sessionDeck = d;
+  sessionActive = true;
+  sessionNewLearned = 0;
+  correctStreak = 0;
+  newCard(0);
+  toggleLessonChrome();
+  render();
+  const bar = document.getElementById('lesson-bar');
+  if(bar) bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function endSession() {
+  sessionActive = false;
+  sessionDeck = [];
+  stopTimer();
+  toggleLessonChrome();
+  renderLessonStart();
+  render();
+}
+
+// Переключает «оболочку»: во время урока не видно ничего лишнего
+function toggleLessonChrome() {
+  const start = document.getElementById('lesson-start');
+  const bar = document.getElementById('lesson-bar');
+  if(start) start.hidden = sessionActive;
+  if(bar) bar.hidden = !sessionActive;
+  const main = document.getElementById('main-area');
+  if(main) main.hidden = !sessionActive;
+}
+
+// ===== ШТОРКА НАСТРОЕК =====
+function openSheet() {
+  const sh = document.getElementById('sheet'), sc = document.getElementById('scrim');
+  if(!sh) return;
+  sc.hidden = false; sh.hidden = false;
+  requestAnimationFrame(() => { sc.classList.add('open'); sh.classList.add('open'); });
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet() {
+  const sh = document.getElementById('sheet'), sc = document.getElementById('scrim');
+  if(!sh) return;
+  sh.classList.remove('open'); sc.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { sh.hidden = true; sc.hidden = true; }, 220);
+  renderLessonStart();
 }
 
 // Колода повторения: слова, чей срок показа наступил (отсортированы по сроку)
@@ -737,6 +910,7 @@ function newCard(newIdx) {
 function buildDeck() {
   deck = WORDS.filter(inSelection);
   newCard(0);
+  renderLessonStart();
   render();
 }
 
@@ -773,6 +947,7 @@ function setMode(m) {
   newCard(0);
   ['flash','quiz','type','review'].forEach(x => {
     const tab = document.getElementById('tab-'+x);
+    if(!tab) return;
     tab.classList.toggle('active', x===m);
     tab.setAttribute('aria-selected', x===m ? 'true' : 'false');
   });
@@ -780,22 +955,16 @@ function setMode(m) {
 }
 
 function updateStats() {
-  const selection = WORDS.filter(inSelection);
-  const total = selection.length;
-  const knownSel = selection.reduce((n,w) => n + (known.has(w[0]) ? 1 : 0), 0);
-  const pct = total > 0 ? Math.round(knownSel/total*100) : 0;
-  document.getElementById('s-total').textContent = total;
-  document.getElementById('s-known').textContent = knownSel;
-  document.getElementById('s-repeat').textContent = dueCount();
-  document.getElementById('s-pct').textContent = pct+'%';
-  document.getElementById('hs-total').textContent = WORDS.length;
-  document.getElementById('hs-known').textContent = known.size;
-  document.getElementById('hs-pct').textContent = (WORDS.length ? Math.round(known.size/WORDS.length*100) : 0)+'%';
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('hs-total', WORDS.length);
+  set('hs-known', known.size);
+  set('hs-pct', (WORDS.length ? Math.round(known.size/WORDS.length*100) : 0)+'%');
+  // Полоса урока: только внутри занятия
   const cur = getActiveDeck().length;
-  const fill = cur>0 ? Math.round(idx/cur*100) : 0;
-  document.getElementById('prog').style.transform = 'scaleX(' + (fill/100) + ')';
-  document.getElementById('counter').textContent = cur>0 && idx<cur ? (idx+1)+' / '+cur : '';
-  document.getElementById('pct-txt').textContent = cur>0 ? fill+'%' : '';
+  const fill = cur > 0 ? Math.min(idx, cur)/cur : 0;
+  const lf = document.getElementById('lb-fill');
+  if(lf) lf.style.transform = 'scaleX(' + fill + ')';
+  set('lb-count', cur > 0 && idx < cur ? (idx+1)+' / '+cur : (cur ? cur+' / '+cur : ''));
   saveProgress();
 }
 
@@ -807,7 +976,7 @@ function getCard() {
 function learnWord(w) {
   const isNew = !known.has(w[0]);
   srsCorrect(w[0]);
-  if(isNew) bumpLearnedToday();
+  if(isNew) { bumpLearnedToday(); sessionNewLearned++; }
 }
 
 // Отметить ошибку (общая точка для всех режимов)
@@ -833,9 +1002,7 @@ function renderFlash() {
   const frontLabel = cardDir ? t('lbl_eng_word') : (appLang==='kz'?t('lbl_kz_trans_lbl'):t('lbl_ru_trans_lbl'));
   const backLabel = cardDir ? (appLang==='kz'?t('lbl_kz_trans'):t('lbl_ru_trans')) : t('lbl_eng_word');
   return `
-  <div class="card-actions" style="justify-content:flex-start;margin-bottom:12px">
-    <button class="act-btn" onclick="goBack()" style="font-size:13px;padding:8px 18px">${t('btn_back')}</button>
-  </div>
+  ${idx > 0 ? `<div class="card-nav"><button class="ghost-btn" onclick="goBack()">${t('btn_back')}</button></div>` : ''}
   <div class="card-scene">
     <div class="card-inner${flipped?' flipped':''}" onclick="flipCard()" id="fc">
       <div class="card-face card-front-face">
@@ -957,20 +1124,25 @@ function render() {
     return;
   }
   if(idx>=d.length) {
+    // Финиш урока: сначала итог занятия, потом — что дальше
     area.innerHTML = `
     <div class="result-panel">
-      <div class="result-score" id="res-score">0</div>
-      <div class="result-title">${t('res_words_learned')}</div>
-      <div class="result-sub">${t('res_repeat')} ${dueCount()} ${t('res_words')} · ${t('res_passed')} ${d.length} ${t('res_cards')}</div>
+      <div class="done-mark">${svgIcon('check')}</div>
+      <div class="result-title">${t('done_title')}</div>
+      <div class="done-figures">
+        <div class="done-fig"><b id="res-score">0</b><span>${t('done_new')}</span></div>
+        <div class="done-fig"><b>${currentStreak()}</b><span>${t('done_streak')}</span></div>
+      </div>
+      <div class="result-sub">${t('res_passed')} ${d.length} ${t('res_cards')}${dueCount()>0 ? ' · '+t('res_repeat')+' '+dueCount()+' '+t('res_words') : ''}</div>
       <div class="card-actions" style="justify-content:center">
-        <button class="act-btn btn-know" onclick="restart()">${t('btn_restart')}</button>
-        ${dueCount()>0?`<button class="act-btn btn-repeat" onclick="setMode('review')">${t('btn_repeat_errs')}</button>`:''}
+        <button class="act-btn btn-next" onclick="endSession();startSession()">${t('done_again')}</button>
+        <button class="act-btn" onclick="endSession()">${t('done_finish')}</button>
       </div>
       <div class="card-actions" style="justify-content:center;margin-top:4px">
         <button class="act-btn" onclick="shareCard()">${svgIcon('share')} ${t('btn_share')}</button>
       </div>
     </div>`;
-    countUp(document.getElementById('res-score'), known.size);
+    countUp(document.getElementById('res-score'), sessionActive ? sessionNewLearned : known.size);
     return;
   }
   if(mode==='flash' || mode==='review') area.innerHTML = renderFlash();
@@ -1420,14 +1592,22 @@ async function shareCard() {
 
 // ===== КЛАВИАТУРА =====
 document.addEventListener('keydown', e => {
+  const sheet = document.getElementById('sheet');
+  if(sheet && !sheet.hidden) { if(e.key === 'Escape') closeSheet(); return; }
   const tag = document.activeElement && document.activeElement.tagName;
   if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Вне урока клавиши карточек не работают: Enter начинает занятие
+  if(!sessionActive) {
+    if(e.key === 'Enter' && tag !== 'BUTTON') { e.preventDefault(); startSession(); }
+    return;
+  }
+  if(e.key === 'Escape') { e.preventDefault(); endSession(); return; }
   // На сфокусированной кнопке Space/Enter обрабатывает сама кнопка
   if(tag === 'BUTTON' && (e.code === 'Space' || e.key === 'Enter')) return;
   const d = getActiveDeck();
   if(!d.length) return;
   if(idx >= d.length) {
-    if(e.key === 'Enter') { e.preventDefault(); restart(); }
+    if(e.key === 'Enter') { e.preventDefault(); endSession(); startSession(); }
     return;
   }
   if(mode === 'flash' || mode === 'review') {
@@ -1452,5 +1632,6 @@ paintIcons();
 updateStreak();
 updateUI();
 buildDeck();
-shuffleDeck();
+toggleLessonChrome();
+renderLessonStart();
 startHeroRotation();
